@@ -1,0 +1,21 @@
+services:
+    postgres:
+        image: postgres:13
+        container_name: postgres_db
+        environment:
+            POSTGRES_USER: admin
+            POSTGRES_PASSWORD: admin
+            POSTGRES_DB: fit-me
+        ports:
+            - "8080:8080"
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        networks:
+            - postgres_network
+
+volumes:
+    postgres_data:
+
+networks:
+    postgres_network:
+        driver: bridge
