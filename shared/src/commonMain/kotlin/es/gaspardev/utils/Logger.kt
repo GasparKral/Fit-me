@@ -1,11 +1,11 @@
 package es.gaspardev.utils
 
 import es.gaspardev.interfaces.Printter
-import es.gaspardev.core.debug.BasicPrinter
+import es.gaspardev.core.debug.BasicPrintter
 
 object Logger {
 
-    private var printter: Printter = BasicPrinter
+    private var printter: Printter = BasicPrintter
 
     fun setPrintter(newPrintter: Printter) {
         this.printter = newPrintter
