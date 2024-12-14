@@ -8,7 +8,7 @@ object DebugPrintter : Printter {
         //TODO
     }
 
-    override fun warm(message: String) {
+    override fun warn(message: String) {
         //TODO
     }
 

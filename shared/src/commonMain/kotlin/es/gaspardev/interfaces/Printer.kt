@@ -13,8 +13,8 @@ interface Printter {
         println("\u001b[0mLOG(${getCurrentTime()}): $message\u001b[0m")
     }
 
-    fun warm(message: String) {
-        println("\u001b[0;33mWARM(${getCurrentTime()}): $message\u001b[0m")
+    fun warn(message: String) {
+        println("\u001b[0;33mWARN(${getCurrentTime()}): $message\u001b[0m")
     }
 
     fun error(message: String) {

@@ -3,24 +3,15 @@ package es.gaspardev.utils
 import es.gaspardev.interfaces.Printter
 import es.gaspardev.core.debug.BasicPrintter
 
-object Logger {
 
-    private var printter: Printter = BasicPrintter
+expect object Logger {
 
-    fun setPrintter(newPrintter: Printter) {
-        this.printter = newPrintter
-    }
+    var printter: Printter
 
-    fun log(message: String) {
-        printter.log(message)
-    }
+    fun log(message: String)
 
-    fun warm(message: String) {
-        printter.warm(message)
-    }
+    fun warn(message: String)
 
-    fun error(message: String) {
-        printter.error(message)
-    }
+    fun error(message: String)
 
 }

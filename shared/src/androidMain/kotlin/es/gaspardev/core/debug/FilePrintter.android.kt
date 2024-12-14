@@ -23,7 +23,7 @@ actual object FilePrintter : Printter {
                 writer.appendLine("$level(${Clock.System.now()}): $message")
             }
         } catch (io: IOException) {
-            Logger.setPrintter(BasicPrintter)
+            Logger.printter = BasicPrintter
             io.message?.let { Logger.error(it) }
         }
     }
@@ -32,8 +32,8 @@ actual object FilePrintter : Printter {
         writeLog("Log", message)
     }
 
-    override fun warm(message: String) {
-        writeLog("Warm", message)
+    override fun warn(message: String) {
+        writeLog("Warn", message)
     }
 
     override fun error(message: String) {
