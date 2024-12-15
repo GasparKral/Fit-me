@@ -1,0 +1,32 @@
+{
+    "plugins": [
+        {
+            "type": "add",
+            "pluginName": "fleet.gradle"
+        },
+        {
+            "type": "add",
+            "pluginName": "fleet.javascript"
+        },
+        {
+            "type": "add",
+            "pluginName": "fleet.kotlin"
+        },
+        {
+            "type": "add",
+            "pluginName": "fleet.mercury"
+        },
+        {
+            "type": "add",
+            "pluginName": "fleet.lightweightIndexer"
+        },
+        {
+            "type": "add",
+            "pluginName": "fleet.prettier"
+        },
+        {
+            "type": "add",
+            "pluginName": "fleet.react"
+        }
+    ]
+}

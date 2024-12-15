@@ -1,8 +1,14 @@
 package es.gaspardev
 
 import es.gaspardev.utils.Logger
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
-import io.netty.handler.codec.http2.StreamBufferingEncoder
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.server.plugins.compression.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.cors.routing.*
 
 fun main() {
 
@@ -27,10 +33,52 @@ fun main() {
 
     errorPrinter.start()
 
-    /* embeddedServer(Netty, port = SERVER_PORT, host = "0.0.0.0", module = Application::module)
-         .start(wait = true)*/
+    embeddedServer(
+        Netty, port = SERVER_PORT, module = Application::module, host = "localhost",
+    ).start(wait = true)
 }
 
 fun Application.module() {
 
+    /* CONFIGURATION  */
+    install(ContentNegotiation) {
+        json()
+    }
+    install(CORS) {
+        allowMethod(HttpMethod.Get)
+        allowMethod(HttpMethod.Post)
+        allowMethod(HttpMethod.Delete)
+        anyHost()
+    }
+    install(Compression) {
+        gzip()
+    }
+
+    /* MODULE ROUTING */
+    common()
+    web()
+    desktopAndMobile()
+    desktop()
+    mobile()
 }
+
+fun Application.common() {
+
+}
+
+fun Application.web() {
+
+}
+
+fun Application.desktopAndMobile() {
+
+}
+
+fun Application.desktop() {
+
+}
+
+fun Application.mobile() {
+
+}
+
