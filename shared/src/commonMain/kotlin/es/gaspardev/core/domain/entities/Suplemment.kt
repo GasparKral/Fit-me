@@ -1,9 +1,12 @@
 package es.gaspardev.core.domain.entities
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Suplemment(
-    val id: Int,
     val name: String,
-    var ammount: Double
+    var ammount: Double,
+    val notes: List<Note>
 ) {
 
 }

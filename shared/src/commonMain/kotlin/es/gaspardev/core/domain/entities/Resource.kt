@@ -1,9 +1,10 @@
 package es.gaspardev.core.domain.entities
 
 import es.gaspardev.enums.MediaType
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Resource(
-    val id: Int,
     val resourceType: MediaType,
     var src: String
 ) {

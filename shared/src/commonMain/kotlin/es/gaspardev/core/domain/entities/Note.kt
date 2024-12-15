@@ -1,7 +1,9 @@
 package es.gaspardev.core.domain.entities
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Note(
-    val id: Int,
     val user: User,
     var message: String
 ) {

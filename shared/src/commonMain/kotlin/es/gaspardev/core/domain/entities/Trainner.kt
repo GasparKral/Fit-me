@@ -1,5 +1,8 @@
 package es.gaspardev.core.domain.entities
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Trainner(
     val user: User,
     var specialization: String,

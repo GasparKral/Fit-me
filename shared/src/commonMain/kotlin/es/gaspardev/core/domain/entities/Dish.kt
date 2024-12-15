@@ -1,9 +1,12 @@
 package es.gaspardev.core.domain.entities
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Dish(
-    val id: Int,
     var name: String,
-    val author: Trainner?
+    var ammount: Double,
+    val optionalDishes: List<Dish>?
 ) {
 
 }
