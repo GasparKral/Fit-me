@@ -19,7 +19,7 @@ El sistema se secciona entre cuatro medios:
 >
 > Se decidirá en función del tiempo, pero la estructura de la aplicación tanto como el servidor se organizará para permitir su futuro desarrollo
 >
-
+{style="note"}
 
 ---
 ## Arquitectura de la Aplicación
