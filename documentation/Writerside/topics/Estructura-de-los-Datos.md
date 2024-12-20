@@ -4,8 +4,8 @@
 
 La aplicación se compondrá de las siguientes principales clases:
 - **User**: Almacenará la información común entre usuarios, esto incluye los entrenadores y los deportistas.
-- **Trainner**: Datos específicos de los entrenadores, incluyendo certificaciones, experiencia, disponibilidad.
-- **Sportman**: Datos específicos de los deportistas, medidas, pesos, sexo, alergias, dietas, rutinas y suplementación.
+- **Trainer**: Datos específicos de los entrenadores, incluyendo certificaciones, experiencia, disponibilidad.
+- **Sportsman**: Datos específicos de los deportistas, medidas, pesos, sexo, alergias, dietas, rutinas y suplementación.
 - **Exercise**: Clase que representa los ejercicios a realizar.
 - **Dish**: Clase que representa los platos(pollo, pescado blanco, verduras, frutas, ...) y sus cantidades en las dietas.
 - **Supplementation**: Clase que representa los distintos tipos de suplementación y cantidades a usar por los deportistas.
@@ -16,7 +16,7 @@ La aplicación se compondrá de las siguientes principales clases:
 Hay dos JSON específicos que requieren de un formato rígido; estos son las rutinas/entrenamientos (Workout::class) y 
 las dietas (Diet::class) que son explícitamente un Map dentro de la aplicación
 
-### Esquema para los entrenamientos (Workout::class) 
+### Esquema para los platos (Dish::class)
 
 <code-block lang="JSON">
 {
@@ -92,7 +92,7 @@ las dietas (Diet::class) que son explícitamente un Map dentro de la aplicación
 }
 </code-block>
 
-### Esquema para los platos (Dish::class)
+### Esquema para los entrenamientos (Workout::class)
 
 <code-block lang="JSON">
 {
@@ -246,161 +246,196 @@ La **Clean Architecture** proporciona una estructura modular, donde cada capa cu
 > Esta estructura será actualizada periodicamente
 > 
 {style="note"}
-
-📦 Fit-me <br/>
-├── 📁 .fleet <br/>
-├── 📁 .git <br/>
-├── 📄 .gitignore <br/>
-├── 📁 .gradle <br/>
-├── 📁 .idea <br/>
-├── 📁 .kotlin <br/>
-├── 📄 build.gradle.kts <br/>
-├── 📁 composeApp <br/>
-│├── 📁 build <br/>
-│   ├── 📄 build.gradle.kts <br/>
-│   ├── 📁 frontend <br/>
-│   │   ├── 📁 .idea <br/>
-│   │   ├── 📄 bun.lockb <br/>
-│   │   ├── 📄 eslint.config.js <br/>
-│   │   ├── 📄 index.html <br/>
-│   │   ├── 📁 node_modules <br/>
-│   │   ├── 📄 package.json <br/>
-│   │   ├── 📄 postcss.config.js <br/>
-│   │   ├── 📁 public <br/>
-│   │   ├── 📁 src <br/>
-│   │   │   ├── 📄 App.tsx <br/>
-│   │   │   ├── 📁 assets <br/>
-│   │   │   ├── 📄 index.css <br/>
-│   │   │   ├── 📄 main.tsx <br/>
-│   │   │   └── 📄 vite-env.d.ts <br/>
-│   │   ├── 📄 tailwind.config.js <br/>
-│   │   ├── 📄 tsconfig.app.json <br/>
-│   │   ├── 📄 tsconfig.json <br/>
-│   │   ├── 📄 tsconfig.node.json <br/>
-│   │   └── 📄 vite.config.ts <br/>
-│   └── 📁 src <br/>
-│       ├── 📁 androidMain <br/>
-│       │   ├── 📄 AndroidManifest.xml <br/>
-│       │   └── 📁 kotlin <br/>
-│       │       └── 📁 es <br/>
-│       │           └── 📁 gaspardev <br/>
-│       │               └── 📄 MainActivity.kt <br/>
-│       ├── 📁 commonMain <br/>
-│       │   ├── 📁 composeResources <br/>
-│       │   │   └── 📁 drawable <br/>
-│       │   │       └── 📄 compose-multiplatform.xml <br/>
-│       │   └── 📁 kotlin <br/>
-│       │       └── 📁 es <br/>
-│       │           └── 📁 gaspardev <br/>
-│       │               └── 📄 App.kt <br/>
-│       └── 📁 desktopMain <br/>
-│           └── 📁 kotlin <br/>
-│               └── 📁 es <br/>
-│                   └── 📁 gaspardev <br/>
-│                       └── 📄 main.kt <br/>
-├── 📁 documentation <br/>
+📁 Fit-me <br/>
+│   ├── 📁 .fleet <br/>
+│   ├── 📁 .git <br/>
+│   ├── 📄 .gitignore <br/>
+│   ├── 📁 .gradle <br/>
 │   ├── 📁 .idea <br/>
-│   └── 📁 Writerside <br/>
-│       ├── 📄 c.list <br/>
-│       ├── 📁 cfg <br/>
-│       │   └── 📄 buildprofiles.xml <br/>
-│       ├── 📄 f.tree <br/>
-│       ├── 📁 images <br/>
-│       │   ├── 📄 completion_procedure.png <br/>
-│       │   ├── 📄 completion_procedure_dark.png <br/>
-│       │   ├── 📄 convert_table_to_xml.png <br/>
-│       │   ├── 📄 convert_table_to_xml_dark.png <br/>
-│       │   ├── 📄 Data-base.png <br/>
-│       │   ├── 📄 new_topic_options.png <br/>
-│       │   └── 📄 new_topic_options_dark.png <br/>
-│       ├── 📁 topics <br/>
-│       │   ├── 📄 Estructura-de-los-Datos.md <br/>
-│       │   └── 📄 starter-topic.md <br/>
-│       ├── 📄 v.list <br/>
-│       └── 📄 writerside.cfg <br/>
-├── 📁 gradle <br/>
-│   ├── 📄 libs.versions.toml <br/>
-│   └── 📁 wrapper <br/>
-│       ├── 📄 gradle-wrapper.jar <br/>
-│       └── 📄 gradle-wrapper.properties <br/>
-├── 📄 gradle.properties <br/>
-├── 📄 gradlew <br/>
-├── 📄 gradlew.bat <br/>
-├── 📁 kotlin-js-store <br/>
-│   └── 📄 package-lock.json <br/>
-├── 📄 LICENSE.md <br/>
-├── 📄 local.properties <br/>
-├── 📄 README.md <br/>
-├── 📁 server <br/>
+│   ├── 📁 .kotlin <br/>
 │   ├── 📄 build.gradle.kts <br/>
-│   └── 📁 src <br/>
-│       ├── 📁 main <br/>
-│       │   ├── 📁 kotlin <br/>
-│       │   │   └── 📁 es <br/>
-│       │   │       └── 📁 gaspardev <br/>
-│       │   │           ├── 📄 Application.kt <br/>
-│       │   │           ├── 📁 db <br/>
-│       │   │           └── 📁 modules <br/>
-│       │   │               ├── 📄 CommonModule.kt <br/>
-│       │   │               ├── 📄 DektopAndMobileModule.kt <br/>
-│       │   │               ├── 📄 DesktopModule.kt <br/>
-│       │   │               ├── 📄 MobileModule.kt <br/>
-│       │   │               └── 📄 WebModule.kt <br/>
-│       │   └── 📁 resources <br/>
-└── 📁 shared <br/>
-├── 📄 build.gradle.kts <br/>
-└── 📁 src <br/>
-├── 📁 androidMain <br/>
-│   └── 📁 kotlin <br/>
-│       └── 📁 es <br/>
-│           └── 📁 gaspardev <br/>
-│               ├── 📁 core <br/>
-│               │   └── 📁 debug <br/>
-│               │       └── 📄 FilePrintter.android.kt <br/>
-│               └── 📁 utils <br/>
-│                   └── 📄 Logger.android.kt <br/>
-├── 📁 commonMain <br/>
-│   └── 📁 kotlin <br/>
-│       └── 📁 es <br/>
-│           └── 📁 gaspardev <br/>
-│               ├── 📁 auxliars <br/>
-│               │   └── 📄 Either.kt <br/>
-│               ├── 📁 core <br/>
-│               │   ├── 📁 adapters <br/>
-│               │   ├── 📁 debug <br/>
-│               │   │   ├── 📄 BasicPrintter.kt <br/>
-│               │   │   ├── 📄 DebugPrintter.kt <br/>
-│               │   │   └── 📄 FilePrintter.kt <br/>
-│               │   ├── 📁 domain <br/>
-│               │   │   ├── 📁 entities <br/>
-│               │   │   │   ├── 📄 Certification.kt <br/>
-│               │   │   │   ├── 📄 Chat.kt <br/>
-│               │   │   │   ├── 📄 Diet.kt <br/>
-│               │   │   │   ├── 📄 Dish.kt <br/>
-│               │   │   │   ├── 📄 Exercise.kt <br/>
-│               │   │   │   ├── 📄 Message.kt <br/>
-│               │   │   │   ├── 📄 Note.kt <br/>
-│               │   │   │   ├── 📄 Resource.kt <br/>
-│               │   │   │   ├── 📄 Sportman.kt <br/>
-│               │   │   │   ├── 📄 Suplemment.kt <br/>
-│               │   │   │   ├── 📄 Trainner.kt <br/>
-│               │   │   │   ├── 📄 User.kt <br/>
-│               │   │   │   └── 📄 Workout.kt <br/>
-│               │   │   └── 📁 usecases <br/>
-│               │   │       ├── 📁 create <br/>
-│               │   │       │   ├── 📄 CreateNewSportManUseCase.kt <br/>
-│               │   │       │   ├── 📄 CreateNewTrainnerUseCase.kt <br/>
-│               │   │       │   └── 📄 CreateNewUserUseCase.kt <br/>
-│               │   │       ├── 📁 delete <br/>
-│               │   │       ├── 📁 read <br/>
-│               │   │       └── 📁 update <br/>
-│               │   └── 📁 infrastructure <br/>
-│               ├── 📁 enums <br/>
-│               ├── 📁 interfaces <br/>
-│               └── 📁 utils <br/>
-├── 📁 commonTest <br/>
-│   └── 📁 kotlin <br/>
-├── 📁 jsMain <br/>
-│   └── 📁 kotlin <br/>
-└── 📁 jvmMain <br/>
-└── 📁 kotlin <br/>
+│   ├── 📁 composeApp <br/>
+│   │   ├── 📁 build <br/>
+│   │   ├── 📄 build.gradle.kts <br/>
+│   │   ├── 📁 frontend <br/>
+│   │   │   ├── 📁 .idea <br/>
+│   │   │   ├── 📄 bun.lockb <br/>
+│   │   │   ├── 📄 eslint.config.js <br/>
+│   │   │   ├── 📄 index.html <br/>
+│   │   │   ├── 📁 node_modules <br/>
+│   │   │   ├── 📄 package.json <br/>
+│   │   │   ├── 📄 postcss.config.js <br/>
+│   │   │   ├── 📁 public <br/>
+│   │   │   ├── 📁 src <br/>
+│   │   │   │   ├── 📄 App.tsx <br/>
+│   │   │   │   ├── 📁 assets <br/>
+│   │   │   │   ├── 📄 index.css <br/>
+│   │   │   │   ├── 📄 main.tsx <br/>
+│   │   │   │   ├── 📄 vite-env.d.ts <br/>
+│   │   │   ├── 📄 tailwind.config.js <br/>
+│   │   │   ├── 📄 tsconfig.app.json <br/>
+│   │   │   ├── 📄 tsconfig.json <br/>
+│   │   │   ├── 📄 tsconfig.node.json <br/>
+│   │   │   ├── 📄 vite.config.ts <br/>
+│   │   ├── 📁 src <br/>
+│   │   │   ├── 📁 androidMain <br/>
+│   │   │   │   ├── 📄 AndroidManifest.xml <br/>
+│   │   │   │   ├── 📁 kotlin <br/>
+│   │   │   │   │   ├── 📁 es <br/>
+│   │   │   │   │   │   ├── 📁 gaspardev <br/>
+│   │   │   │   │   │   │   ├── 📄 MainActivity.kt <br/>
+│   │   │   │   ├── 📁 res <br/>
+│   │   │   ├── 📁 commonMain <br/>
+│   │   │   │   ├── 📁 composeResources <br/>
+│   │   │   │   │   ├── 📁 drawable <br/>
+│   │   │   │   │   │   ├── 📄 compose-multiplatform.xml <br/>
+│   │   │   │   ├── 📁 kotlin <br/>
+│   │   │   │   │   ├── 📁 es <br/>
+│   │   │   │   │   │   ├── 📁 gaspardev <br/>
+│   │   │   │   │   │   │   ├── 📄 App.kt <br/>
+│   │   │   ├── 📁 desktopMain <br/>
+│   │   │   │   ├── 📁 kotlin <br/>
+│   │   │   │   │   ├── 📁 es <br/>
+│   │   │   │   │   │   ├── 📁 gaspardev <br/>
+│   │   │   │   │   │   │   ├── 📄 main.kt <br/>
+│   ├── 📁 documentation <br/>
+│   │   ├── 📁 .idea <br/>
+│   │   ├── 📁 Writerside <br/>
+│   │   │   ├── 📄 c.list <br/>
+│   │   │   ├── 📁 cfg <br/>
+│   │   │   │   ├── 📄 buildprofiles.xml <br/>
+│   │   │   ├── 📄 f.tree <br/>
+│   │   │   ├── 📁 images <br/>
+│   │   │   │   ├── 📄 completion_procedure.png <br/>
+│   │   │   │   ├── 📄 completion_procedure_dark.png <br/>
+│   │   │   │   ├── 📄 convert_table_to_xml.png <br/>
+│   │   │   │   ├── 📄 convert_table_to_xml_dark.png <br/>
+│   │   │   │   ├── 📄 Data-base.png <br/>
+│   │   │   │   ├── 📄 new_topic_options.png <br/>
+│   │   │   │   ├── 📄 new_topic_options_dark.png <br/>
+│   │   │   ├── 📁 topics <br/>
+│   │   │   │   ├── 📄 Estructura-de-los-Datos.md <br/>
+│   │   │   │   ├── 📄 starter-topic.md <br/>
+│   │   │   ├── 📄 v.list <br/>
+│   │   │   ├── 📄 writerside.cfg <br/>
+│   ├── 📁 gradle <br/>
+│   │   ├── 📄 libs.versions.toml <br/>
+│   │   ├── 📁 wrapper <br/>
+│   │   │   ├── 📄 gradle-wrapper.jar <br/>
+│   │   │   ├── 📄 gradle-wrapper.properties <br/>
+│   ├── 📄 gradle.properties <br/>
+│   ├── 📄 gradlew <br/>
+│   ├── 📄 gradlew.bat <br/>
+│   ├── 📁 kotlin-js-store <br/>
+│   │   ├── 📄 package-lock.json <br/>
+│   ├── 📄 LICENSE.md <br/>
+│   ├── 📄 local.properties <br/>
+│   ├── 📄 README.md <br/>
+│   ├── 📁 server <br/>
+│   │   ├── 📄 build.gradle.kts <br/>
+│   │   ├── 📁 src <br/>
+│   │   │   ├── 📁 main <br/>
+│   │   │   │   ├── 📁 kotlin <br/>
+│   │   │   │   │   ├── 📁 es <br/>
+│   │   │   │   │   │   ├── 📁 gaspardev <br/>
+│   │   │   │   │   │   │   ├── 📄 Application.kt <br/>
+│   │   │   │   │   │   │   ├── 📁 db <br/>
+│   │   │   │   │   │   │   ├── 📁 modules <br/>
+│   │   │   │   │   │   │   │   ├── 📄 CommonModule.kt <br/>
+│   │   │   │   │   │   │   │   ├── 📄 DektopAndMobileModule.kt <br/>
+│   │   │   │   │   │   │   │   ├── 📄 DesktopModule.kt <br/>
+│   │   │   │   │   │   │   │   ├── 📄 MobileModule.kt <br/>
+│   │   │   │   │   │   │   │   ├── 📄 WebModule.kt <br/>
+│   │   │   │   ├── 📁 resources <br/>
+│   ├── 📄 settings.gradle.kts <br/>
+│   ├── 📁 shared <br/>
+│   │   ├── 📄 build.gradle.kts <br/>
+│   │   ├── 📁 src <br/>
+│   │   │   ├── 📁 androidMain <br/>
+│   │   │   │   ├── 📁 kotlin <br/>
+│   │   │   │   │   ├── 📁 es <br/>
+│   │   │   │   │   │   ├── 📁 gaspardev <br/>
+│   │   │   │   │   │   │   ├── 📁 core <br/>
+│   │   │   │   │   │   │   │   ├── 📁 debug <br/>
+│   │   │   │   │   │   │   │   │   ├── 📄 FilePrintter.android.kt <br/>
+│   │   │   │   │   │   │   ├── 📁 utils <br/>
+│   │   │   │   │   │   │   │   ├── 📄 Logger.android.kt <br/>
+│   │   │   ├── 📁 commonMain <br/>
+│   │   │   │   ├── 📁 kotlin <br/>
+│   │   │   │   │   ├── 📁 es <br/>
+│   │   │   │   │   │   ├── 📁 gaspardev <br/>
+│   │   │   │   │   │   │   ├── 📁 auxliars <br/>
+│   │   │   │   │   │   │   │   ├── 📄 Either.kt <br/>
+│   │   │   │   │   │   │   ├── 📁 core <br/>
+│   │   │   │   │   │   │   │   ├── 📁 adapters <br/>
+│   │   │   │   │   │   │   │   ├── 📁 debug <br/>
+│   │   │   │   │   │   │   │   │   ├── 📄 BasicPrintter.kt <br/>
+│   │   │   │   │   │   │   │   │   ├── 📄 DebugPrintter.kt <br/>
+│   │   │   │   │   │   │   │   │   ├── 📄 FilePrintter.kt <br/>
+│   │   │   │   │   │   │   │   ├── 📁 domain <br/>
+│   │   │   │   │   │   │   │   │   ├── 📁 entities <br/>
+│   │   │   │   │   │   │   │   │   │   ├── 📄 Certification.kt <br/>
+│   │   │   │   │   │   │   │   │   │   ├── 📄 Chat.kt <br/>
+│   │   │   │   │   │   │   │   │   │   ├── 📄 Diet.kt <br/>
+│   │   │   │   │   │   │   │   │   │   ├── 📄 Dish.kt <br/>
+│   │   │   │   │   │   │   │   │   │   ├── 📄 Exercise.kt <br/>
+│   │   │   │   │   │   │   │   │   │   ├── 📄 Message.kt <br/>
+│   │   │   │   │   │   │   │   │   │   ├── 📄 Note.kt <br/>
+│   │   │   │   │   │   │   │   │   │   ├── 📄 Resource.kt <br/>
+│   │   │   │   │   │   │   │   │   │   ├── 📄 Sportman.kt <br/>
+│   │   │   │   │   │   │   │   │   │   ├── 📄 Suplemment.kt <br/>
+│   │   │   │   │   │   │   │   │   │   ├── 📄 Trainner.kt <br/>
+│   │   │   │   │   │   │   │   │   │   ├── 📄 User.kt <br/>
+│   │   │   │   │   │   │   │   │   │   ├── 📄 Workout.kt <br/>
+│   │   │   │   │   │   │   │   │   ├── 📁 usecases <br/>
+│   │   │   │   │   │   │   │   │   │   ├── 📁 create <br/>
+│   │   │   │   │   │   │   │   │   │   │   ├── 📄 CreateNewSportManUseCase.kt <br/>
+│   │   │   │   │   │   │   │   │   │   │   ├── 📄 CreateNewTrainnerUseCase.kt <br/>
+│   │   │   │   │   │   │   │   │   │   │   ├── 📄 CreateNewUserUseCase.kt <br/>
+│   │   │   │   │   │   │   │   │   │   ├── 📁 delete <br/>
+│   │   │   │   │   │   │   │   │   │   ├── 📁 read <br/>
+│   │   │   │   │   │   │   │   │   │   ├── 📁 update <br/>
+│   │   │   │   │   │   │   │   │   │   ├── 📄 UseCase.kt <br/>
+│   │   │   │   │   │   │   │   ├── 📁 infrastructure <br/>
+│   │   │   │   │   │   │   │   │   ├── 📁 apis <br/>
+│   │   │   │   │   │   │   │   │   │   ├── 📄 TrainnerAPI.kt <br/>
+│   │   │   │   │   │   │   │   │   ├── 📁 repositories <br/>
+│   │   │   │   │   │   │   │   │   │   ├── 📄 SportmantRepositoryImp.kt <br/>
+│   │   │   │   │   │   │   │   │   │   ├── 📄 TrainnerRepositoryImp.kt <br/>
+│   │   │   │   │   │   │   │   │   │   ├── 📄 UserRespositoryImp.kt <br/>
+│   │   │   │   │   │   │   │   ├── 📁 presentation <br/>
+│   │   │   │   │   │   │   ├── 📁 enums <br/>
+│   │   │   │   │   │   │   │   ├── 📄 BodyPart.kt <br/>
+│   │   │   │   │   │   │   │   ├── 📄 MediaType.kt <br/>
+│   │   │   │   │   │   │   │   ├── 📄 MessageType.kt <br/>
+│   │   │   │   │   │   │   │   ├── 📄 WeekDay.kt <br/>
+│   │   │   │   │   │   │   ├── 📁 interfaces <br/>
+│   │   │   │   │   │   │   │   ├── 📁 apis <br/>
+│   │   │   │   │   │   │   │   │   ├── 📄 API.kt <br/>
+│   │   │   │   │   │   │   │   ├── 📁 debug <br/>
+│   │   │   │   │   │   │   │   │   ├── 📄 Printter.kt <br/>
+│   │   │   │   │   │   │   │   ├── 📁 repositories <br/>
+│   │   │   │   │   │   │   │   │   ├── 📄 EntitieRepository.kt <br/>
+│   │   │   │   │   │   │   │   │   ├── 📄 SportmanRepository.kt <br/>
+│   │   │   │   │   │   │   │   │   ├── 📄 TrainnerRepository.kt <br/>
+│   │   │   │   │   │   │   │   │   ├── 📄 UserRepository.kt <br/>
+│   │   │   │   │   │   │   ├── 📁 utils <br/>
+│   │   │   │   │   │   │   │   ├── 📄 Constants.kt <br/>
+│   │   │   │   │   │   │   │   ├── 📄 Logger.kt <br/>
+│   │   │   ├── 📁 commonTest <br/>
+│   │   │   │   ├── 📁 kotlin <br/>
+│   │   │   ├── 📁 jsMain <br/>
+│   │   │   │   ├── 📁 kotlin <br/>
+│   │   │   │   │   ├── 📁 es <br/>
+│   │   │   │   │   │   ├── 📁 gaspardev <br/>
+│   │   │   │   │   │   │   ├── 📁 utils <br/>
+│   │   │   │   │   │   │   │   ├── 📄 Logger.js.kt <br/>
+│   │   │   ├── 📁 jvmMain <br/>
+│   │   │   │   ├── 📁 kotlin <br/>
+│   │   │   │   │   ├── 📁 es <br/>
+│   │   │   │   │   │   ├── 📁 gaspardev <br/>
+│   │   │   │   │   │   │   ├── 📁 core <br/>
+│   │   │   │   │   │   │   │   ├── 📁 debug <br/>
+│   │   │   │   │   │   │   │   │   ├── 📄 FilePrintter.jvm.kt <br/>
+│   │   │   │   │   │   │   ├── 📁 utils <br/>
+│   │   │   │   │   │   │   │   ├── 📄 Logger.jvm.kt <br/>
