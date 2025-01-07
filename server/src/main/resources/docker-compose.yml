@@ -9,7 +9,8 @@ services:
         ports:
             - "8080:8080"
         volumes:
-            - postgres_data:/var/lib/postgresql/data
+            - ./server/src/main/kotlin/es/gaspardev/db:/var/lib/postgresql/data  # Monta la carpeta db del servidor al contenedor
+            - postgres_data:/var/lib/postgresql/data  # También puedes mantener el volumen de datos persistente
         networks:
             - postgres_network
 

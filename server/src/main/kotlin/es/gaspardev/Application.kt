@@ -1,6 +1,8 @@
 package es.gaspardev
 
+import es.gaspardev.modules.*
 import es.gaspardev.utils.Logger
+import es.gaspardev.utils.SERVER_PORT
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -9,9 +11,9 @@ import io.ktor.server.netty.*
 import io.ktor.server.plugins.compression.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
+import kotlinx.serialization.json.Json
 
 fun main() {
-
     val runDBProcess = ProcessBuilder(
         "docker",
         "compose",
@@ -20,7 +22,6 @@ fun main() {
         "up",
         "-d"
     ).inheritIO().start()
-
 
     val errorPrinter = Thread {
         runDBProcess.errorStream.bufferedReader().use { errorReader ->
@@ -33,16 +34,17 @@ fun main() {
 
     errorPrinter.start()
 
+    
+
     embeddedServer(
         Netty, port = SERVER_PORT, module = Application::module, host = "localhost",
     ).start(wait = true)
 }
 
 fun Application.module() {
-
-    /* CONFIGURATION  */
+    /* CONFIGURACIÓN GENERAL */
     install(ContentNegotiation) {
-        json()
+        json(Json { prettyPrint = true })
     }
     install(CORS) {
         allowMethod(HttpMethod.Get)
@@ -54,31 +56,7 @@ fun Application.module() {
         gzip()
     }
 
-    /* MODULE ROUTING */
-    common()
-    web()
-    desktopAndMobile()
-    desktop()
-    mobile()
+    /* CARGA DE MÓDULOS */
+    trainer()
+    sportsman()
 }
-
-fun Application.common() {
-
-}
-
-fun Application.web() {
-
-}
-
-fun Application.desktopAndMobile() {
-
-}
-
-fun Application.desktop() {
-
-}
-
-fun Application.mobile() {
-
-}
-
