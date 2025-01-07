@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -9,7 +8,6 @@ plugins {
 
 kotlin {
     androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
@@ -25,12 +23,23 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.serialization.core)
-            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.org.jetbrains.kotlinx.kotlinx.serialization.json2)
+            implementation(libs.ktor.ktor.client.core)
+            implementation(libs.ktor.ktor.client.cio)
+            implementation(libs.ktor.ktor.client.serialization)
+            implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.1")
+            implementation(libs.ktor.ktor.client.logging)
+            implementation(libs.io.ktor.ktor.client.content.negotiation2)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
+        androidMain.dependencies {
+            implementation(libs.kotlinx.coroutines.core)
+
+        }
     }
+
 }
 
 android {
