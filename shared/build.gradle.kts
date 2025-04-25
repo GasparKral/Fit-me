@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -8,16 +9,13 @@ plugins {
 
 kotlin {
     androidTarget {
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
 
     jvm()
-
-    js(IR) {
-        browser()
-    }
 
     sourceSets {
         commonMain.dependencies {
@@ -27,9 +25,10 @@ kotlin {
             implementation(libs.ktor.ktor.client.core)
             implementation(libs.ktor.ktor.client.cio)
             implementation(libs.ktor.ktor.client.serialization)
-            implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.1")
+            implementation(libs.io.ktor.ktor.serialization.kotlinx.json)
             implementation(libs.ktor.ktor.client.logging)
             implementation(libs.io.ktor.ktor.client.content.negotiation2)
+            implementation(libs.postgresql)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -53,3 +52,7 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
     }
 }
+dependencies {
+    implementation(libs.androidx.annotation.jvm)
+}
+ 

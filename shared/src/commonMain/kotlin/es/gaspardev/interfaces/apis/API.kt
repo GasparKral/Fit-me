@@ -23,12 +23,13 @@ abstract class API<ApiType> where ApiType : Any {
     }
 
     abstract suspend fun post(
-        route: String,
-        body: ApiType,
-        exceptionMessage: String?
+        route: String = apiPath,
+        body: ApiType
     ): Either<Exception, ApiType>
 
-    abstract suspend fun get(route: String): Either<Exception, ApiType>
+    abstract suspend fun get(route: String = apiPath, vararg params: String?): Either<Exception, List<ApiType>>
 
-    abstract suspend fun getList(route: String): Either<Exception, List<ApiType>>
+    abstract suspend fun delete(route: String = apiPath, vararg params: String?): Either.Failure<Exception>?
+
+    abstract suspend fun patch(route: String = apiPath, body: Any): Either.Failure<Exception>?
 }

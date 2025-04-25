@@ -19,21 +19,8 @@ kotlin {
 
     jvm("desktop")
 
-    js(IR) {
-        browser {
-            commonWebpackConfig {
-                cssSupport {
-                    enabled.set(true)
-                }
-            }
-        }
-        binaries.executable()
-    }
-
-
     sourceSets {
         val desktopMain by getting
-        val jsMain by getting
 
         androidMain.dependencies {
             implementation(compose.preview)
@@ -53,9 +40,6 @@ kotlin {
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
-        }
-        jsMain.dependencies {
-            implementation(libs.kotlinx.coroutines.core)
         }
     }
 }

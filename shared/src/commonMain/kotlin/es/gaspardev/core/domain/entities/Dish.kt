@@ -4,8 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Dish(
+    val id: Int,
     var name: String,
-    var ammount: Double,
     val optionalDishes: List<Dish>?
 ) {
 

@@ -1,0 +1,64 @@
+openapi: 3.0.3
+info:
+  title: API de Usuarios
+  description: API para gestionar la autenticación de usuarios.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Servidor local
+
+paths:
+  /user:
+    get:
+      summary: Obtiene los detalles de un usuario
+      description: Devuelve la información del usuario si las credenciales son correctas.
+      parameters:
+        - name: userIdentification
+          in: query
+          required: true
+          description: Nombre de usuario o correo electrónico.
+          schema:
+            type: string
+        - name: userPassword
+          in: query
+          required: true
+          description: Contraseña del usuario.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Usuario encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Parámetros requeridos faltantes.
+        "404":
+          description: Usuario no encontrado.
+
+    post:
+      summary: Prueba de conexión
+      description: Retorna un mensaje de prueba para verificar la conexión con la API.
+      responses:
+        "200":
+          description: Conexión exitosa.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Halo desde user"
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        email:
+          type: string
+          format: email

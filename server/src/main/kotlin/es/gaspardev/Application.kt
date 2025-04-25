@@ -1,7 +1,7 @@
 package es.gaspardev
 
-import es.gaspardev.modules.*
-import es.gaspardev.utils.Logger
+import es.gaspardev.modules.endpoints.*
+import es.gaspardev.modules.shockets.socket
 import es.gaspardev.utils.SERVER_PORT
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
@@ -11,31 +11,11 @@ import io.ktor.server.netty.*
 import io.ktor.server.plugins.compression.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import kotlinx.serialization.json.Json
 
 fun main() {
-    val runDBProcess = ProcessBuilder(
-        "docker",
-        "compose",
-        "-f",
-        "server/src/main/kotlin/es/gaspardev/db/docker-compose.yml", // Ruta relativa ajustada
-        "up",
-        "-d"
-    ).inheritIO().start()
-
-    val errorPrinter = Thread {
-        runDBProcess.errorStream.bufferedReader().use { errorReader ->
-            var line: String?
-            while (errorReader.readLine().also { line = it } != null) {
-                Logger.error(line!!)
-            }
-        }
-    }
-
-    errorPrinter.start()
-
-    
-
     embeddedServer(
         Netty, port = SERVER_PORT, module = Application::module, host = "localhost",
     ).start(wait = true)
@@ -56,7 +36,25 @@ fun Application.module() {
         gzip()
     }
 
+    /* Rutas de testing */
+    routing {
+        route("/ping"){
+            handle {
+                call.respond(HttpStatusCode.OK, "pong")
+            }
+        }
+    }
+
     /* CARGA DE MÓDULOS */
+    configureDatabases()
+    socket()
+
+    /* Modulos Referentes a recursos */
+    upload()
+    resources()
+
+    user()
     trainer()
     sportsman()
+
 }

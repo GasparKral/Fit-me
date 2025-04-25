@@ -24,7 +24,11 @@ dependencies {
     implementation(libs.exposed.core)
     implementation(libs.exposed.dao)
     implementation(libs.exposed.jdbc)
+    implementation(libs.jetbrains.exposed.java.time)
     implementation(libs.postgresql)
+    implementation(libs.kotlinx.datetime)
+    implementation(libs.ktor.websockets)
+    implementation(libs.ktor.server.websockets)
     testImplementation(libs.ktor.server.tests)
     testImplementation(libs.kotlin.test.junit)
 }

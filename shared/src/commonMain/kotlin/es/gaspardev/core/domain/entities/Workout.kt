@@ -2,11 +2,15 @@ package es.gaspardev.core.domain.entities
 
 import es.gaspardev.enums.WeekDay
 import kotlinx.serialization.Serializable
+import kotlin.time.Duration
 
 @Serializable
 data class Workout(
     val notes: List<Note>,
-    val exercies: Map<WeekDay, List<Exercise>>
+    val exercises: Map<WeekDay, List<WorkoutExercise>>,
+    val duration: Duration? = Duration.parse("W01")
 ) {
-
-}
+    companion object {
+        const val URLPATH = "/workouts"
+    }
+} 

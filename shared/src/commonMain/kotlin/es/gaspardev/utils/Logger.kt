@@ -1,8 +1,6 @@
 package es.gaspardev.utils
 
 import es.gaspardev.interfaces.Printter
-import es.gaspardev.core.debug.BasicPrintter
-
 
 expect object Logger {
 

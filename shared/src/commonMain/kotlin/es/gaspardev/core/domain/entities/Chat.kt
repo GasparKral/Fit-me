@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Chat(
     val trainer: Trainer,
-    val sportman: Sportman,
+    val sportman: Sportsman,
     val message: List<Message>
 ) {
 

@@ -1,27 +1,44 @@
 package es.gaspardev.core.domain.entities
 
 import es.gaspardev.enums.BodyPart
-import es.gaspardev.enums.grip.Grip
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Exercise(
+data class ExerciseBase(
+    val id: Int,
     val name: String,
     val bodyPart: BodyPart,
-    var reps: Int,
-    var sets: Int,
-    val gripType: Grip?,
-    var description: String,
+    val description: String,
     val author: Trainer?,
-    var video: Resource?,
-    val notes: List<Note>,
-    val optionalExercises: List<Exercise>?
+    val video: Resource?
 ) {
-
     companion object {
-        fun isValid(exercise: Exercise): Boolean {
+        fun isValid(exercise: ExerciseBase): Boolean {
             return exercise.name.isNotBlank() && exercise.description.length >= 10
         }
     }
+}
 
+@Serializable
+data class WorkoutExercise(
+    val base: ExerciseBase,
+    val reps: Int,
+    val sets: Int,
+    val note: Note? = null,
+    private var optionalExercises: MutableList<WorkoutExercise>? = null,
+    val isOption: Boolean
+) {
+    fun addOptionalExercise(exercise: WorkoutExercise) {
+        if (!isOption) {
+            if (optionalExercises == null) {
+                optionalExercises = mutableListOf(exercise)
+            } else {
+                optionalExercises!!.add(exercise)
+            }
+        }
+    }
+
+    fun getOptionalExercises(): MutableList<WorkoutExercise>? {
+        return this.optionalExercises
+    }
 }

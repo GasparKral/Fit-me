@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Note(
     val user: User,
-    var message: String
+    var message: String,
 ) {
 
 }

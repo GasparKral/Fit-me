@@ -1,0 +1,36 @@
+openapi: 3.0.3
+info:
+  title: API de Upload
+  description: API para la subida de archivos al servidor.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Servidor local
+
+paths:
+  /upload:
+    post:
+      summary: Sube un archivo
+      description: Permite subir un archivo al servidor.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Archivo guardado correctamente.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "File correctly saved: 16987654321.jpg"
+        "400":
+          description: Petición incorrecta (ej. archivo no proporcionado).
+        "500":
+          description: Error interno del servidor (ej. carpeta de destino no encontrada).

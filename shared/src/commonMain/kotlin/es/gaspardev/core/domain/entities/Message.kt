@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Message(
-    val user: User,
+    val author: User,
     val messageType: MessageType,
     var message: String,
     var media: Resource?,

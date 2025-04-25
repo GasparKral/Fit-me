@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Fit-me</string>
+    <string name="inicio_de_sesion">Inicia Sesión en tu cuenta</string>
+    <string name="inicio_de_sesion_portal">Portal de Entrenadores</string>
+    <string name="inicio_de_sesion-usuario">Usuario o e-mail</string>
+    <string name="inicio_de_sesion_contraseña">Contraseña</string>
+    <string name="inicio_de_sesion_recuerdame">Recordarme</string>
+</resources>
