@@ -1,9 +1,10 @@
 package es.gaspardev.core.Routing
 
 import androidx.compose.runtime.*
-import es.gaspardev.core.actions.PageAction
 import es.gaspardev.pages.*
+import kotlin.reflect.KFunction
 import kotlin.reflect.KFunction1
+import kotlin.reflect.KFunction3
 
 @Composable
 fun Router(box: @Composable (content: @Composable () -> Unit) -> Unit): RouterController {
@@ -15,10 +16,14 @@ fun Router(box: @Composable (content: @Composable () -> Unit) -> Unit): RouterCo
         actualRoute = route
     }
 
-    fun navigateToWithAcction(route: Route, action: PageAction, vararg actionParams: Any?) {
+    fun navigateToWithAction(route: Route, action: KFunction<Unit>, args: Array<out Any?>? = null) {
         history.add(actualRoute)
         actualRoute = route
-        action.execute(actionParams)
+        if (args != null) {
+            action.call(*args)
+        } else {
+            action.call()
+        }
     }
 
     fun goBack() {
@@ -29,7 +34,7 @@ fun Router(box: @Composable (content: @Composable () -> Unit) -> Unit): RouterCo
 
     val controller = RouterController(
         ::navigateTo,
-        ::navigateToWithAcction,
+        ::navigateToWithAction,
         ::goBack,
         rememberUpdatedState(actualRoute)
     )
@@ -57,7 +62,7 @@ fun Router(box: @Composable (content: @Composable () -> Unit) -> Unit): RouterCo
 @Stable
 data class RouterController(
     val navigateTo: KFunction1<Route, Unit>,
-    val navigateToWithAcction: (Route, PageAction, Array<out Any?>) -> Unit,
+    val navigateToWithAcction: KFunction3<Route, KFunction<Unit>, Array<out Any?>?, Unit>,
     val goBack: () -> Unit,
     val currentRoute: State<Route>
 )

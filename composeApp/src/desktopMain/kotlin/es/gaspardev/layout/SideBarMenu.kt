@@ -2,9 +2,11 @@ package es.gaspardev.layout
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -14,12 +16,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.gaspardev.core.Routing.Route
 import es.gaspardev.core.Routing.RouterController
-import fit_me.composeapp.generated.resources.*
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import es.gaspardev.icons.FitMeIcons
 
 @OptIn(ExperimentalLayoutApi::class)
-@Preview
 @Composable
 fun SideBarMenu(controller: RouterController) {
 
@@ -78,40 +77,49 @@ fun SideBarMenu(controller: RouterController) {
             )
         }
 
-        SideBarMenuItem("Home", Route.Dashboard, controller) { Icon(painterResource(Res.drawable.Home), "Home Icon") }
+        SideBarMenuItem("Home", Route.Dashboard, controller, Icons.Default.Home)
         SideBarMenuItem(
             "Athletes",
             Route.Athletes,
-            controller
-        ) { Icon(painterResource(Res.drawable.Athlets), "Athletes Icon") }
+            controller,
+            FitMeIcons.Athlets
+        )
         SideBarMenuItem(
             "Workouts",
             Route.Workouts,
-            controller
-        ) { Icon(painterResource(Res.drawable.Weights), "Workouts Icon") }
+            controller,
+            FitMeIcons.Weight
+        )
         SideBarMenuItem(
             "Nutrition",
-            Route.Nutrition, controller
-        ) { Icon(painterResource(Res.drawable.Nutrition), "Nutrition Icon") }
+            Route.Nutrition,
+            controller,
+            FitMeIcons.Nutrition
+        )
         SideBarMenuItem(
             "Calendar",
             Route.Calendar,
-            controller
-        ) { Icon(painterResource(Res.drawable.Calendar), "Calendar Icon") }
+            controller,
+            FitMeIcons.Calendar
+        )
         SideBarMenuItem(
             "Statistics",
-            Route.Statistics, controller
-        ) { Icon(painterResource(Res.drawable.Stadistics), "Staditics Icon") }
+            Route.Statistics,
+            controller,
+            FitMeIcons.ChartBar
+        )
         SideBarMenuItem(
             "Messages",
             Route.Messages,
-            controller
-        ) { Icon(painterResource(Res.drawable.Messages), "Message Icon") }
+            controller,
+            FitMeIcons.Messages
+        )
         SideBarMenuItem(
             "Settings",
             Route.Settings,
-            controller
-        ) { Icon(painterResource(Res.drawable.Settings), "Settings Icon") }
+            controller,
+            Icons.Default.Settings
+        )
     }
 
 }

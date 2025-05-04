@@ -5,6 +5,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,6 +33,12 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.input.key.*
+
 
 @Preview
 @Composable
@@ -49,6 +57,38 @@ fun LoginScreen(controller: RouterController) {
         }
     })
 
+    val focusRequesterUsername = remember { FocusRequester() }
+    val focusRequesterPassword = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
+
+
+    fun iniciarSesion() {
+        error = ""
+        isLoading = true
+
+        CoroutineScope(Dispatchers.IO).launch {
+            UserRepositoryImp().logIn(LoginUserInfo(username, encrypt(password)))
+                .fold(
+                    onSuccess = { result ->
+                        withContext(Dispatchers.Main) {
+                            isLoading = false
+                            LoggedUser.user = result
+                            if (rememberMe) {
+                                CacheManager.saveValue(CacheRef.RememberUserName, result.name)
+                            }
+                            controller.navigateTo(Route.Dashboard)
+                        }
+                    },
+                    onFailure = { throwable ->
+                        withContext(Dispatchers.Main) {
+                            isLoading = false
+                            error = throwable.message ?: "An error occurred"
+                            println("Login failed: ${throwable.message}")
+                        }
+                    }
+                )
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -109,8 +149,20 @@ fun LoginScreen(controller: RouterController) {
                         value = username,
                         onValueChange = { username = it },
                         label = { Text(stringResource(Res.string.inicio_de_sesion_usuario)) },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequesterUsername)
+                            .onPreviewKeyEvent {
+                                if (it.key == Key.Tab && it.type == KeyEventType.KeyDown) {
+                                    focusRequesterPassword.requestFocus()
+                                    true
+                                } else {
+                                    false
+                                }
+                            },
+                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next)
                     )
+
 
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -119,9 +171,27 @@ fun LoginScreen(controller: RouterController) {
                         onValueChange = { password = it },
                         label = { Text(stringResource(Res.string.inicio_de_sesion_contraseña)) },
                         visualTransformation = PasswordVisualTransformation(),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequesterPassword)
+                            .onPreviewKeyEvent {
+                                if (it.key == Key.Tab && it.type == KeyEventType.KeyDown) {
+                                    focusManager.clearFocus()
+                                    true
+                                } else if (it.key == Key.Enter && it.type == KeyEventType.KeyDown) {
+                                    focusManager.clearFocus()
+                                    iniciarSesion()
+                                    true
+                                } else {
+                                    false
+                                }
+                            },
+                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = {
+                            focusManager.clearFocus()
+                            iniciarSesion()
+                        })
                     )
-
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -133,37 +203,7 @@ fun LoginScreen(controller: RouterController) {
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Button(
-                        onClick = {
-                            error = ""
-                            isLoading = true
-
-                            // Llamar a la función suspend dentro de un CoroutineScope
-                            CoroutineScope(Dispatchers.IO).launch {
-                                UserRepositoryImp().logIn(LoginUserInfo(username, encrypt(password)))
-                                    .fold(
-                                        onSuccess = { result ->
-                                            // Manejar el caso de éxito
-                                            withContext(Dispatchers.Main) {
-                                                isLoading = false
-                                                LoggedUser.user = result[0]
-                                                if (rememberMe) {
-                                                    CacheManager.saveValue(CacheRef.RememberUserName, result[0].name)
-                                                }
-
-                                                controller.navigateTo(Route.Dashboard)
-                                            }
-                                        },
-                                        onFailure = { throwable ->
-                                            // Manejar el caso de error
-                                            withContext(Dispatchers.Main) {
-                                                isLoading = false
-                                                error = throwable.message ?: "An error occurred"
-                                                println("Login failed: ${throwable.message}")
-                                            }
-                                        }
-                                    )
-                            }
-                        },
+                        onClick = { iniciarSesion() },
                         modifier = Modifier.fillMaxWidth(),
                         enabled = !isLoading
                     ) {
@@ -174,6 +214,7 @@ fun LoginScreen(controller: RouterController) {
             }
         }
     }
+
 
 }
 

@@ -1,98 +1,250 @@
 package es.gaspardev.pages
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.Button
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import es.gaspardev.controllers.LoggedUser
-import es.gaspardev.core.Routing.Route
 import es.gaspardev.core.Routing.RouterController
-import es.gaspardev.core.infrastructure.repositories.TrainerRepositoryImp
-import fit_me.composeapp.generated.resources.*
-import fit_me.composeapp.generated.resources.Home
-import fit_me.composeapp.generated.resources.Res
-import fit_me.composeapp.generated.resources.Weights
-import fit_me.composeapp.generated.resources.app_name
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
+import es.gaspardev.icons.FitMeIcons
+import es.gaspardev.layout.Dashboard.*
 
 @Composable
 fun DashboardScreen(controller: RouterController) {
 
-    val buttons: Map<String, @Composable () -> Unit> = mapOf(
-        "Agregar Atleta" to {
-            Button(
-                onClick = {
-                    controller.navigateToWithAcction(
-                        Route.Athletes,
-                        AddNewAthlete,
-                        emptyArray()
-                    )
-                }) { Text("Agregar Atleta") }
-        },
-        "Agendar Calendario" to {
-            Button(onClick = {
-                controller.navigateToWithAcction(
-                    Route.Calendar,
-                    SetNewEvent,
-                    emptyArray()
-                )
-            }) { Text("Agendar Calendario") }
-        }
+    val scrollState = rememberScrollState()
+    VerticalScrollbar(
+        adapter = rememberScrollbarAdapter(scrollState)
     )
-
-
-
     Column(
-        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colors.primary)
+        modifier = Modifier
+            .verticalScroll(scrollState)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        Row {
-            Column {
-                Text(stringResource(Res.string.app_name) + LoggedUser.user.name)
-                Text("Tienes " + TrainerRepositoryImp().getPendingWorkouts(LoggedUser.user) + " atletas esperando rutinas")
-            }
-            Button(
-                onClick = {}
-            ) {
-                "+ " + stringResource(Res.string.app_name)
-            }
-        }
-
-        Column(
+        Card(
+            backgroundColor = MaterialTheme.colors.primary,
+            contentColor = MaterialTheme.colors.onPrimary,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Acciones Rápidas ")
-            Text("Tareas que tal vez necesites")
             Row(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Button(onClick = {}) {
-                    Text("Agregar Deportista")
-                    Icon(painterResource(Res.drawable.Athlets), "Home Icon")
+                Column {
+                    Text(
+                        text = "Bienvenido de vuelta ${LoggedUser.user.name}",
+                        style = MaterialTheme.typography.h2,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "You have 3 athletes waiting for workout plans.",
+                        color = MaterialTheme.colors.onPrimary.copy(alpha = 0.9f)
+                    )
                 }
-                Button(onClick = {}) {
-                    Text("Crear rutina")
-                    Icon(painterResource(Res.drawable.Weights), "Home Icon")
+                Button(
+                    onClick = { /* Create new plan */ },
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = MaterialTheme.colors.onPrimary,
+                        contentColor = MaterialTheme.colors.primary
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add",
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Create New Plan")
                 }
-                Button(onClick = {}) {
-                    Text("Crear dieta")
-                    Icon(painterResource(Res.drawable.Nutrition), "Home Icon")
+            }
+        }
+
+        // Quick Actions
+        QuickActions(controller)
+
+        // Stats Cards
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(4),
+            modifier = Modifier.fillMaxWidth().heightIn(max = 300.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            listOf(
+                Triple("Total Athletes", "24", "+2 from last month") to Icons.Filled.Person,
+                Triple("Active Plans", "18", "+3 from last month") to FitMeIcons.Weight,
+                Triple("Upcoming Sessions", "7", "For the next 48 hours") to FitMeIcons.Calendar,
+                Triple("Unread Messages", "12", "5 new since yesterday") to Icons.Filled.Notifications
+            ).forEach { (data, icon) ->
+                item {
+                    StatCard(
+                        title = data.first,
+                        value = data.second,
+                        description = data.third,
+                        icon = icon,
+                        footer = {
+                            if (data.first == "Unread Messages") {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                TextButton(
+                                    onClick = { /* View messages */ },
+                                    colors = ButtonDefaults.textButtonColors(
+                                        contentColor = MaterialTheme.colors.primary
+                                    )
+                                ) {
+                                    Text("View Messages")
+                                }
+                            }
+                        }
+                    )
                 }
-                Button(onClick = {}) {
-                    Text("Agendar Entrenamiento")
-                    Icon(painterResource(Res.drawable.Calendar), "Home Icon")
+            }
+        }
+
+        // Performance and Athletes Section
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Performance Overview
+            Card(
+                modifier = Modifier.weight(4f)
+            ) {
+                Column {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "Performance Overview",
+                                style = MaterialTheme.typography.h2,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Athlete progress metrics for the last 30 days",
+                                style = MaterialTheme.typography.body2,
+                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                            )
+                        }
+                        OutlinedButton(
+                            onClick = { /* Export data */ },
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = MaterialTheme.colors.primary
+                            )
+                        ) {
+                            Text("Export Data")
+                        }
+                    }
+                    // Chart would go here
+                    StatisticsChart()
                 }
-                Button(onClick = {}) {
-                    Text("Enviar Mensage")
-                    Icon(painterResource(Res.drawable.Messages), "Home Icon")
+            }
+
+            // Your Athletes
+            Card(
+                modifier = Modifier.weight(3f)
+            ) {
+                Column {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "Your Athletes",
+                                style = MaterialTheme.typography.h2,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Manage your athletes and their progress",
+                                style = MaterialTheme.typography.body2,
+                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                            )
+                        }
+                        Button(
+                            onClick = { /* Add athlete */ },
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = MaterialTheme.colors.primary,
+                                contentColor = MaterialTheme.colors.onPrimary
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add",
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Add Athlete")
+
+                        }
+                    }
+                    // Athletes list would go here
+                    AthletesList()
                 }
+            }
+        }
+
+        // Recent Activities
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "Recent Activities",
+                            style = MaterialTheme.typography.h2,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Latest updates from your athletes",
+                            style = MaterialTheme.typography.body2,
+                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
+                    OutlinedButton(
+                        onClick = { /* View all */ },
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colors.primary
+                        )
+                    ) {
+                        Text("View All")
+                    }
+                }
+                // Activities would go here
+                RecentActivities()
             }
         }
     }
+
 }
+
+

@@ -36,6 +36,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(projects.shared)
+            implementation(libs.kotlin.reflect)
+            implementation(libs.chart)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
@@ -72,7 +74,9 @@ android {
 }
 
 dependencies {
+    implementation(libs.constraintlayout)
     debugImplementation(compose.uiTooling)
+    implementation(kotlin("reflect"))
 }
 
 compose.desktop {
