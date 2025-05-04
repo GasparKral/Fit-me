@@ -201,8 +201,9 @@ skinparam classAttributeIconSize 0
 ' Enumeraciones
 enum MediaType
 enum BodyPart
+enum WeekDay
 
-' Tablas
+' Tablas base
 class UserTable {
 +id: Int
 +name: String
@@ -259,20 +260,34 @@ class NoteTable {
 +answer: Int?
 }
 
-class Exercises {
+' Ejercicios
+class ExerciseBase {
 +id: Int
 +name: String
 +bodyPart: BodyPart
-+reps: Int
-+sets: Int
 +description: Text
 +author: Int?
 +video: Int?
 }
 
+class WorkoutTable {
++id: Int
++duration: String
+}
+
+class WorkoutExercises {
++id: Int
++workoutId: Int
++exerciseId: Int
++reps: Int
++sets: Int
++note: Text?
++day: WeekDay
+}
+
 class ExerciseOptionalLinks {
-+exercise_id: Int
-+optional_id: Int
++workoutExerciseId: Int
++optionalExerciseId: Int
 }
 
 ' Relaciones
@@ -280,12 +295,14 @@ UserTable --o{ TrainerTable : userId
 UserTable --o{ SportsmanTable : userId
 TrainerTable --o{ SportsmanTable : trainerId
 TrainerTable --o{ SocialLinksTable : trainerId
-TrainerTable --o{ Exercises : author
-ResourceTable --o{ Exercises : video
+TrainerTable --o{ ExerciseBase : author
+ResourceTable --o{ ExerciseBase : video
 UserTable --o{ NoteTable : user
-NoteTable --o{ NoteTable : answer
-Exercises --o{ ExerciseOptionalLinks : exercise_id
-Exercises --o{ ExerciseOptionalLinks : optional_id
+
+WorkoutTable --o{ WorkoutExercises : id
+ExerciseBase --o{ WorkoutExercises : exerciseId
+WorkoutExercises --o{ ExerciseOptionalLinks : workoutExerciseId
+ExerciseBase --o{ ExerciseOptionalLinks : optionalExerciseId
 
 @enduml
 

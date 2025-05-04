@@ -81,9 +81,7 @@
     @enduml
 </code-block>
 
-## Diagrama relacional
-
-    
+## Modelo Entidad-Relación
 
 <code-block lang="plantuml">
     @startuml
