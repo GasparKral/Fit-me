@@ -3,15 +3,20 @@ package es.gaspardev.core.infrastructure.apis
 import API
 import es.gaspardev.auxliars.Either
 import es.gaspardev.core.domain.entities.Trainer
+import es.gaspardev.utils.SERVER_HTTPS_DIR
 import io.ktor.client.request.*
 import io.ktor.http.*
 
-class TrainerAPI(override val apiPath: String = Trainer.URLPATH) : API<Trainer>() {
+class TrainerAPI(override val apiPath: String = SERVER_HTTPS_DIR + Trainer.URLPATH) : API<Trainer>() {
     override suspend fun post(route: String, body: Trainer): Either<Exception, Trainer> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun get(route: String, vararg params: String?): Either<Exception, List<Trainer>> {
+    override suspend fun get(route: String, vararg params: String?): Either<Exception, Trainer> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getList(route: String, vararg params: String?): Either<Exception, List<Trainer>> {
         TODO("Not yet implemented")
     }
 

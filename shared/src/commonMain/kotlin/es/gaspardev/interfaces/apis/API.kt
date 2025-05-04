@@ -27,7 +27,9 @@ abstract class API<ApiType> where ApiType : Any {
         body: ApiType
     ): Either<Exception, ApiType>
 
-    abstract suspend fun get(route: String = apiPath, vararg params: String?): Either<Exception, List<ApiType>>
+    abstract suspend fun get(route: String = apiPath, vararg params: String?): Either<Exception, ApiType>
+
+    abstract suspend fun getList(route: String = apiPath, vararg params: String?): Either<Exception, List<ApiType>>
 
     abstract suspend fun delete(route: String = apiPath, vararg params: String?): Either.Failure<Exception>?
 

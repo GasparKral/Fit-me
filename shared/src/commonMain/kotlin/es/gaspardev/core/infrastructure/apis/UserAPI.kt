@@ -3,11 +3,12 @@ package es.gaspardev.core.infrastructure.apis
 import API
 import es.gaspardev.auxliars.Either
 import es.gaspardev.core.domain.entities.User
+import es.gaspardev.utils.SERVER_HTTPS_DIR
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 
-class UserAPI(override val apiPath: String = User.URLPATH) : API<User>() {
+class UserAPI(override val apiPath: String = SERVER_HTTPS_DIR + User.URLPATH) : API<User>() {
     override suspend fun post(route: String, body: User): Either<Exception, User> {
 
         return try {
@@ -35,10 +36,11 @@ class UserAPI(override val apiPath: String = User.URLPATH) : API<User>() {
         }
     }
 
-    override suspend fun get(route: String, vararg params: String?): Either<Exception, List<User>> {
+    // TODO: CAMBIAR A USER EN VEZ DE LIST<USER>
+    override suspend fun get(route: String, vararg params: String?): Either<Exception, User> {
         // Filter non-null parameters and construct the query string
         val queryString = params.filterNotNull()
-            .joinToString("&") { "param=$it" }
+            .joinToString("&") { it }
 
         // Concatenate the route with the query string
         val url: String = if (queryString.isNotEmpty()) {
@@ -52,10 +54,7 @@ class UserAPI(override val apiPath: String = User.URLPATH) : API<User>() {
 
             when (response.status) {
                 HttpStatusCode.OK -> {
-                    val users: List<User> = response.body()
-                    return if (users.size == 0) Either.Failure(Exception("Usuario no encontrado")) else Either.Success(
-                        users
-                    )
+                    return Either.Success(response.body())
                 }
 
                 HttpStatusCode.RequestTimeout -> {
@@ -69,6 +68,10 @@ class UserAPI(override val apiPath: String = User.URLPATH) : API<User>() {
         } catch (e: Exception) {
             Either.Failure(e)
         }
+    }
+
+    override suspend fun getList(route: String, vararg params: String?): Either<Exception, List<User>> {
+        TODO("Not yet implemented")
     }
 
 

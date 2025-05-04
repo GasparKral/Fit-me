@@ -1,8 +1,8 @@
 package es.gaspardev.modules.endpoints
 
-import es.gaspardev.core.domain.DAOs.BindDTO
+
 import es.gaspardev.core.domain.entities.User
-import es.gaspardev.db.Trainer_SportsmantTable
+
 import es.gaspardev.db.UserDAO
 import es.gaspardev.db.UserTable
 import es.gaspardev.db.daoToModel
@@ -46,7 +46,7 @@ fun Application.user() {
         }
 
         post(User.URLPATH + "/bind") {
-           
+
         }
     }
 }

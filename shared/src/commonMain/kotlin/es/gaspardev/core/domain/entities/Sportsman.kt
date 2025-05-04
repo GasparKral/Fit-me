@@ -1,10 +1,12 @@
 package es.gaspardev.core.domain.entities
 
 import es.gaspardev.enums.WeekDay
+import kotlinx.datetime.Clock
 import kotlinx.serialization.Serializable
+import kotlin.time.Duration
 
 @Serializable
-data class Sportsman(
+class Sportsman(
     val user: User,
     var trainer: Trainer?,
     var age: Int,
@@ -14,7 +16,8 @@ data class Sportsman(
     val allergies: List<String>,
     val workouts: Workout?,
     val diet: Diet?,
-    val suplementation: Map<WeekDay, List<Suplemment>>?
+    val suplementation: Map<WeekDay, List<Suplemment>>?,
+    val status: SportsmanStatus
 ) {
 
     companion object {
@@ -27,4 +30,15 @@ data class Sportsman(
         )
     }
 
+}
+
+@Serializable
+data class SportsmanStatus(
+    val status: Boolean, // 1 = activo,0 = inactivo
+    val lastActive: kotlinx.datetime.Instant,
+    val needsAttetion: Boolean
+) {
+    fun getLastConectionTimeDiference(): Duration {
+        return Clock.System.now().minus(lastActive)
+    }
 }
