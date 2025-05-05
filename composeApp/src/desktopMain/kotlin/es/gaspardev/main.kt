@@ -25,6 +25,7 @@ private val LightColorPalette = lightColors(
     primary = Color(0xFFFF4000),
     primaryVariant = Color(0xFFFF4000),
     secondary = Color(0xFF00FF40),
+    secondaryVariant = Color(0xFFFFFAFA),
     background = Color(0xFFFAFAFA),
     surface = Color(0xFFFAFAFA),
     error = Color(0xFFEF000C),

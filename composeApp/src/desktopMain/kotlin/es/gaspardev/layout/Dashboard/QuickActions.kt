@@ -7,15 +7,13 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogState
 import es.gaspardev.core.Routing.Route
 import es.gaspardev.core.Routing.RouterController
 import es.gaspardev.icons.FitMeIcons
@@ -109,7 +107,7 @@ val quickActions = listOf(
         route = Route.Workouts,
         icon = FitMeIcons.Weight,
         label = "Create Workout",
-        action = ::test
+        action = es.gaspardev.layout.DialogState::open
     ),
     QuickAction(
         route = Route.Nutrition,

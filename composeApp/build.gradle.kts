@@ -23,10 +23,11 @@ kotlin {
         val desktopMain by getting
 
         androidMain.dependencies {
-            implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
         }
         commonMain.dependencies {
+            implementation(projects.shared)
+            implementation(compose.preview)
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)
@@ -35,7 +36,6 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
-            implementation(projects.shared)
             implementation(libs.kotlin.reflect)
             implementation(libs.chart)
         }
@@ -75,6 +75,7 @@ android {
 
 dependencies {
     implementation(libs.constraintlayout)
+    implementation(libs.androidx.material3.android)
     debugImplementation(compose.uiTooling)
     implementation(kotlin("reflect"))
 }

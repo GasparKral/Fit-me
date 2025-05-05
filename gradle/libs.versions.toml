@@ -9,7 +9,7 @@ androidx-constraintlayout = "2.1.4"
 androidx-core-ktx = "1.13.1"
 androidx-espresso-core = "3.6.1"
 androidx-lifecycle = "2.8.3"
-androidx-material = "1.12.0"
+androidx-material = "1.3.2"
 androidx-test-junit = "1.2.1"
 chart = "1.1.0"
 compose-multiplatform = "1.7.0"
@@ -43,6 +43,7 @@ ktorClientSerialization = "3.0.1"
 ktorSerializationKotlinxJson = "3.0.1"
 ktorWebsockets = "3.1.2"
 logback = "1.5.11"
+material3Android = "1.3.2"
 multiplatform = "2.1.2"
 multiplatformM3 = "2.1.2"
 postgresql = "42.6.0"
@@ -56,17 +57,14 @@ constraintlayout = "2.2.1"
 [libraries]
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 androidx-gridlayout = { module = "androidx.gridlayout:gridlayout", version.ref = "gridlayout" }
+androidx-material3-android = { module = "androidx.compose.material3:material3-android", version.ref = "material3Android" }
 chart = { module = "io.github.thechance101:chart", version.ref = "chart" }
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposedCore" }
-exposed-core-v0501 = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposedCoreVersion" }
 exposed-core-v0610 = { module = "org.jetbrains.exposed:exposed-core", version.ref = "jetbrainsExposedCore" }
 exposed-dao = { module = "org.jetbrains.exposed:exposed-dao", version.ref = "exposedCore" }
-exposed-dao-v0501 = { module = "org.jetbrains.exposed:exposed-dao", version.ref = "exposedDao" }
 exposed-dao-v0610 = { module = "org.jetbrains.exposed:exposed-dao", version.ref = "exposedDaoVersion" }
-exposed-java-time = { module = "org.jetbrains.exposed:exposed-java-time" }
 exposed-java-time-v0610 = { module = "org.jetbrains.exposed:exposed-java-time", version.ref = "exposedJavaTimeVersion" }
 exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposedCore" }
-exposed-jdbc-v0501 = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposedJdbc" }
 exposed-jdbc-v0610 = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposedJdbcVersion" }
 grid = { module = "com.cheonjaeung.compose.grid:grid", version.ref = "grid" }
 io-ktor-ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation" }
@@ -117,14 +115,10 @@ logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 ktor-server-core = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
 ktor-server-netty = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor" }
 ktor-server-tests = { module = "io.ktor:ktor-server-tests-jvm", version.ref = "ktor" }
-multiplatform = { module = "com.patrykandpatrick.vico:multiplatform", version.ref = "multiplatform" }
-multiplatform-m3 = { module = "com.patrykandpatrick.vico:multiplatform-m3", version.ref = "multiplatformM3" }
 org-jetbrains-kotlinx-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json" }
 org-jetbrains-kotlinx-kotlinx-serialization-json2 = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
-postgresql-v4271 = { module = "org.postgresql:postgresql", version.ref = "postgresqlVersion" }
 androidx-annotation-jvm = { group = "androidx.annotation", name = "annotation-jvm", version.ref = "annotationJvm" }
-postgresql-v4273 = { module = "org.postgresql:postgresql", version.ref = "postgresqlPostgresql" }
 postgresql-v4275 = { module = "org.postgresql:postgresql", version.ref = "postgresqlPostgresqlVersion" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 
