@@ -49,7 +49,7 @@ fun DashboardScreen(controller: RouterController) {
             ) {
                 Column {
                     Text(
-                        text = "Bienvenido de vuelta ${LoggedUser.user.name}",
+                        text = "Bienvenido de vuelta ${LoggedUser.user!!.name}",
                         style = MaterialTheme.typography.h2,
                         fontWeight = FontWeight.Bold
                     )
