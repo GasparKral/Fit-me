@@ -11,6 +11,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import es.gaspardev.components.AssistChip
+import es.gaspardev.components.DifficultyBadge
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.pages.WorkoutTemplate
 
@@ -44,22 +45,7 @@ fun WorkoutTemplateCard(template: WorkoutTemplate) {
             }
 
             Spacer(Modifier.height(16.dp))
-            Badge(
-                backgroundColor = when (template.difficulty) {
-                    "beginner" -> Color(0xFFE8F5E9)
-                    "intermediate" -> Color(0xFFE3F2FD)
-                    "advanced" -> Color(0xFFFFEBEE)
-                    else -> Color(0xFFF5F5F5)
-                },
-                contentColor = when (template.difficulty) {
-                    "beginner" -> Color(0xFF2E7D32)
-                    "intermediate" -> Color(0xFF1565C0)
-                    "advanced" -> Color(0xFFC62828)
-                    else -> Color(0xFF424242)
-                }
-            ) {
-                Text(template.difficulty.replaceFirstChar { it.uppercase() })
-            }
+            DifficultyBadge(template.difficulty)
             // Badges row
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),

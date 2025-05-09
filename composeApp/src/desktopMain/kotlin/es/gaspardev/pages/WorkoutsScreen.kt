@@ -23,6 +23,8 @@ import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
 import es.gaspardev.layout.FloatingDialog
 import es.gaspardev.layout.Workouts.WorkoutPlanCard
+import es.gaspardev.layout.Workouts.WorkoutPlanForm
+import es.gaspardev.layout.Workouts.WorkoutPlanFormData
 import es.gaspardev.layout.Workouts.WorkoutTemplateCard
 
 @Composable
@@ -63,6 +65,8 @@ fun WorkoutsScreen(controller: RouterController) {
         )
     }
 
+    var formData by remember { mutableStateOf(WorkoutPlanFormData()) }
+
     val filteredWorkouts = workoutPlans.filter { plan ->
         val matchesSearch = plan.name.contains(searchQuery, ignoreCase = true) ||
                 plan.description.contains(searchQuery, ignoreCase = true)
@@ -74,38 +78,20 @@ fun WorkoutsScreen(controller: RouterController) {
         adapter = rememberScrollbarAdapter(scrollState)
     )
     FloatingDialog {
-        Card(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(24.dp)
-            ) {
-                Text(
-                    text = "Create New Workout Plan",
-                    style = MaterialTheme.typography.subtitle1,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-
-                // Form fields would go here
-
-                Spacer(Modifier.height(24.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TextButton(onClick = { DialogState.close() }) {
-                        Text("Cancel")
-                    }
-                    Spacer(Modifier.width(8.dp))
-                    Button(onClick = { /* Save action */ }) {
-                        Text("Create Plan")
-                    }
+        WorkoutPlanForm(
+            formData = formData,
+            onFormChange = { field, value ->
+                formData = when (field) {
+                    "name" -> formData.copy(name = value)
+                    "description" -> formData.copy(description = value)
+                    "type" -> formData.copy(type = value)
+                    "difficulty" -> formData.copy(difficulty = value)
+                    "duration" -> formData.copy(duration = value)
+                    "frequency" -> formData.copy(frequency = value)
+                    else -> formData
                 }
             }
-        }
+        )
     }
     Column(
         modifier = Modifier

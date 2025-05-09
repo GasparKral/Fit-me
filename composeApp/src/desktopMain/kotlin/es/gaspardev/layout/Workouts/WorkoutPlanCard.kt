@@ -4,18 +4,19 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import es.gaspardev.components.AssistChip
+import es.gaspardev.components.DifficultyBadge
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.pages.WorkoutPlan
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -85,22 +86,7 @@ fun WorkoutPlanCard(plan: WorkoutPlan) {
             }
 
             Spacer(Modifier.height(16.dp))
-            Badge(
-                backgroundColor = when (plan.difficulty) {
-                    "beginner" -> Color(0xFFE8F5E9)
-                    "intermediate" -> Color(0xFFE3F2FD)
-                    "advanced" -> Color(0xFFFFEBEE)
-                    else -> Color(0xFFF5F5F5)
-                },
-                contentColor = when (plan.difficulty) {
-                    "beginner" -> Color(0xFF2E7D32)
-                    "intermediate" -> Color(0xFF1565C0)
-                    "advanced" -> Color(0xFFC62828)
-                    else -> Color(0xFF424242)
-                }
-            ) {
-                Text(plan.difficulty.replaceFirstChar { it.uppercase() })
-            }
+            DifficultyBadge(plan.difficulty)
             // Badges row
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),

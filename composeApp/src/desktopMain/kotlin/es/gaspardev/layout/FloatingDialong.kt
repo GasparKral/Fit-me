@@ -84,7 +84,7 @@ fun FloatingDialog(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = 64.dp)
+                        .padding(top = 40.dp)
                         .verticalScroll(rememberScrollState())
                 ) {
                     content()
