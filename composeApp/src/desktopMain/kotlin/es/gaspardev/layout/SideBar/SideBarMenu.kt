@@ -1,4 +1,4 @@
-package es.gaspardev.layout
+package es.gaspardev.layout.SideBar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -8,15 +8,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import es.gaspardev.controllers.LoggedUser
 import es.gaspardev.core.Routing.Route
 import es.gaspardev.core.Routing.RouterController
 import es.gaspardev.icons.FitMeIcons
+import es.gaspardev.layout.SideBar.SideBar.SideBarMenuItem
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -121,5 +124,18 @@ fun SideBarMenu(controller: RouterController) {
             Icons.Default.Settings
         )
     }
+
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        UserProfileDropdown(
+            controller, {
+                LoggedUser.logOut()
+                controller.navigateTo(Route.Login)
+            },
+            Modifier.align(Alignment.BottomCenter)
+        )
+    }
+
 
 }

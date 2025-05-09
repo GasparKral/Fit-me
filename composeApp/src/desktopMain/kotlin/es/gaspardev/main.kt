@@ -17,7 +17,7 @@ import androidx.compose.ui.window.application
 import es.gaspardev.core.Routing.Route
 import es.gaspardev.core.Routing.Router
 import es.gaspardev.core.Routing.RouterController
-import es.gaspardev.layout.SideBarMenu
+import es.gaspardev.layout.SideBar.SideBarMenu
 import java.awt.Toolkit
 
 // Definición de la paleta de colores

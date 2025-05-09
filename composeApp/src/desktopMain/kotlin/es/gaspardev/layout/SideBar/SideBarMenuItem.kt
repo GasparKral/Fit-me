@@ -1,4 +1,4 @@
-package es.gaspardev.layout
+package es.gaspardev.layout.SideBar.SideBar
 
 import Anchor
 import androidx.compose.foundation.layout.*
