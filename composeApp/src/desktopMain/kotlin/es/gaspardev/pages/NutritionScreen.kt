@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import es.gaspardev.core.Routing.RouterController
+import es.gaspardev.core.LocalRouter
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.Nutrition.NutritionPlanCard
 import es.gaspardev.layout.Nutrition.NutritionTemplateCard
@@ -48,7 +48,10 @@ data class NutritionTemplate(
 )
 
 @Composable
-fun NutritionScreen(controller: RouterController) {
+fun NutritionScreen() {
+
+   val controller = LocalRouter.current
+
    val scrollState = rememberScrollState()
    var searchQuery by remember { mutableStateOf("") }
    var activeTab by remember { mutableStateOf("all") }

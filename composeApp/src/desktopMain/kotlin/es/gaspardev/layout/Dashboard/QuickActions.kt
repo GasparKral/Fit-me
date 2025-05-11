@@ -13,15 +13,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogState
-import es.gaspardev.core.Routing.Route
-import es.gaspardev.core.Routing.RouterController
+import es.gaspardev.core.Route
+import es.gaspardev.core.RouterState
 import es.gaspardev.icons.FitMeIcons
+import es.gaspardev.pages.Routes
 import es.gaspardev.pages.test
 import kotlin.reflect.KFunction
 
 @Composable
-fun QuickActions(controller: RouterController) {
+fun QuickActions(controller: RouterState) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = 4.dp
@@ -55,7 +55,7 @@ fun QuickActions(controller: RouterController) {
                 items(quickActions) { action ->
                     Button(
                         onClick = {
-                            if (action.route != null) controller.navigateToWithAcction(
+                            if (action.route != null) controller.navigateToWithAction(
                                 action.route,
                                 action.action,
                                 null
@@ -98,31 +98,31 @@ data class QuickAction(
 // Quick actions list
 val quickActions = listOf(
     QuickAction(
-        route = Route.Athletes,
+        route = Routes.Athletes,
         icon = FitMeIcons.Athlets,
         label = "Add Athlete",
         action = ::test
     ),
     QuickAction(
-        route = Route.Workouts,
+        route = Routes.Workouts,
         icon = FitMeIcons.Weight,
         label = "Create Workout",
         action = es.gaspardev.layout.DialogState::open
     ),
     QuickAction(
-        route = Route.Nutrition,
+        route = Routes.Nutrition,
         icon = FitMeIcons.Nutrition,
         label = "Create Diet",
         action = ::test
     ),
     QuickAction(
-        route = Route.Calendar,
+        route = Routes.Calendar,
         icon = FitMeIcons.Calendar,
         label = "Schedule Session",
         action = ::test
     ),
     QuickAction(
-        route = Route.Messages,
+        route = Routes.Messages,
         icon = FitMeIcons.Messages,
         label = "Send Message",
         action = ::test

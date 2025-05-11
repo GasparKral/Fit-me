@@ -18,12 +18,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import es.gaspardev.controllers.LoggedUser
-import es.gaspardev.core.Routing.RouterController
+import es.gaspardev.core.LocalRouter
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.Dashboard.*
 
 @Composable
-fun DashboardScreen(controller: RouterController) {
+fun DashboardScreen() {
+
+    val controller = LocalRouter.current
 
     val scrollState = rememberScrollState()
     VerticalScrollbar(

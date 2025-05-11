@@ -16,14 +16,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.gaspardev.controllers.LoggedUser
-import es.gaspardev.core.Routing.Route
-import es.gaspardev.core.Routing.RouterController
+import es.gaspardev.core.RouterState
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.SideBar.SideBar.SideBarMenuItem
+import es.gaspardev.pages.Routes
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun SideBarMenu(controller: RouterController) {
+fun SideBarMenu(controller: RouterState) {
 
     val PADDING = 16
 
@@ -80,46 +80,46 @@ fun SideBarMenu(controller: RouterController) {
             )
         }
 
-        SideBarMenuItem("Home", Route.Dashboard, controller, Icons.Default.Home)
+        SideBarMenuItem("Home", Routes.Dashboard, controller, Icons.Default.Home)
         SideBarMenuItem(
             "Athletes",
-            Route.Athletes,
+            Routes.Athletes,
             controller,
             FitMeIcons.Athlets
         )
         SideBarMenuItem(
             "Workouts",
-            Route.Workouts,
+            Routes.Workouts,
             controller,
             FitMeIcons.Weight
         )
         SideBarMenuItem(
             "Nutrition",
-            Route.Nutrition,
+            Routes.Nutrition,
             controller,
             FitMeIcons.Nutrition
         )
         SideBarMenuItem(
             "Calendar",
-            Route.Calendar,
+            Routes.Calendar,
             controller,
             FitMeIcons.Calendar
         )
         SideBarMenuItem(
             "Statistics",
-            Route.Statistics,
+            Routes.Statistics,
             controller,
             FitMeIcons.ChartBar
         )
         SideBarMenuItem(
             "Messages",
-            Route.Messages,
+            Routes.Messages,
             controller,
             FitMeIcons.Messages
         )
         SideBarMenuItem(
             "Settings",
-            Route.Settings,
+            Routes.Settings,
             controller,
             Icons.Default.Settings
         )
@@ -131,7 +131,7 @@ fun SideBarMenu(controller: RouterController) {
         UserProfileDropdown(
             controller, {
                 LoggedUser.logOut()
-                controller.navigateTo(Route.Login)
+                controller.navigateTo(Routes.Login)
             },
             Modifier.align(Alignment.BottomCenter)
         )

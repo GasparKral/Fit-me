@@ -11,19 +11,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import es.gaspardev.core.Routing.Route
-import es.gaspardev.core.Routing.RouterController
+import es.gaspardev.core.Route
+import es.gaspardev.core.RouterState
 
 @Composable
 fun SideBarMenuItem(
     text: String,
     path: Route,
-    controller: RouterController,
+    controller: RouterState,
     icon: ImageVector
 ) {
     Anchor(
         href = path,
-        controller,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -35,7 +34,7 @@ fun SideBarMenuItem(
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text,
-                color = if (controller.currentRoute.value == path) MaterialTheme.colors.onPrimary else Color(0xFF5F5F5F)
+                color = if (controller.currentRoute == path) MaterialTheme.colors.onPrimary else Color(0xFF5F5F5F)
             )
         }
 

@@ -13,7 +13,7 @@ class Sportsman(
     var weight: Double?,
     var height: Double?,
     val sex: Boolean, // 1 hombre, 0 mujer
-    val allergies: List<String>,
+    val allergies: List<String>?,
     val workouts: Workout?,
     val diet: Diet?,
     val suplementation: Map<WeekDay, List<Suplemment>>?,

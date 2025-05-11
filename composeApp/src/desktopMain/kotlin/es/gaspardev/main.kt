@@ -14,11 +14,12 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
-import es.gaspardev.core.Routing.Route
-import es.gaspardev.core.Routing.Router
-import es.gaspardev.core.Routing.RouterController
+import es.gaspardev.core.LocalRouter
+import es.gaspardev.core.Router
 import es.gaspardev.layout.SideBar.SideBarMenu
+import es.gaspardev.pages.Routes
 import java.awt.Toolkit
+
 
 // Definición de la paleta de colores
 private val LightColorPalette = lightColors(
@@ -46,7 +47,6 @@ fun AppTheme(content: @Composable () -> Unit) {
     )
 }
 
-
 val screenSize = Toolkit.getDefaultToolkit().screenSize
 val SCREEN_WIDTH = screenSize.width.dp
 val SCREEN_HEIGHT = screenSize.height.dp
@@ -55,7 +55,6 @@ val windowsState = WindowState(placement = WindowPlacement.Maximized)
 
 fun main() = application {
 
-    var controller: RouterController = Router {}
 
     Window(
         onCloseRequest = ::exitApplication,
@@ -63,19 +62,22 @@ fun main() = application {
         title = "Fit-me",
     ) {
         AppTheme {
-            controller = Router { content ->
+            Router(Routes.Login) { content ->
+                val controller = LocalRouter.current
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(
-                            start = if (controller.currentRoute.value != Route.Login && controller.currentRoute.value != Route.Regist) 255.dp else 0.dp
-                        )
+
                 ) {
-                    content()
+                    val isVisible = controller.currentRoute != Routes.Login && controller.currentRoute != Routes.Regist
+
+                    if (isVisible) {
+                        SideBarMenu(controller)
+                    }
+                    Box(modifier = Modifier.padding(start = if (isVisible) 255.dp else 0.dp)) {
+                        content()
+                    }
                 }
-            }
-            if (controller.currentRoute.value != Route.Login && controller.currentRoute.value != Route.Regist) {
-                SideBarMenu(controller)
             }
         }
     }

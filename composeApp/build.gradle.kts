@@ -42,6 +42,8 @@ kotlin {
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
+            implementation(libs.kotlinx.datetime) // TODO: ELIMINAR
+            implementation(libs.router.compose.jvm)
         }
     }
 }

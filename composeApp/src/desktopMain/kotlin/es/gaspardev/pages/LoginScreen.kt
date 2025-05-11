@@ -12,14 +12,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.*
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.gaspardev.controllers.LoggedUser
-import es.gaspardev.core.Routing.Route
-import es.gaspardev.core.Routing.RouterController
+import es.gaspardev.core.LocalRouter
 import es.gaspardev.core.domain.DAOs.LoginUserInfo
 import es.gaspardev.core.infrastructure.memo.CacheManager
 import es.gaspardev.core.infrastructure.memo.CacheRef
@@ -33,16 +37,13 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.input.key.*
 
 
 @Preview
 @Composable
-fun LoginScreen(controller: RouterController) {
+fun LoginScreen() {
+
+    val controller = LocalRouter.current
 
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -76,7 +77,7 @@ fun LoginScreen(controller: RouterController) {
                             if (rememberMe) {
                                 CacheManager.saveValue(CacheRef.RememberUserName, result.name)
                             }
-                            controller.navigateTo(Route.Dashboard)
+                            controller.navigateTo(Routes.Dashboard)
                         }
                     },
                     onFailure = { throwable ->

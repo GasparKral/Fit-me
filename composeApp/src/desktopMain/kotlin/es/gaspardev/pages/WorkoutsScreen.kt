@@ -18,7 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import es.gaspardev.core.Routing.RouterController
+import es.gaspardev.core.LocalRouter
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
 import es.gaspardev.layout.FloatingDialog
@@ -28,7 +28,9 @@ import es.gaspardev.layout.Workouts.WorkoutPlanFormData
 import es.gaspardev.layout.Workouts.WorkoutTemplateCard
 
 @Composable
-fun WorkoutsScreen(controller: RouterController) {
+fun WorkoutsScreen() {
+
+    val controller = LocalRouter.current
 
     var searchQuery by remember { mutableStateOf("") }
     var activeTab by remember { mutableStateOf("all") }

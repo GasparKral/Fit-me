@@ -52,6 +52,8 @@ postgresqlPostgresqlVersion = "42.7.5"
 postgresqlVersion = "42.7.1"
 annotationJvm = "1.9.1"
 constraintlayout = "2.2.1"
+routerComposeJvm = "1.0.0"
+
 
 
 [libraries]
@@ -121,6 +123,7 @@ postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" 
 androidx-annotation-jvm = { group = "androidx.annotation", name = "annotation-jvm", version.ref = "annotationJvm" }
 postgresql-v4275 = { module = "org.postgresql:postgresql", version.ref = "postgresqlPostgresqlVersion" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+router-compose-jvm = { module = "es.gaspardev:router-compose-jvm", version.ref = "routerComposeJvm" }
 
 
 [plugins]

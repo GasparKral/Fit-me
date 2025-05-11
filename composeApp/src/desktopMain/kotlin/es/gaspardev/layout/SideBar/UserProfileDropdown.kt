@@ -3,7 +3,6 @@ package es.gaspardev.layout.SideBar
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -12,13 +11,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.gaspardev.controllers.LoggedUser
-import es.gaspardev.core.Routing.Route
-import es.gaspardev.core.Routing.RouterController
+import es.gaspardev.core.RouterState
+import es.gaspardev.pages.Routes
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun UserProfileDropdown(
-    controller: RouterController,
+    controller: RouterState,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -69,7 +68,7 @@ fun UserProfileDropdown(
                 modifier = Modifier.width(255.dp)
             ) {
                 DropdownMenuItem(
-                    onClick = { controller.navigateTo(Route.Settings) },
+                    onClick = { controller.navigateTo(Routes.Settings) },
                     enabled = false
                 ) {
                     Text("Mi Perfil y Opciones")
@@ -79,7 +78,7 @@ fun UserProfileDropdown(
 
                 DropdownMenuItem(
                     onClick = {
-                        controller.navigateTo(Route.Settings)
+                        controller.navigateTo(Routes.Settings)
                         expanded = false
                     }
                 ) {
