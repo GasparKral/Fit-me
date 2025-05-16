@@ -18,4 +18,17 @@ data class User(
         const val URLPATH = "/users"
     }
 
+    /**
+     * Obtiene las iniciales del nombre de usuario.
+     * Toma la primera letra de cada palabra en el nombre y devuelve las dos primeras iniciales.
+     * Si solo hay una palabra, devuelve su primera letra.
+     */
+    fun getInitials(): String {
+        return name
+            .split(" ")
+            .filter { it.isNotEmpty() }
+            .take(2)
+            .joinToString(separator = "") { it.first().uppercase() }
+    }
+
 }

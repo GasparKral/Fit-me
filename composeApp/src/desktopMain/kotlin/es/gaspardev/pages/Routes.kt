@@ -2,6 +2,7 @@ package es.gaspardev.pages
 
 import androidx.compose.runtime.Composable
 import es.gaspardev.core.Route
+import es.gaspardev.core.domain.entities.Sportsman
 
 sealed class Routes {
     object Login : Route {
@@ -54,5 +55,11 @@ sealed class Routes {
     object Workouts : Route {
         override val view: @Composable () -> Unit
             get() = { WorkoutsScreen() }
+    }
+
+    object AthleteInfo : Route {
+        lateinit var athlete: Sportsman
+        override val view: @Composable () -> Unit
+            get() = { AthleteInfoScreen(athlete) }
     }
 }

@@ -117,12 +117,6 @@ fun SideBarMenu(controller: RouterState) {
             controller,
             FitMeIcons.Messages
         )
-        SideBarMenuItem(
-            "Settings",
-            Routes.Settings,
-            controller,
-            Icons.Default.Settings
-        )
     }
 
     Box(

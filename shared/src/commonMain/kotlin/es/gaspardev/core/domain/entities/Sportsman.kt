@@ -29,7 +29,6 @@ class Sportsman(
             "Faltan datos para hacer la medición"
         )
     }
-
 }
 
 @Serializable
