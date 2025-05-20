@@ -1,4 +1,4 @@
-package es.gaspardev.core.domain.DAOs
+package es.gaspardev.core.domain.dtos
 
 data class RegisterTrainerData(
     val userName: String,

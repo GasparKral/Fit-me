@@ -1,4 +1,4 @@
-package es.gaspardev.core.domain.DAOs
+package es.gaspardev.core.domain.dtos
 
 import es.gaspardev.core.domain.entities.Social
 import es.gaspardev.core.domain.entities.WeeklyAvailability
