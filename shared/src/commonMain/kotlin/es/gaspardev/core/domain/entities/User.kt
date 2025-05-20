@@ -8,10 +8,11 @@ import kotlinx.serialization.Serializable
 data class User(
     val id: Int,
     var name: String,
-    var password: String,
+    // var password: String,
     var email: String,
     val creationTime: Instant,
     var userImage: Resource?,
+    var status: UserStatus
 ) {
 
     companion object {
