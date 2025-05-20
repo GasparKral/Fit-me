@@ -1,9 +1,9 @@
 package es.gaspardev.auxliars
 
-sealed class Either<out E, out T> where E : Exception, T : Any {
+sealed class Either<out E, out T> where E : Any, T : Any {
 
     // Representa un caso de error
-    data class Failure<out E : Exception>(val error: E) : Either<E, Nothing>()
+    data class Failure<out E : Any>(val error: E) : Either<E, Nothing>()
 
     // Representa un caso de éxito
     data class Success<out T : Any>(val value: T) : Either<Nothing, T>()
@@ -16,7 +16,6 @@ sealed class Either<out E, out T> where E : Exception, T : Any {
         }
     }
 
-    
     // Propiedades para verificar el estado
     val isFailure: Boolean get() = this is Failure<E>
     val isSuccess: Boolean get() = this is Success<T>

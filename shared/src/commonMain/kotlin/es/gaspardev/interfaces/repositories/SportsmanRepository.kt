@@ -1,11 +1,11 @@
 package es.gaspardev.interfaces.repositories
 
 import es.gaspardev.auxliars.Either
-import es.gaspardev.core.domain.DAOs.RegisterSportsmanData
+import es.gaspardev.core.domain.dtos.RegisterSportsmanData
 import es.gaspardev.core.domain.entities.Sportsman
 import es.gaspardev.core.infrastructure.apis.SportsmanAPI
 
-interface SportsmanRepository {
+interface SportsmanRepository : UserRepository<Sportsman> {
 
     companion object {
         val API = SportsmanAPI()
