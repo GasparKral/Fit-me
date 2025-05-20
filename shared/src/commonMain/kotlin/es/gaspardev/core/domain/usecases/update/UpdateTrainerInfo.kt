@@ -1,8 +1,7 @@
 package es.gaspardev.core.domain.usecases.update
 
 import es.gaspardev.auxliars.Either
-import es.gaspardev.controllers.LoggedUser
-import es.gaspardev.core.domain.DAOs.TrainerPatchDTO
+import es.gaspardev.core.domain.dtos.TrainerPatchDTO
 import es.gaspardev.core.domain.entities.Trainer
 import es.gaspardev.core.domain.usecases.UseCase
 import es.gaspardev.interfaces.repositories.TrainerRepository
