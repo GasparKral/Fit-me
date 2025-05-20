@@ -20,8 +20,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import es.gaspardev.core.LocalRouter
 import es.gaspardev.icons.FitMeIcons
-import es.gaspardev.layout.Nutrition.NutritionPlanCard
-import es.gaspardev.layout.Nutrition.NutritionTemplateCard
+import es.gaspardev.layout.nutrition.NutritionPlanCard
+import es.gaspardev.layout.nutrition.NutritionTemplateCard
 
 // Data classes
 data class NutritionPlan(

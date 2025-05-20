@@ -1,4 +1,4 @@
-package es.gaspardev.layout.Calendar
+package es.gaspardev.layout.calendar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

@@ -1,4 +1,4 @@
-package es.gaspardev.layout
+package es.gaspardev.layout.messages
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

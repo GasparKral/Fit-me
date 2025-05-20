@@ -14,9 +14,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.gaspardev.core.LocalRouter
 import es.gaspardev.icons.FitMeIcons
-import es.gaspardev.layout.Calendar.DayView
-import es.gaspardev.layout.Calendar.MonthView
-import es.gaspardev.layout.Calendar.WeekView
+import es.gaspardev.layout.calendar.DayView
+import es.gaspardev.layout.calendar.MonthView
+import es.gaspardev.layout.calendar.WeekView
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -58,7 +58,6 @@ val sampleEvents = listOf(
         location = "Main Gym",
         notes = "Focus on upper body strength"
     ),
-    // Add other events...
 )
 
 val sampleAthletes = listOf(

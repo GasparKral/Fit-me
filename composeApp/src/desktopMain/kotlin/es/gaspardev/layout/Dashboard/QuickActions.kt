@@ -1,12 +1,11 @@
-package es.gaspardev.layout.Dashboard
+package es.gaspardev.layout.dashboard
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,7 +17,13 @@ import es.gaspardev.core.RouterState
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.pages.Routes
 import es.gaspardev.pages.test
+import fit_me.composeapp.generated.resources.*
+import fit_me.composeapp.generated.resources.Res
+import fit_me.composeapp.generated.resources.add_athlete_action
+import fit_me.composeapp.generated.resources.create_workout
 import kotlin.reflect.KFunction
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun QuickActions(controller: RouterState) {
@@ -32,12 +37,12 @@ fun QuickActions(controller: RouterState) {
                 modifier = Modifier.padding(16.dp)
             ) {
                 Text(
-                    text = "Quick Actions",
+                    text = stringResource(Res.string.quick_actions_title),
                     style = MaterialTheme.typography.h6,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Common tasks you might want to perform",
+                    text = stringResource(Res.string.quick_actions_subtitle),
                     style = MaterialTheme.typography.body2,
                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                 )
@@ -69,13 +74,13 @@ fun QuickActions(controller: RouterState) {
                         ) {
                             Icon(
                                 imageVector = action.icon,
-                                contentDescription = action.label,
+                                contentDescription = "",
                                 modifier = Modifier.size(24.dp),
                                 tint = MaterialTheme.colors.onPrimary
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = action.label,
+                                text = stringResource(action.labelRes),
                                 style = MaterialTheme.typography.body2,
                                 color = MaterialTheme.colors.onPrimary
                             )
@@ -87,50 +92,42 @@ fun QuickActions(controller: RouterState) {
     }
 }
 
-// Data class for quick actions
 data class QuickAction(
     val route: Route?,
     val icon: ImageVector,
-    val label: String,
+    val labelRes: StringResource,
     val action: KFunction<Unit>
 )
 
-// Quick actions list
 val quickActions = listOf(
     QuickAction(
         route = Routes.Athletes,
         icon = FitMeIcons.Athlets,
-        label = "Add Athlete",
+        labelRes = Res.string.add_athlete_action,
         action = ::test
     ),
     QuickAction(
         route = Routes.Workouts,
         icon = FitMeIcons.Weight,
-        label = "Create Workout",
+        labelRes = Res.string.create_workout,
         action = es.gaspardev.layout.DialogState::open
     ),
     QuickAction(
         route = Routes.Nutrition,
         icon = FitMeIcons.Nutrition,
-        label = "Create Diet",
+        labelRes = Res.string.create_diet,
         action = ::test
     ),
     QuickAction(
         route = Routes.Calendar,
         icon = FitMeIcons.Calendar,
-        label = "Schedule Session",
+        labelRes = Res.string.schedule_session,
         action = ::test
     ),
     QuickAction(
         route = Routes.Messages,
         icon = FitMeIcons.Messages,
-        label = "Send Message",
-        action = ::test
-    ),
-    QuickAction(
-        route = null,
-        icon = Icons.Default.Add,
-        label = "More Actions",
+        labelRes = Res.string.send_message,
         action = ::test
     )
 )

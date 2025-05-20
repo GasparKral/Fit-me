@@ -1,4 +1,4 @@
-package es.gaspardev.layout.Workouts
+package es.gaspardev.layout.workouts
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*

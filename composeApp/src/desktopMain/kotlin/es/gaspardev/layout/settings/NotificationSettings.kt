@@ -1,4 +1,4 @@
-package es.gaspardev.layout.Settings
+package es.gaspardev.layout.settings
 
 import androidx.compose.runtime.Composable
 

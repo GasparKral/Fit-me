@@ -1,4 +1,4 @@
-package es.gaspardev.layout.SideBar
+package es.gaspardev.layout.sideBar
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -10,9 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import es.gaspardev.controllers.LoggedUser
 import es.gaspardev.core.RouterState
 import es.gaspardev.pages.Routes
+import es.gaspardev.states.LoggedTrainer
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -54,7 +54,7 @@ fun UserProfileDropdown(
                 // User info
                 Column {
                     Text(
-                        text = LoggedUser.user!!.name,
+                        text = LoggedTrainer.state.trainer!!.user.name,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium
                     )

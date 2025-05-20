@@ -1,21 +1,23 @@
 package es.gaspardev.pages
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ScrollableTabRow
 import androidx.compose.material.Tab
 import androidx.compose.material.Text
-import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import es.gaspardev.layout.Settings.AccountSettings
-import es.gaspardev.layout.Settings.AppearanceSettings
-import es.gaspardev.layout.Settings.NotificationSettings
-import es.gaspardev.layout.Settings.ProfileSettings
+import es.gaspardev.layout.settings.AccountSettings
+import es.gaspardev.layout.settings.AppearanceSettings
+import es.gaspardev.layout.settings.NotificationSettings
+import es.gaspardev.layout.settings.ProfileSettings
 
 @Composable
 fun SettingsScreen() {

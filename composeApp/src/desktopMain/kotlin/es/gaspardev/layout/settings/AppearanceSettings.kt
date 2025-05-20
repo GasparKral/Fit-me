@@ -1,4 +1,4 @@
-package es.gaspardev.layout.Settings
+package es.gaspardev.layout.settings
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState

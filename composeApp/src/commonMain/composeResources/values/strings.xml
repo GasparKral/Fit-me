@@ -1,8 +1,52 @@
 <resources>
+    <!-- ============ GENERAL ============ -->
     <string name="app_name">Fit-me</string>
+    <string name="active">Activo</string>
+    <string name="inactive">Desconectado</string>
+
+    <!-- ============ LOGIN ============ -->
     <string name="inicio_de_sesion">Inicia Sesión en tu cuenta</string>
     <string name="inicio_de_sesion_portal">Portal de Entrenadores</string>
     <string name="inicio_de_sesion-usuario">Usuario o e-mail</string>
     <string name="inicio_de_sesion_contraseña">Contraseña</string>
     <string name="inicio_de_sesion_recuerdame">Recordarme</string>
+
+    <!-- ============ DASHBOARD ============ -->
+    <string name="dashboard_bienvenida">Bienvenido de vuelta</string>
+    <string name="dashboard_pendientes">Tienes %d planes pendientes de revisión</string>
+
+    <!-- ============ QUICK ACTIONS ============ -->
+    <string name="quick_actions_title">Acciones Rápidas</string>
+    <string name="quick_actions_subtitle">Tareas comunes que podrías necesitar</string>
+    <string name="add_athlete_action">Añadir Atleta</string>
+    <string name="create_workout">Crear Entrenamiento</string>
+    <string name="create_diet">Crear Dieta</string>
+    <string name="schedule_session">Programar Sesión</string>
+    <string name="send_message">Enviar Mensaje</string>
+
+    <!-- ============ STATISTICS CARDS ============ -->
+    <string name="total_athletes">Total de Deportistas</string>
+    <string name="total_athletes_description">+%d respecto al mes pasado</string>
+    <string name="active_plans">Planes Activos</string>
+    <string name="active_plans_description">+%d respecto al mes pasado</string>
+    <string name="upcoming_sessions">Próximas Sesiones</string>
+    <string name="upcoming_sessions_description">Para las próximas 48 horas</string>
+    <string name="unread_messages">Mensajes sin Leer</string>
+    <string name="unread_messages_description">%d nuevos desde ayer</string>
+    <string name="view_messages">Ver Mensajes</string>
+
+    <!-- ============ PERFORMANCE SECTION ============ -->
+    <string name="performance_overview">Resumen de Rendimiento</string>
+    <string name="performance_description">Métricas de progreso de atletas en los últimos 30 días</string>
+    <string name="export_data">Exportar Datos</string>
+
+    <!-- ============ ATHLETES SECTION ============ -->
+    <string name="your_athletes">Tus Clientes</string>
+    <string name="athletes_description">Gestiona tus atletas y su progreso</string>
+    <string name="add_athlete">Agregar un Cliente</string>
+
+    <!-- ============ RECENT ACTIVITIES ============ -->
+    <string name="recent_activities">Actividades Recientes</string>
+    <string name="activities_description">Últimas actualizaciones de tus atletas</string>
+    <string name="view_all">Ver Todo</string>
 </resources>

@@ -1,8 +1,7 @@
-package es.gaspardev.layout.Dashboard
+package es.gaspardev.layout.dashboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -14,65 +13,33 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import es.gaspardev.components.UserAvatar
-import es.gaspardev.core.domain.entities.User
+import es.gaspardev.core.LocalRouter
+import es.gaspardev.core.domain.entities.Sportsman
 import es.gaspardev.icons.FitMeIcons
-import kotlinx.datetime.Clock
+import es.gaspardev.pages.Routes
+import es.gaspardev.states.LoggedTrainer
+import fit_me.composeapp.generated.resources.Res
+import fit_me.composeapp.generated.resources.active
+import fit_me.composeapp.generated.resources.inactive
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun AthletesList() {
-    val athletes = listOf(
-        Athlete(
-            id = 1,
-            name = "Carlos Rodriguez",
-            image = null,
-            initials = "CR",
-            status = "active",
-            lastActive = "2 hours ago",
-            progress = 85,
-            needsAttention = false
-        ),
-        Athlete(
-            id = 2,
-            name = "Maria Garcia",
-            image = null,
-            initials = "MG",
-            status = "active",
-            lastActive = "Just now",
-            progress = 92,
-            needsAttention = false
-        ),
-        Athlete(
-            id = 3,
-            name = "Juan Lopez",
-            image = null,
-            initials = "JL",
-            status = "inactive",
-            lastActive = "3 days ago",
-            progress = 45,
-            needsAttention = true
-        ),
-        Athlete(
-            id = 4,
-            name = "Ana Martinez",
-            image = null,
-            initials = "AM",
-            status = "active",
-            lastActive = "5 hours ago",
-            progress = 78,
-            needsAttention = false
-        )
-    )
+    val router = LocalRouter.current
 
     Column(
         modifier = Modifier.fillMaxWidth().padding(16.dp, 12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        athletes.forEach { athlete ->
-            AthleteListItem(athlete = athlete)
+
+        if (LoggedTrainer.state.trainer != null) {
+            LoggedTrainer.state.trainer!!.sportmans.take(5).forEach { athlete ->
+                AthleteListItem(athlete = athlete)
+            }
         }
 
         OutlinedButton(
-            onClick = { /* View all athletes */ },
+            onClick = { router.navigateTo(Routes.Athletes) },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.outlinedButtonColors(
                 contentColor = MaterialTheme.colors.primary
@@ -84,7 +51,7 @@ fun AthletesList() {
 }
 
 @Composable
-fun AthleteListItem(athlete: Athlete) {
+fun AthleteListItem(athlete: Sportsman) {
     var showDropdown by remember { mutableStateOf(false) }
 
     Row(
@@ -95,9 +62,9 @@ fun AthleteListItem(athlete: Athlete) {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         UserAvatar(
-            User(athlete.id, athlete.name, "@gail", "@gmail", Clock.System.now(), null),
+            athlete.user,
             {
-                if (athlete.needsAttention) {
+                if (athlete.user.status.needsAttetion) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Box(
                         modifier = Modifier
@@ -120,7 +87,7 @@ fun AthleteListItem(athlete: Athlete) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Last active: ${athlete.lastActive}",
+                        text = "Last active: ${athlete.user.status.lastActive}",
                         style = MaterialTheme.typography.caption,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                     )
@@ -129,16 +96,19 @@ fun AthleteListItem(athlete: Athlete) {
                         modifier = Modifier
                             .clip(RoundedCornerShape(4.dp))
                             .background(
-                                if (athlete.status == "active") MaterialTheme.colors.primary.copy(alpha = 0.1f)
+                                if (athlete.user.status.status) MaterialTheme.colors.primary.copy(alpha = 0.1f)
                                 else MaterialTheme.colors.onSurface.copy(alpha = 0.1f)
                             ),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = athlete.status,
+                            text = if (athlete.user.status.status) stringResource(Res.string.active) else stringResource(
+                                Res.string.inactive
+                            ),
                             style = MaterialTheme.typography.overline,
-                            color = if (athlete.status == "active") MaterialTheme.colors.primary
-                            else MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                            color = if (athlete.user.status.status) MaterialTheme.colors.primary else MaterialTheme.colors.onSurface.copy(
+                                alpha = 0.6f
+                            ),
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
                         )
                     }
@@ -151,7 +121,7 @@ fun AthleteListItem(athlete: Athlete) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "${athlete.progress}%",
+                        text = "${athlete.getWorkoutProgression()}%",
                         style = MaterialTheme.typography.body2,
                         fontWeight = FontWeight.Medium
                     )
@@ -238,14 +208,3 @@ fun AthleteListItem(athlete: Athlete) {
     }
 }
 
-
-data class Athlete(
-    val id: Int,
-    val name: String,
-    val image: String?,
-    val initials: String,
-    val status: String,
-    val lastActive: String,
-    val progress: Int,
-    val needsAttention: Boolean
-)

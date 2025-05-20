@@ -13,19 +13,58 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import es.gaspardev.controllers.LoggedUser
 import es.gaspardev.core.LocalRouter
+import es.gaspardev.core.domain.dtos.TrainerDashBoardInfo
+import es.gaspardev.core.domain.usecases.read.LoadDashboardInfo
 import es.gaspardev.icons.FitMeIcons
-import es.gaspardev.layout.Dashboard.*
+import es.gaspardev.layout.dashboard.*
+import es.gaspardev.states.LoggedTrainer
+import fit_me.composeapp.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun DashboardScreen() {
 
-    val controller = LocalRouter.current
+    val router = LocalRouter.current
+    var info: TrainerDashBoardInfo = TrainerDashBoardInfo()
+
+    LaunchedEffect(LoggedTrainer.state.trainer) {
+        LoggedTrainer.state.trainer?.let {
+            LoadDashboardInfo().run(it).fold(
+                { res -> info = res },
+                {}
+            )
+        }
+    }
+
+    val statisticsCardInfo = listOf(
+        Triple(
+            stringResource(Res.string.total_athletes),
+            "${LoggedTrainer.state.trainer!!.sportmans.size}",
+            String.format(stringResource(Res.string.total_athletes_description), info.newsSportsman)
+        ) to Icons.Filled.Person,
+        Triple(
+            stringResource(Res.string.active_plans),
+            "${info.activePlans}",
+            String.format(stringResource(Res.string.active_plans_description), info.newsPlans)
+        ) to FitMeIcons.Weight,
+        Triple(
+            stringResource(Res.string.upcoming_sessions),
+            "${info.upcommingSessions}",
+            stringResource(Res.string.upcoming_sessions_description)
+        ) to FitMeIcons.Calendar,
+        Triple(
+            stringResource(Res.string.unread_messages),
+            "${info.unreadMessages}",
+            String.format(stringResource(Res.string.unread_messages_description), info.newMessages)
+        ) to Icons.Filled.Notifications
+    )
+
 
     val scrollState = rememberScrollState()
     VerticalScrollbar(
@@ -51,35 +90,23 @@ fun DashboardScreen() {
             ) {
                 Column {
                     Text(
-                        text = "Bienvenido de vuelta ${LoggedUser.user!!.name}",
+                        text = stringResource(Res.string.dashboard_bienvenida) + " " + LoggedTrainer.state.trainer!!.user.name,
                         style = MaterialTheme.typography.h2,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "You have 3 athletes waiting for workout plans.",
+                        text = String.format(
+                            stringResource(Res.string.dashboard_pendientes),
+                            info.pendingWorkouts
+                        ),
                         color = MaterialTheme.colors.onPrimary.copy(alpha = 0.9f)
                     )
-                }
-                Button(
-                    onClick = { /* Create new plan */ },
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = MaterialTheme.colors.onPrimary,
-                        contentColor = MaterialTheme.colors.primary
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add",
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Create New Plan")
                 }
             }
         }
 
         // Quick Actions
-        QuickActions(controller)
+        QuickActions(router)
 
         // Stats Cards
         LazyVerticalGrid(
@@ -88,12 +115,7 @@ fun DashboardScreen() {
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            listOf(
-                Triple("Total Athletes", "24", "+2 from last month") to Icons.Filled.Person,
-                Triple("Active Plans", "18", "+3 from last month") to FitMeIcons.Weight,
-                Triple("Upcoming Sessions", "7", "For the next 48 hours") to FitMeIcons.Calendar,
-                Triple("Unread Messages", "12", "5 new since yesterday") to Icons.Filled.Notifications
-            ).forEach { (data, icon) ->
+            statisticsCardInfo.forEach { (data, icon) ->
                 item {
                     StatCard(
                         title = data.first,
@@ -101,15 +123,15 @@ fun DashboardScreen() {
                         description = data.third,
                         icon = icon,
                         footer = {
-                            if (data.first == "Unread Messages") {
+                            if (data.first == stringResource(Res.string.unread_messages)) {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 TextButton(
-                                    onClick = { /* View messages */ },
+                                    onClick = { router.navigateTo(Routes.Messages) },
                                     colors = ButtonDefaults.textButtonColors(
                                         contentColor = MaterialTheme.colors.primary
                                     )
                                 ) {
-                                    Text("View Messages")
+                                    Text(stringResource(Res.string.view_messages))
                                 }
                             }
                         }
@@ -137,24 +159,24 @@ fun DashboardScreen() {
                     ) {
                         Column {
                             Text(
-                                text = "Performance Overview",
+                                text = stringResource(Res.string.performance_overview),
                                 style = MaterialTheme.typography.h2,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "Athlete progress metrics for the last 30 days",
+                                text = stringResource(Res.string.performance_description),
                                 style = MaterialTheme.typography.body2,
                                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                             )
                         }
-                        OutlinedButton(
-                            onClick = { /* Export data */ },
+                        /*OutlinedButton(
+                            onClick = { *//* Export data *//* }, TODO: TALVEZ
                             colors = ButtonDefaults.outlinedButtonColors(
                                 contentColor = MaterialTheme.colors.primary
                             )
                         ) {
-                            Text("Export Data")
-                        }
+                            Text(stringResource(Res.string.export_data))
+                        }*/
                     }
                     // Chart would go here
                     StatisticsChart()
@@ -175,12 +197,12 @@ fun DashboardScreen() {
                     ) {
                         Column {
                             Text(
-                                text = "Your Athletes",
+                                text = stringResource(Res.string.your_athletes),
                                 style = MaterialTheme.typography.h2,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "Manage your athletes and their progress",
+                                text = stringResource(Res.string.athletes_description),
                                 style = MaterialTheme.typography.body2,
                                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                             )
@@ -198,7 +220,7 @@ fun DashboardScreen() {
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Add Athlete")
+                            Text(stringResource(Res.string.add_athlete))
 
                         }
                     }
@@ -222,23 +244,23 @@ fun DashboardScreen() {
                 ) {
                     Column {
                         Text(
-                            text = "Recent Activities",
+                            text = stringResource(Res.string.recent_activities),
                             style = MaterialTheme.typography.h2,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Latest updates from your athletes",
+                            text = stringResource(Res.string.active_plans_description),
                             style = MaterialTheme.typography.body2,
                             color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                         )
                     }
                     OutlinedButton(
-                        onClick = { /* View all */ },
+                        onClick = { /*TODO*/ },
                         colors = ButtonDefaults.outlinedButtonColors(
                             contentColor = MaterialTheme.colors.primary
                         )
                     ) {
-                        Text("View All")
+                        Text(stringResource(Res.string.view_all))
                     }
                 }
                 // Activities would go here

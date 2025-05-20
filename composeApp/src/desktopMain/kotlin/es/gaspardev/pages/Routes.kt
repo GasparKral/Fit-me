@@ -58,8 +58,14 @@ sealed class Routes {
     }
 
     object AthleteInfo : Route {
+
+        fun load(sportsman: Sportsman): AthleteInfo {
+            this.athlete = sportsman
+            return this
+        }
+
         lateinit var athlete: Sportsman
         override val view: @Composable () -> Unit
-            get() = { AthleteInfoScreen(athlete) }
+            get() = { AthleteInfoScreen() }
     }
 }

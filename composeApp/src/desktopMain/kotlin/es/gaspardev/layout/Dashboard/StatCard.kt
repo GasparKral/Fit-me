@@ -1,4 +1,4 @@
-package es.gaspardev.layout.Dashboard
+package es.gaspardev.layout.dashboard
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*

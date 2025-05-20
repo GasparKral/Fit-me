@@ -22,10 +22,10 @@ import es.gaspardev.core.LocalRouter
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
 import es.gaspardev.layout.FloatingDialog
-import es.gaspardev.layout.Workouts.WorkoutPlanCard
-import es.gaspardev.layout.Workouts.WorkoutPlanForm
-import es.gaspardev.layout.Workouts.WorkoutPlanFormData
-import es.gaspardev.layout.Workouts.WorkoutTemplateCard
+import es.gaspardev.layout.workouts.WorkoutPlanCard
+import es.gaspardev.layout.workouts.WorkoutPlanForm
+import es.gaspardev.layout.workouts.WorkoutPlanFormData
+import es.gaspardev.layout.workouts.WorkoutTemplateCard
 
 @Composable
 fun WorkoutsScreen() {

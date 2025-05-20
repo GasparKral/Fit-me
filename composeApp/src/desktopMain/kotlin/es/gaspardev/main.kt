@@ -16,7 +16,7 @@ import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
 import es.gaspardev.core.LocalRouter
 import es.gaspardev.core.Router
-import es.gaspardev.layout.SideBar.SideBarMenu
+import es.gaspardev.layout.sideBar.SideBarMenu
 import es.gaspardev.pages.Routes
 import java.awt.Toolkit
 

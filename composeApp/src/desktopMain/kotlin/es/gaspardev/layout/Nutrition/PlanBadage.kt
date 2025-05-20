@@ -1,4 +1,4 @@
-package es.gaspardev.layout.Nutrition
+package es.gaspardev.layout.nutrition
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*

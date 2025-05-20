@@ -22,12 +22,13 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import es.gaspardev.controllers.LoggedUser
 import es.gaspardev.core.LocalRouter
-import es.gaspardev.core.domain.DAOs.LoginUserInfo
+import es.gaspardev.core.domain.dtos.LoginUserInfo
+import es.gaspardev.core.domain.usecases.read.LogInUser
 import es.gaspardev.core.infrastructure.memo.CacheManager
 import es.gaspardev.core.infrastructure.memo.CacheRef
-import es.gaspardev.core.infrastructure.repositories.UserRepositoryImp
+import es.gaspardev.core.infrastructure.repositories.TrainerRepositoryImp
+import es.gaspardev.states.LoggedTrainer
 import es.gaspardev.utils.encrypt
 import fit_me.composeapp.generated.resources.*
 import kotlinx.coroutines.CoroutineScope
@@ -36,10 +37,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
-
-@Preview
 @Composable
 fun LoginScreen() {
 
@@ -68,14 +66,14 @@ fun LoginScreen() {
         isLoading = true
 
         CoroutineScope(Dispatchers.IO).launch {
-            UserRepositoryImp().logIn(LoginUserInfo(username, encrypt(password)))
+            LogInUser(TrainerRepositoryImp()).run(LoginUserInfo(username, encrypt(password)))
                 .fold(
                     onSuccess = { result ->
                         withContext(Dispatchers.Main) {
                             isLoading = false
-                            LoggedUser.user = result
+                            LoggedTrainer.state.trainer = result
                             if (rememberMe) {
-                                CacheManager.saveValue(CacheRef.RememberUserName, result.name)
+                                CacheManager.saveValue(CacheRef.RememberUserName, result.user.name)
                             }
                             controller.navigateTo(Routes.Dashboard)
                         }

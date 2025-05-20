@@ -24,8 +24,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.gaspardev.components.UserAvatar
 import es.gaspardev.core.domain.entities.User
+import es.gaspardev.core.domain.entities.UserStatus
 import es.gaspardev.icons.FitMeIcons
-import es.gaspardev.layout.ConversationItem
+import es.gaspardev.layout.messages.ConversationItem
 import es.gaspardev.layout.messages.MessageBubble
 import es.gaspardev.layout.messages.MessageDialog
 import kotlinx.datetime.Clock
@@ -93,8 +94,8 @@ val sampleUser = listOf(
         email = "carlos.rodriguez@example.com",
         userImage = null,
         id = 1,
-        password = "DO()",
-        creationTime = Clock.System.now()
+        creationTime = Clock.System.now(),
+        status = UserStatus()
     )
 )
 

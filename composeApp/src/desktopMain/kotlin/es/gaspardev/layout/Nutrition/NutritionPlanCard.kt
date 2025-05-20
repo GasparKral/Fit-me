@@ -1,4 +1,4 @@
-package es.gaspardev.layout.Nutrition
+package es.gaspardev.layout.nutrition
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
