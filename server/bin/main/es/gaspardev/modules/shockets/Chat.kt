@@ -10,18 +10,18 @@ import kotlinx.serialization.json.Json
 import kotlin.time.Duration
 
 
-fun Application.socket(){
-  install(WebSockets){
+fun Application.socket() {
+  install(WebSockets) {
     contentConverter = KotlinxWebsocketSerializationConverter(Json)
     pingPeriod = Duration.parse("15s")
     timeout = Duration.parse("5s")
     maxFrameSize = Long.MAX_VALUE
-    masking= false
+    masking = false
   }
 
   routing {
-    webSocket("/chat"){
-      sendSerialized(Social.X_teeter)
+    webSocket("/chat") {
+      sendSerialized("testing")
       close(CloseReason(CloseReason.Codes.NORMAL, "All done"))
     }
   }

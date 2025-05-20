@@ -2,6 +2,8 @@ package es.gaspardev.db
 
 import es.gaspardev.enums.BodyPart
 import es.gaspardev.enums.MediaType
+import es.gaspardev.enums.WeekDay
+import kotlinx.datetime.Instant
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.Table
@@ -19,12 +21,14 @@ object UserTable : IntIdTable("user") {
     val name = varchar("name", 50)
     val password = varchar("password", 250)
     val email = varchar("email", 250)
-    val creationTime = timestamp("creationTime")
-    val userImage = varchar("image_dir", 100)
+    val creationTime = timestamp("creationTime").transform(
+        wrap = { Instant.fromEpochMilliseconds(it.toEpochMilli()) },
+        unwrap = { java.time.Instant.ofEpochMilli(it.toEpochMilliseconds()) })
+    val userImage = optReference("userImage", ResourceTable.id, ReferenceOption.SET_NULL, ReferenceOption.CASCADE)
 }
 
 object SocialLinksTable : IntIdTable("socials") {
-    val trainerId = optReference(
+    val trainerId = reference(
         "trainer_id",
         TrainerTable.id,
         ReferenceOption.CASCADE,
@@ -37,7 +41,9 @@ object SocialLinksTable : IntIdTable("socials") {
 object CertificationTable : IntIdTable("certifications") {
     val name = varchar("name", 50)
     val issuinOrganization = varchar("issuin_organization", 75)
-    val optainedDate = timestamp("dateObtained")
+    val optainedDate = timestamp("optainedDate").transform(
+        wrap = { Instant.fromEpochMilliseconds(it.toEpochMilli()) },
+        unwrap = { java.time.Instant.ofEpochMilli(it.toEpochMilliseconds()) })
 }
 
 object TrainerTable : IntIdTable("trainer") {
@@ -48,9 +54,8 @@ object TrainerTable : IntIdTable("trainer") {
         ReferenceOption.CASCADE
     )
     val specialization = varchar("specialization", 50)
-    val years_of_experience = integer("experience")
+    val years_of_experience = integer("years_of_experience")
     val bio = text("bio")
-    val rating = double("rating")
     val certification =
         array<Int>("certifications", Int.MAX_VALUE) // guarda la referencia al indice de la tabla Certifications
 }
@@ -126,6 +131,101 @@ object MessagesTable : IntIdTable("messages") {
         { PGEnum<MediaType>("MediaType", it) })
 }
 
-object Workouts : IntIdTable("workouts") {
+// Completar la tabla de Workouts
+object WorkoutsTable : IntIdTable("workouts") {
+    val name = varchar("name", 100)
+    val description = text("description").nullable()
+    val sportsman = reference("sportsman_id", SportsmanTable.id, ReferenceOption.CASCADE, ReferenceOption.CASCADE)
+    val author = reference("trainer_id", TrainerTable.id, ReferenceOption.CASCADE, ReferenceOption.CASCADE)
+    val requiresAssistance = bool("requires_assistance").default(false)
+    val creationDate = timestamp("creation_date").transform(
+        wrap = { Instant.fromEpochMilliseconds(it.toEpochMilli()) },
+        unwrap = { java.time.Instant.ofEpochMilli(it.toEpochMilliseconds()) })
+    val durationWeeks = integer("duration_weeks")
+}
 
+// Tabla para los ejercicios de una rutina, organizados por día
+object WorkoutExercises : IntIdTable("workout_exercises") {
+    val workout = reference("workout_id", WorkoutsTable.id, ReferenceOption.CASCADE, ReferenceOption.CASCADE)
+    val exercise = reference("exercise_id", ExercisesTable.id, ReferenceOption.CASCADE, ReferenceOption.CASCADE)
+    val weekDay = customEnumeration(
+        "week_day", "WeekDay",
+        { value -> WeekDay.valueOf(value as String) },
+        { PGEnum<WeekDay>("WeekDay", it) }
+    )
+    val order = integer("exercise_order") // orden de ejecución dentro del día
+    val reps = integer("reps")
+    val sets = integer("sets")
+    val note = optReference("note_id", NoteTable.id, ReferenceOption.SET_NULL, ReferenceOption.CASCADE)
+    val isOption = bool("is_option").default(false) // Indica si es un ejercicio opcional
+    val parentExercise = optReference(
+        "parent_exercise",
+        id,
+        ReferenceOption.CASCADE,
+        ReferenceOption.CASCADE
+    )
+
+    // Índice para buscar ejercicios por rutina y día
+    init {
+        index(true, workout, weekDay, order)
+    }
+}
+
+// Tabla para registrar el progreso del deportista con sus rutinas
+object WorkoutProgress : IntIdTable("workout_progress") {
+    val workout = reference("workout_id", WorkoutsTable.id, ReferenceOption.CASCADE, ReferenceOption.CASCADE)
+    val exercise =
+        reference("exercise_id", WorkoutExercises.id, ReferenceOption.CASCADE, ReferenceOption.CASCADE)
+    val weekDay = customEnumeration(
+        "week_day", "WeekDay",
+        { value -> WeekDay.valueOf(value as String) },
+        { PGEnum<WeekDay>("WeekDay", it) }
+    )
+    val completionDate = timestamp("completion_date").transform(
+        wrap = { Instant.fromEpochMilliseconds(it.toEpochMilli()) },
+        unwrap = { java.time.Instant.ofEpochMilli(it.toEpochMilliseconds()) })
+    val completed = bool("completed").default(false)
+    val feedback = text("feedback").nullable() // comentarios del deportista sobre el ejercicio
+    val actualReps = integer("actual_reps").nullable() // repeticiones realmente realizadas
+    val actualSets = integer("actual_sets").nullable() // series realmente realizadas
+    val difficulty = integer("perceived_difficulty").nullable() // percepción de dificultad (1-5)
+}
+
+// Tabla para gestionar las notas específicas de una rutina
+object WorkoutNotes : Table("workout_notes") {
+    val workout = reference("workout_id", WorkoutsTable.id, ReferenceOption.CASCADE, ReferenceOption.CASCADE)
+    val note = reference("note_id", NoteTable.id, ReferenceOption.CASCADE, ReferenceOption.CASCADE)
+
+    override val primaryKey = PrimaryKey(workout, note, name = "PK_Workout_Note")
+}
+
+
+object SportsmanAllergiesTable : Table("sportsman_allergies") {
+    val sportsman = reference("sportsman_id", SportsmanTable)
+    val allergy = reference("allergy_id", AllergyTable)
+    override val primaryKey = PrimaryKey(sportsman, allergy)
+}
+
+object AllergyTable : IntIdTable("allergies") {
+    val name = varchar("name", 100)
+}
+
+
+object DietTable : IntIdTable("diets") {
+    val name = varchar("name", 100)
+    val sportsmanId = reference("sportsman_id", SportsmanTable)
+    val initialDate = timestamp("initial_date").transform(
+        wrap = { Instant.fromEpochMilliseconds(it.toEpochMilli()) },
+        unwrap = { java.time.Instant.ofEpochMilli(it.toEpochMilliseconds()) })
+    val duration = long("duration_days")
+    val description = text("description").nullable()
+}
+
+object UserStatus : IntIdTable("sportsman_status") {
+    val sportsmanId = reference("user_id", UserTable.id)
+    val status = bool("status")
+    val lastActive = timestamp("last_active").transform(
+        wrap = { Instant.fromEpochMilliseconds(it.toEpochMilli()) },
+        unwrap = { java.time.Instant.ofEpochMilli(it.toEpochMilliseconds()) })
+    val needsAttention = bool("needs_attention").default(false)
 }

@@ -28,7 +28,7 @@ fun main() {
 fun Application.module() {
     /* CONFIGURACIÓN GENERAL */
     install(ContentNegotiation) {
-        json(Json { prettyPrint = true })
+        json(Json { prettyPrint = true;allowStructuredMapKeys = true })
     }
     install(CORS) {
         allowMethod(HttpMethod.Get)
@@ -66,16 +66,35 @@ fun Application.module() {
 fun startDB() {
     try {
         // Verificar si el contenedor ya está corriendo
-        val checkProcessBuilder = ProcessBuilder("docker", "ps", "-q", "-f", "name=$DATA_BASE_NAME")
-        val checkProcess = checkProcessBuilder.start()
-        val checkOutput = checkProcess.inputStream.bufferedReader().readText()
+        val checkRunningProcessBuilder = ProcessBuilder("docker", "ps", "-q", "-f", "name=$DATA_BASE_NAME")
+        val checkRunningProcess = checkRunningProcessBuilder.start()
+        val runningOutput = checkRunningProcess.inputStream.bufferedReader().readText()
 
-        if (checkOutput.isNotEmpty()) {
+        if (runningOutput.isNotEmpty()) {
             println("El contenedor PostgreSQL ya está corriendo.")
-            return // Si el contenedor está corriendo, no hacemos nada
+            return
         }
 
-        // Si el contenedor no existe, proceder a crear uno
+        // Si no está corriendo, verificar si existe pero está detenido
+        val checkExistsProcessBuilder = ProcessBuilder("docker", "ps", "-aq", "-f", "name=$DATA_BASE_NAME")
+        val checkExistsProcess = checkExistsProcessBuilder.start()
+        val existsOutput = checkExistsProcess.inputStream.bufferedReader().readText()
+
+        if (existsOutput.isNotEmpty()) {
+            // El contenedor existe pero está detenido, iniciarlo
+            val startProcessBuilder = ProcessBuilder("docker", "start", DATA_BASE_NAME)
+            val startProcess = startProcessBuilder.start()
+            val startOutput = startProcess.inputStream.bufferedReader().readText()
+
+            if (startProcess.waitFor() == 0) {
+                println("Contenedor PostgreSQL existente iniciado: $startOutput")
+                return
+            } else {
+                println("Error al iniciar el contenedor existente")
+            }
+        }
+
+        // Si el contenedor no existe, crear uno nuevo
         val initScriptsPath = File("server/src/main/resources/DB").absolutePath
 
         val processBuilder = ProcessBuilder(
@@ -90,19 +109,17 @@ fun startDB() {
             "postgres:15"
         )
 
-        // Redirigir errores a la salida estándar
         processBuilder.redirectErrorStream(true)
 
         val process = processBuilder.start()
         val output = process.inputStream.bufferedReader().readText()
 
         if (process.waitFor() == 0) {
-            println("Contenedor PostgreSQL iniciado: $output")
+            println("Nuevo contenedor PostgreSQL creado e iniciado: $output")
         } else {
-            println("Error al iniciar el contenedor")
+            println("Error al crear el contenedor")
         }
     } catch (e: Exception) {
         println("Error: ${e.message}")
     }
 }
-
