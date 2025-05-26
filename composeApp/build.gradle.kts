@@ -38,13 +38,14 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.kotlin.reflect)
             implementation(libs.chart)
+            implementation(libs.compose.native.notification.jvm)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.kotlinx.datetime)
             implementation(libs.router.compose.jvm)
-            implementation("eu.codlab:kotlin-kamel-image-ext-jvm:1.16.0")
+            implementation(libs.kotlin.kamel.image.ext.jvm)
         }
     }
 }
