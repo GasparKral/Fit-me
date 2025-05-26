@@ -14,7 +14,9 @@ androidx-test-junit = "1.2.1"
 chart = "1.1.0"
 coilComposeBase = "2.7.0"
 compose-multiplatform = "1.7.0"
+composeNativeNotificationJvm = "0.2.0"
 constraintlayoutCompose = "1.1.1"
+core = "3.5.1"
 exposedCore = "0.43.0"
 exposedCoreVersion = "0.50.1"
 exposedDao = "0.50.1"
@@ -29,6 +31,7 @@ jetbrainsExposedCore = "0.61.0"
 junit = "4.13.2"
 kamelImage = "1.0.5"
 kotlin = "2.0.21"
+kotlinKamelImageExtJvm = "1.16.0"
 kotlinReflect = "2.1.21-RC2"
 kotlinx-coroutines = "1.9.0"
 kotlinxCoroutinesCore = "1.8.1"
@@ -54,7 +57,8 @@ postgresqlPostgresqlVersion = "42.7.5"
 postgresqlVersion = "42.7.1"
 annotationJvm = "1.9.1"
 constraintlayout = "2.2.1"
-routerComposeJvm = "1.0.0"
+routerComposeJvm = "1.0.2"
+uiGraphicsAndroid = "1.8.2"
 
 
 
@@ -64,6 +68,8 @@ androidx-gridlayout = { module = "androidx.gridlayout:gridlayout", version.ref =
 androidx-material3-android = { module = "androidx.compose.material3:material3-android", version.ref = "material3Android" }
 chart = { module = "io.github.thechance101:chart", version.ref = "chart" }
 coil-compose-base = { module = "io.coil-kt:coil-compose-base", version.ref = "coilComposeBase" }
+compose-native-notification-jvm = { module = "io.github.kdroidfilter:compose-native-notification-jvm", version.ref = "composeNativeNotificationJvm" }
+core = { module = "com.google.zxing:core", version.ref = "core" }
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposedCore" }
 exposed-core-v0610 = { module = "org.jetbrains.exposed:exposed-core", version.ref = "jetbrainsExposedCore" }
 exposed-dao = { module = "org.jetbrains.exposed:exposed-dao", version.ref = "exposedCore" }
@@ -75,9 +81,11 @@ grid = { module = "com.cheonjaeung.compose.grid:grid", version.ref = "grid" }
 io-ktor-ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation" }
 io-ktor-ktor-client-content-negotiation2 = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktorClientContentNegotiation" }
 io-ktor-ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorSerializationKotlinxJson" }
+javase = { module = "com.google.zxing:javase", version.ref = "core" }
 jetbrains-exposed-java-time = { module = "org.jetbrains.exposed:exposed-java-time", version.ref = "exposedJavaTime" }
 jetbrains-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json" }
 kamel-image = { module = "media.kamel:kamel-image", version.ref = "kamelImage" }
+kotlin-kamel-image-ext-jvm = { module = "eu.codlab:kotlin-kamel-image-ext-jvm", version.ref = "kotlinKamelImageExtJvm" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlinReflect" }
 kotlin-serialization-compiler-plugin = { module = "org.jetbrains.kotlin:kotlin-serialization-compiler-plugin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -128,6 +136,7 @@ androidx-annotation-jvm = { group = "androidx.annotation", name = "annotation-jv
 postgresql-v4275 = { module = "org.postgresql:postgresql", version.ref = "postgresqlPostgresqlVersion" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 router-compose-jvm = { module = "es.gaspardev:router-compose-jvm", version.ref = "routerComposeJvm" }
+androidx-ui-graphics-android = { group = "androidx.compose.ui", name = "ui-graphics-android", version.ref = "uiGraphicsAndroid" }
 
 
 [plugins]
