@@ -19,11 +19,17 @@ import com.aay.compose.baseComponents.model.GridOrientation
 import com.aay.compose.lineChart.LineChart
 import com.aay.compose.lineChart.model.LineParameters
 import com.aay.compose.lineChart.model.LineType
+import es.gaspardev.components.formatDateTime
+import es.gaspardev.core.domain.dtos.DashboardChartInfo
 import es.gaspardev.core.domain.usecases.read.LoadDashboarChartInfo
 import es.gaspardev.states.LoggedTrainer
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Clock.System.now
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import java.time.temporal.ChronoUnit
+import kotlin.time.Duration.Companion.days
 
 data class ChartData(
     val date: String,
@@ -35,7 +41,11 @@ data class ChartData(
 @Composable
 fun StatisticsChart() {
 
-    var data: List<ChartData> = listOf()
+    var data: List<ChartData> = listOf(
+        ChartData((now() - 2.days).toLocalDateTime(TimeZone.UTC).formatDateTime(), 0, 0, 0),
+        ChartData((now() - 1.days).toLocalDateTime(TimeZone.UTC).formatDateTime(), 0, 0, 0),
+        ChartData(now().toLocalDateTime(TimeZone.UTC).formatDateTime(), 0, 0, 0)
+    )
 
     LaunchedEffect("Load Statistics") {
         LoadDashboarChartInfo().run(LoggedTrainer.state.trainer!!).fold({
@@ -130,23 +140,21 @@ fun StatisticsChart() {
     }
 }
 
-fun mapToChartData(data: Array<List<Pair<Instant, Long>>>): List<ChartData> {
-    val workoutList = data.getOrNull(0) ?: emptyList()
-    val nutritionList = data.getOrNull(1) ?: emptyList()
+fun mapToChartData(data: DashboardChartInfo): List<ChartData> {
+    val workoutList = data.workouts.groupBy { it.completedAt }
+    val nutritionList = data.diets.groupBy { it.completeAt }
 
     // Asegura que ambas listas estén alineadas por índice
-    return workoutList.zip(nutritionList).map { (workout, nutrition) ->
-        val instant = workout.first
-        val date = instant.toLocalDateTime(TimeZone.currentSystemDefault()).date.toString() // yyyy-MM-dd
-        val workoutValue = workout.second.toInt()
-        val nutritionValue = nutrition.second.toInt()
-        val overall = ((workoutValue + nutritionValue) / 2) // promedio simple
+    return workoutList.entries.zip(nutritionList.entries).map { (w, n) ->
+        val moment = w.key.toLocalDateTime(TimeZone.currentSystemDefault()).formatDateTime()
+        val wCount = w.value.size
+        val nCOunt = n.value.size
 
         ChartData(
-            date = date,
-            workoutCompletion = workoutValue,
-            nutritionAdherence = nutritionValue,
-            overallProgress = overall
+            date = moment,
+            workoutCompletion = wCount,
+            nutritionAdherence = nCOunt,
+            overallProgress = (wCount + nCOunt) / 2
         )
     }
 }

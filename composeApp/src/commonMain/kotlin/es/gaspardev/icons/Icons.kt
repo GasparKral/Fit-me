@@ -7,6 +7,109 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 object FitMeIcons {
+
+    val Gender: ImageVector
+        get() {
+            return ImageVector.Builder(
+                name = "bigender",
+                defaultWidth = 24.0.dp,
+                defaultHeight = 24.0.dp,
+                viewportWidth = 24.0f,
+                viewportHeight = 24.0f
+            ).apply {
+                path(
+                    fill = SolidColor(Color.Black),
+                    fillAlpha = 1.0f,
+                    stroke = null,
+                    strokeAlpha = 1.0f,
+                    strokeLineWidth = 1.0f,
+                    strokeLineCap = StrokeCap.Butt,
+                    strokeLineJoin = StrokeJoin.Miter,
+                    strokeLineMiter = 1.0f,
+                    pathFillType = PathFillType.NonZero
+                ) {
+                    moveTo(0.0f, 0.0f)
+                    horizontalLineToRelative(24.0f)
+                    verticalLineToRelative(24.0f)
+                    horizontalLineToRelative(-24.0f)
+                    close()
+                }
+                path(
+                    fill = SolidColor(Color.Transparent),
+                    fillAlpha = 1.0f,
+                    stroke = SolidColor(Color.Black),
+                    strokeAlpha = 1.0f,
+                    strokeLineWidth = 2.0f,
+                    strokeLineCap = StrokeCap.Round,
+                    strokeLineJoin = StrokeJoin.Round,
+                    strokeLineMiter = 1.0f,
+                    pathFillType = PathFillType.NonZero
+                ) {
+                    moveTo(11.0f, 11.0f)
+                    moveToRelative(-4.0f, 0.0f)
+                    arcToRelative(4.0f, 4.0f, 0.0f, true, true, 8.0f, 0.0f)
+                    arcToRelative(4.0f, 4.0f, 0.0f, true, true, -8.0f, 0.0f)
+                }
+                path(
+                    fill = SolidColor(Color.Transparent),
+                    fillAlpha = 1.0f,
+                    stroke = SolidColor(Color.Black),
+                    strokeAlpha = 1.0f,
+                    strokeLineWidth = 2.0f,
+                    strokeLineCap = StrokeCap.Round,
+                    strokeLineJoin = StrokeJoin.Round,
+                    strokeLineMiter = 1.0f,
+                    pathFillType = PathFillType.NonZero
+                ) {
+                    moveTo(19.0f, 3.0f)
+                    lineToRelative(-5.0f, 5.0f)
+                }
+                path(
+                    fill = SolidColor(Color.Transparent),
+                    fillAlpha = 1.0f,
+                    stroke = SolidColor(Color.Black),
+                    strokeAlpha = 1.0f,
+                    strokeLineWidth = 2.0f,
+                    strokeLineCap = StrokeCap.Round,
+                    strokeLineJoin = StrokeJoin.Round,
+                    strokeLineMiter = 1.0f,
+                    pathFillType = PathFillType.NonZero
+                ) {
+                    moveTo(15.0f, 3.0f)
+                    horizontalLineToRelative(4.0f)
+                    verticalLineToRelative(4.0f)
+                }
+                path(
+                    fill = SolidColor(Color.Transparent),
+                    fillAlpha = 1.0f,
+                    stroke = SolidColor(Color.Black),
+                    strokeAlpha = 1.0f,
+                    strokeLineWidth = 2.0f,
+                    strokeLineCap = StrokeCap.Round,
+                    strokeLineJoin = StrokeJoin.Round,
+                    strokeLineMiter = 1.0f,
+                    pathFillType = PathFillType.NonZero
+                ) {
+                    moveTo(11.0f, 16.0f)
+                    verticalLineToRelative(6.0f)
+                }
+                path(
+                    fill = SolidColor(Color.Transparent),
+                    fillAlpha = 1.0f,
+                    stroke = SolidColor(Color.Black),
+                    strokeAlpha = 1.0f,
+                    strokeLineWidth = 2.0f,
+                    strokeLineCap = StrokeCap.Round,
+                    strokeLineJoin = StrokeJoin.Round,
+                    strokeLineMiter = 1.0f,
+                    pathFillType = PathFillType.NonZero
+                ) {
+                    moveTo(8.0f, 19.0f)
+                    horizontalLineToRelative(6.0f)
+                }
+            }.build()
+        }
+
     val Athlets: ImageVector
         get() {
             return Builder(

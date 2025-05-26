@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -25,6 +26,7 @@ import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.dashboard.*
 import es.gaspardev.states.LoggedTrainer
 import fit_me.composeapp.generated.resources.*
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -32,6 +34,7 @@ fun DashboardScreen() {
 
     val router = LocalRouter.current
     var info: TrainerDashBoardInfo = TrainerDashBoardInfo()
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(LoggedTrainer.state.trainer) {
         LoggedTrainer.state.trainer?.let {
@@ -91,7 +94,7 @@ fun DashboardScreen() {
                 Column {
                     Text(
                         text = stringResource(Res.string.dashboard_bienvenida) + " " + LoggedTrainer.state.trainer!!.user.name,
-                        style = MaterialTheme.typography.h2,
+                        style = MaterialTheme.typography.h1,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
@@ -99,7 +102,8 @@ fun DashboardScreen() {
                             stringResource(Res.string.dashboard_pendientes),
                             info.pendingWorkouts
                         ),
-                        color = MaterialTheme.colors.onPrimary.copy(alpha = 0.9f)
+                        color = MaterialTheme.colors.onPrimary,
+                        style = MaterialTheme.typography.subtitle1
                     )
                 }
             }
@@ -160,23 +164,15 @@ fun DashboardScreen() {
                         Column {
                             Text(
                                 text = stringResource(Res.string.performance_overview),
-                                style = MaterialTheme.typography.h2,
+                                style = MaterialTheme.typography.h1,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
                                 text = stringResource(Res.string.performance_description),
-                                style = MaterialTheme.typography.body2,
+                                style = MaterialTheme.typography.subtitle1,
                                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                             )
                         }
-                        /*OutlinedButton(
-                            onClick = { *//* Export data *//* }, TODO: TALVEZ
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = MaterialTheme.colors.primary
-                            )
-                        ) {
-                            Text(stringResource(Res.string.export_data))
-                        }*/
                     }
                     // Chart would go here
                     StatisticsChart()
@@ -198,17 +194,17 @@ fun DashboardScreen() {
                         Column {
                             Text(
                                 text = stringResource(Res.string.your_athletes),
-                                style = MaterialTheme.typography.h2,
+                                style = MaterialTheme.typography.h1,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
                                 text = stringResource(Res.string.athletes_description),
-                                style = MaterialTheme.typography.body2,
+                                style = MaterialTheme.typography.subtitle1,
                                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                             )
                         }
                         Button(
-                            onClick = { /* Add athlete */ },
+                            onClick = { scope.launch { agregateNewSportman() } },
                             colors = ButtonDefaults.buttonColors(
                                 backgroundColor = MaterialTheme.colors.primary,
                                 contentColor = MaterialTheme.colors.onPrimary
@@ -227,44 +223,6 @@ fun DashboardScreen() {
                     // Athletes list would go here
                     AthletesList()
                 }
-            }
-        }
-
-        // Recent Activities
-        Card(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(
-                            text = stringResource(Res.string.recent_activities),
-                            style = MaterialTheme.typography.h2,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = stringResource(Res.string.active_plans_description),
-                            style = MaterialTheme.typography.body2,
-                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
-                        )
-                    }
-                    OutlinedButton(
-                        onClick = { /*TODO*/ },
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colors.primary
-                        )
-                    ) {
-                        Text(stringResource(Res.string.view_all))
-                    }
-                }
-                // Activities would go here
-                RecentActivities()
             }
         }
     }

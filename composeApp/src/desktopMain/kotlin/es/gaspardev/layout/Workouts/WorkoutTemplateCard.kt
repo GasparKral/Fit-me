@@ -21,8 +21,7 @@ import es.gaspardev.pages.WorkoutTemplate
 fun WorkoutTemplateCard(template: WorkoutTemplate) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        backgroundColor = MaterialTheme.colors.secondaryVariant,
+        backgroundColor = Color.White,
         elevation = 4.dp
     ) {
         Column(
@@ -31,7 +30,7 @@ fun WorkoutTemplateCard(template: WorkoutTemplate) {
             Column {
                 Text(
                     text = template.name,
-                    style = MaterialTheme.typography.h4,
+                    style = MaterialTheme.typography.h3,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(Modifier.height(4.dp))

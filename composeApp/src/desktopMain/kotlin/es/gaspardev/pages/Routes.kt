@@ -66,6 +66,6 @@ sealed class Routes {
 
         lateinit var athlete: Sportsman
         override val view: @Composable () -> Unit
-            get() = { AthleteInfoScreen() }
+            get() = { AthleteInfoScreen(athlete) }
     }
 }

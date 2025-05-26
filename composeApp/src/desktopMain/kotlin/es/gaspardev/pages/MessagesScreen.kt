@@ -92,6 +92,7 @@ val sampleUser = listOf(
     User(
         name = "Carlos Rodriguez",
         email = "carlos.rodriguez@example.com",
+        phone = null,
         userImage = null,
         id = 1,
         creationTime = Clock.System.now(),
@@ -120,91 +121,94 @@ fun MessagesScreen() {
 
     Box(modifier = Modifier.fillMaxSize()) {
         Row(modifier = Modifier.fillMaxSize()) {
-            // Conversations sidebar
-            Column(
+            Card(
                 modifier = Modifier
-                    .width(300.dp)
-                    .fillMaxHeight()
-                    .border(1.dp, MaterialTheme.colors.primary)
+                    .width(300.dp).border(1.dp, MaterialTheme.colors.primary).fillMaxHeight()
             ) {
-                Row(
+                // Conversations sidebar
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                        .fillMaxHeight()
                 ) {
-                    Text(
-                        text = "Messages",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Button(
-                        onClick = { isModalOpen = true },
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = MaterialTheme.colors.primary,
-                            contentColor = MaterialTheme.colors.onPrimary
-                        )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = "New")
-                        Spacer(Modifier.width(4.dp))
-                        Text("New")
-                    }
-                }
-
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    placeholder = { Text("Search conversations...") },
-                    leadingIcon = {
-                        Icon(Icons.Default.Search, contentDescription = "Search")
-                    },
-                    singleLine = true
-                )
-
-                TabRow(
-                    selectedTabIndex = when (activeTab) {
-                        "all" -> 0
-                        "unread" -> 1
-                        "important" -> 2
-                        else -> 0
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    listOf("All", "Unread", "Important").forEachIndexed { index, title ->
-                        Tab(
-                            selected = when (index) {
-                                0 -> activeTab == "all"
-                                1 -> activeTab == "unread"
-                                2 -> activeTab == "important"
-                                else -> false
-                            },
-                            onClick = {
-                                activeTab = when (index) {
-                                    0 -> "all"
-                                    1 -> "unread"
-                                    2 -> "important"
-                                    else -> "all"
-                                }
-                            },
-                            text = { Text(title) }
+                        Text(
+                            text = "Messages",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.SemiBold
                         )
+                        Button(
+                            onClick = { isModalOpen = true },
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = MaterialTheme.colors.primary,
+                                contentColor = MaterialTheme.colors.onPrimary
+                            )
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = "New")
+                            Spacer(Modifier.width(4.dp))
+                            Text("New")
+                        }
                     }
-                }
 
-                LazyColumn(modifier = Modifier.weight(1f)) {
-                    items(sampleConversations.filter {
-                        it.name.contains(searchQuery, ignoreCase = true) ||
-                                it.lastMessage.contains(searchQuery, ignoreCase = true)
-                    }) { conversation ->
-                        ConversationItem(
-                            conversation = conversation,
-                            isSelected = selectedConversation == conversation.id,
-                            onClick = { selectedConversation = conversation.id }
-                        )
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        placeholder = { Text("Search conversations...") },
+                        leadingIcon = {
+                            Icon(Icons.Default.Search, contentDescription = "Search")
+                        },
+                        singleLine = true
+                    )
+
+                    TabRow(
+                        selectedTabIndex = when (activeTab) {
+                            "all" -> 0
+                            "unread" -> 1
+                            "important" -> 2
+                            else -> 0
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        listOf("All", "Unread", "Important").forEachIndexed { index, title ->
+                            Tab(
+                                selected = when (index) {
+                                    0 -> activeTab == "all"
+                                    1 -> activeTab == "unread"
+                                    2 -> activeTab == "important"
+                                    else -> false
+                                },
+                                onClick = {
+                                    activeTab = when (index) {
+                                        0 -> "all"
+                                        1 -> "unread"
+                                        2 -> "important"
+                                        else -> "all"
+                                    }
+                                },
+                                text = { Text(title) }
+                            )
+                        }
+                    }
+
+                    LazyColumn(modifier = Modifier.weight(1f)) {
+                        items(sampleConversations.filter {
+                            it.name.contains(searchQuery, ignoreCase = true) ||
+                                    it.lastMessage.contains(searchQuery, ignoreCase = true)
+                        }) { conversation ->
+                            ConversationItem(
+                                conversation = conversation,
+                                isSelected = selectedConversation == conversation.id,
+                                onClick = { selectedConversation = conversation.id }
+                            )
+                        }
                     }
                 }
             }

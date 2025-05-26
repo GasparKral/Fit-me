@@ -1,28 +1,35 @@
 package es.gaspardev.pages
 
-// Iconos equivalentes en Compose
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import es.gaspardev.components.*
+import es.gaspardev.core.LocalRouter
+import es.gaspardev.core.domain.entities.Measurements
+import es.gaspardev.core.domain.entities.Sportsman
 import es.gaspardev.icons.FitMeIcons
-import io.kamel.image.KamelImage
-import io.kamel.image.asyncPainterResource
+import es.gaspardev.layout.athletes.MeasurementItem
+import es.gaspardev.layout.athletes.OverviewTab
+import es.gaspardev.layout.athletes.WorkoutsTab
+import fit_me.composeapp.generated.resources.*
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.stringResource
 
 data class Athlete2(
     val id: String,
@@ -41,13 +48,6 @@ data class Athlete2(
     val goals: List<String>,
     val completedWorkouts: Int,
     val upcomingSessions: Int
-)
-
-data class Measurements(
-    val weight: String,
-    val height: String,
-    val bodyFat: String,
-    val lastUpdated: String
 )
 
 data class Workout2(
@@ -95,10 +95,10 @@ val exampleAthlete = Athlete2(
     workoutPlan = "Plan de fuerza avanzado",
     nutritionPlan = "Dieta alta en proteínas",
     measurements = Measurements(
-        weight = "68.5 kg",
-        height = "170 cm",
-        bodyFat = "18%",
-        lastUpdated = "2023-11-15"
+        weight = 68.5,
+        height = 170.toDouble(),
+        bodyFat = 18,
+        lastUpdated = Clock.System.now()
     ),
     goals = listOf(
         "Perder 5% de grasa corporal",
@@ -150,11 +150,11 @@ val exampleSession = listOf(
 
 @Composable
 fun AthleteInfoScreen(
-
+    sportsman: Sportsman
 ) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Overview", "Workouts", "Nutrition", "Schedule")
-
+    val router = LocalRouter.current
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -167,16 +167,16 @@ fun AthleteInfoScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextButton(
-                onClick = {},
+                onClick = { router.navigateTo(Routes.Athletes) },
                 contentPadding = PaddingValues(horizontal = 8.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Back to Athletes")
+                Text("Volver")
             }
 
             Button(onClick = {}) {
@@ -212,48 +212,19 @@ fun AthleteInfoScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     item {
-                        // Avatar
-                        Box(
-                            modifier = Modifier
-                                .size(96.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colors.surface),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (exampleAthlete.image != null) {
-                                KamelImage(
-                                    resource = asyncPainterResource(exampleAthlete.image),
-                                    contentDescription = exampleAthlete.name,
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            } else {
-                                Text(
-                                    text = exampleAthlete.name,
-                                    style = MaterialTheme.typography.h6
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Name and status
-                        Text(
-                            text = exampleAthlete.name,
-                            style = MaterialTheme.typography.h6,
-                            fontWeight = FontWeight.Bold
-                        )
-
+                        UserAvatar(sportsman.user, LayoutDirection.Vertical)
                         Spacer(modifier = Modifier.height(8.dp))
 
                         // Status badge
                         Surface(
                             shape = RoundedCornerShape(16.dp),
-                            color = if (exampleAthlete.status == "active") Color(0xFF4CAF50) else Color.Gray,
+                            color = if (sportsman.user.status.status) Color(0xFF4CAF50) else Color.Gray,
                             modifier = Modifier.padding(vertical = 4.dp)
                         ) {
                             Text(
-                                text = exampleAthlete.status,
+                                text = if (sportsman.user.status.status) stringResource(Res.string.active) else stringResource(
+                                    Res.string.inactive
+                                ),
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                                 color = Color.White,
                                 style = MaterialTheme.typography.subtitle1
@@ -264,16 +235,28 @@ fun AthleteInfoScreen(
 
                         // Member since and last active
                         Text(
-                            text = "Member since ${exampleAthlete.joinDate}",
+                            text = stringResource(Res.string.member_since) + " ${
+                                sportsman.trainingSince!!.toLocalDateTime(TimeZone.currentSystemDefault())
+                                    .formatDateTime()
+                            }",
                             style = MaterialTheme.typography.body2,
                             color = MaterialTheme.colors.onSurface
                         )
 
-                        Text(
-                            text = "Last active: ${exampleAthlete.lastActive}",
-                            style = MaterialTheme.typography.body2,
-                            color = MaterialTheme.colors.onSurface
-                        )
+                        LastActiveText(sportsman.user.status.lastActive)
+
+                        if (sportsman.allergies.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(24.dp))
+
+                            LazyColumn(
+                                contentPadding = PaddingValues(6.dp),
+                                modifier = Modifier.fillMaxWidth().heightIn(max = 150.dp)
+                            ) {
+                                items(sportsman.allergies.sorted()) { allergy ->
+                                    AssistChip({}, label = { Text(allergy, style = MaterialTheme.typography.caption) })
+                                }
+                            }
+                        }
 
                         Spacer(modifier = Modifier.height(24.dp))
 
@@ -283,7 +266,7 @@ fun AthleteInfoScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "Overall Progress",
+                                text = stringResource(Res.string.overall_progress),
                                 style = MaterialTheme.typography.body2
                             )
                             Text(
@@ -304,156 +287,170 @@ fun AthleteInfoScreen(
                         // Contact Information
                         Column(modifier = Modifier.fillMaxWidth()) {
                             Text(
-                                text = "Contact Information",
+                                text = stringResource(Res.string.contact_info),
                                 style = MaterialTheme.typography.body1,
                                 fontWeight = FontWeight.Medium
                             )
 
                             Spacer(modifier = Modifier.height(8.dp))
 
+                            if (sportsman.user.phone != null) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Phone,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = MaterialTheme.colors.onSurface
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = sportsman.user.phone!!,
+                                        style = MaterialTheme.typography.body2
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
-                                    imageVector = Icons.Default.Person,
+                                    imageVector = Icons.Default.Email,
                                     contentDescription = null,
                                     modifier = Modifier.size(16.dp),
                                     tint = MaterialTheme.colors.onSurface
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = exampleAthlete.email,
+                                    text = sportsman.user.email,
                                     style = MaterialTheme.typography.body2
                                 )
                             }
+                            Spacer(modifier = Modifier.height(16.dp))
 
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = FitMeIcons.Messages,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colors.onSurface
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
+                            // Current Plans
+                            Column(modifier = Modifier.fillMaxWidth()) {
                                 Text(
-                                    text = exampleAthlete.phone,
-                                    style = MaterialTheme.typography.body2
+                                    text = stringResource(Res.string.current_plans),
+                                    style = MaterialTheme.typography.body1,
+                                    fontWeight = FontWeight.Medium
                                 )
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = FitMeIcons.Weight,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = if (sportsman.workouts == null) MaterialTheme.colors.onSurface.copy(.6f) else MaterialTheme.colors.primary
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = sportsman.workouts?.name
+                                            ?: stringResource(Res.string.no_workout_plan_assigned),
+                                        style = MaterialTheme.typography.body2
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(4.dp))
+
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = FitMeIcons.Nutrition,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = if (sportsman.diet == null) MaterialTheme.colors.onSurface.copy(.6f) else MaterialTheme.colors.primary
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = sportsman.diet?.name ?: stringResource(Res.string.no_diet_plan_assigned),
+                                        style = MaterialTheme.typography.body2
+                                    )
+                                }
                             }
-                        }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(16.dp))
 
-                        // Current Plans
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            Text(
-                                text = "Current Plans",
-                                style = MaterialTheme.typography.body1,
-                                fontWeight = FontWeight.Medium
-                            )
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = FitMeIcons.Weight,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colors.primary
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
+                            // Measurements
+                            Column(modifier = Modifier.fillMaxWidth()) {
                                 Text(
-                                    text = exampleAthlete.workoutPlan ?: "No workout plan assigned",
-                                    style = MaterialTheme.typography.body2
+                                    text = stringResource(Res.string.measurements),
+                                    style = MaterialTheme.typography.body1,
+                                    fontWeight = FontWeight.Medium
                                 )
-                            }
 
-                            Spacer(modifier = Modifier.height(4.dp))
+                                Spacer(modifier = Modifier.height(8.dp))
 
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = FitMeIcons.Nutrition,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colors.primary
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    MeasurementItem(
+                                        label = stringResource(Res.string.height),
+                                        value = "${exampleAthlete.measurements.weight} Kg"
+                                    )
+                                    MeasurementItem(
+                                        label = stringResource(Res.string.weight),
+                                        value = " ${exampleAthlete.measurements.height} cm"
+                                    )
+                                    MeasurementItem(
+                                        label = stringResource(Res.string.body_fat),
+                                        value = "${exampleAthlete.measurements.bodyFat}%"
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(4.dp))
+
                                 Text(
-                                    text = exampleAthlete.nutritionPlan ?: "No nutrition plan assigned",
-                                    style = MaterialTheme.typography.body2
+                                    text = stringResource(Res.string.last_update) + ": ${
+                                        exampleAthlete.measurements.lastUpdated?.toLocalDateTime(
+                                            TimeZone.currentSystemDefault()
+                                        )?.formatDateTime()
+                                            ?: "Nunca"
+                                    }",
+                                    style = MaterialTheme.typography.subtitle2,
+                                    color = MaterialTheme.colors.onSurface,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
                                 )
                             }
-                        }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(24.dp))
 
-                        // Measurements
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            Text(
-                                text = "Measurements",
-                                style = MaterialTheme.typography.body1,
-                                fontWeight = FontWeight.Medium
-                            )
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
+                            // Action buttons
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceEvenly
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                MeasurementItem(label = "Weight", value = exampleAthlete.measurements.weight)
-                                MeasurementItem(label = "Height", value = exampleAthlete.measurements.height)
-                                MeasurementItem(label = "Body Fat", value = exampleAthlete.measurements.bodyFat)
-                            }
+                                Button(
+                                    onClick = { /* Message action */ },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Icon(
+                                        imageVector = FitMeIcons.Messages,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(stringResource(Res.string.send_message))
+                                }
 
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            Text(
-                                text = "Last updated: ${exampleAthlete.measurements.lastUpdated}",
-                                style = MaterialTheme.typography.subtitle2,
-                                color = MaterialTheme.colors.onSurface,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        // Action buttons
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Button(
-                                onClick = { /* Message action */ },
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Icon(
-                                    imageVector = FitMeIcons.Messages,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("Message")
-                            }
-
-                            OutlinedButton(
-                                onClick = { /* Schedule action */ },
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Icon(
-                                    imageVector = FitMeIcons.Calendar,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("Schedule")
+                                OutlinedButton(
+                                    onClick = { /* Schedule action */ },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Icon(
+                                        imageVector = FitMeIcons.Calendar,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(stringResource(Res.string.schedule))
+                                }
                             }
                         }
                     }
                 }
             }
-
             // Details card (right column)
             Card(
                 modifier = Modifier
@@ -515,458 +512,6 @@ fun AthleteInfoScreen(
     }
 }
 
-@Composable
-fun MeasurementItem(label: String, value: String) {
-    Surface(
-        modifier = Modifier.padding(4.dp),
-        shape = RoundedCornerShape(8.dp),
-        color = MaterialTheme.colors.surface
-    ) {
-        Column(
-            modifier = Modifier.padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.subtitle2,
-                color = MaterialTheme.colors.onSurface
-            )
-            Text(
-                text = value,
-                style = MaterialTheme.typography.body1,
-                fontWeight = FontWeight.Medium
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun OverviewTab(
-    athlete: Athlete2,
-    workoutHistory: List<Workout2>,
-    nutritionLogs: List<NutritionLog>,
-    upcomingSessions: List<Session>
-) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        // Goals section
-        item {
-            Text(
-                text = "Goals",
-                style = MaterialTheme.typography.h5,
-                fontWeight = FontWeight.Medium
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            FlowRow(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                athlete.goals.forEach { goal ->
-                    Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colors.surface
-                    ) {
-                        Text(
-                            text = goal,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                            style = MaterialTheme.typography.body2
-                        )
-                    }
-                }
-            }
-        }
-
-        // Stats section
-        item {
-            Text(
-                text = "Stats",
-                style = MaterialTheme.typography.h5,
-                fontWeight = FontWeight.Medium
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                StatCard(
-                    icon = Icons.Default.AccountBox,
-                    value = athlete.completedWorkouts.toString(),
-                    label = "Workouts Completed",
-                    modifier = Modifier.weight(1f)
-                )
-
-                StatCard(
-                    icon = FitMeIcons.Calendar,
-                    value = athlete.upcomingSessions.toString(),
-                    label = "Upcoming Sessions",
-                    modifier = Modifier.weight(1f)
-                )
-
-                StatCard(
-                    icon = FitMeIcons.Weight,
-                    value = "${workoutHistory.map { it.performance }.average().toInt()}%",
-                    label = "Avg. Performance",
-                    modifier = Modifier.weight(1f)
-                )
-
-                StatCard(
-                    icon = FitMeIcons.Nutrition,
-                    value = "${nutritionLogs.map { it.adherence }.average().toInt()}%",
-                    label = "Diet Adherence",
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
-
-        // Recent Activity section
-        item {
-            Text(
-                text = "Recent Activity",
-                style = MaterialTheme.typography.h5,
-                fontWeight = FontWeight.Medium
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
-        items(workoutHistory) { workout ->
-            WorkoutItem(workout = workout)
-        }
-
-        // Upcoming Sessions section
-        item {
-            Text(
-                text = "Upcoming Sessions",
-                style = MaterialTheme.typography.h5,
-                fontWeight = FontWeight.Medium
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
-        items(upcomingSessions) { session ->
-            SessionItem(session = session)
-        }
-    }
-}
-
-@Composable
-fun StatCard(
-    icon: ImageVector,
-    value: String,
-    label: String,
-    modifier: Modifier = Modifier
-) {
-    Card(modifier = modifier) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colors.primary,
-                modifier = Modifier.size(24.dp)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = value,
-                style = MaterialTheme.typography.h6,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                text = label,
-                style = MaterialTheme.typography.subtitle2,
-                color = MaterialTheme.colors.onSurface,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
-@Composable
-fun WorkoutItem(workout: Workout2) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(
-                    text = workout.name,
-                    style = MaterialTheme.typography.body1,
-                    fontWeight = FontWeight.Medium
-                )
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = workout.date,
-                        style = MaterialTheme.typography.body2,
-                        color = MaterialTheme.colors.onSurface
-                    )
-
-                    Text(
-                        text = "•",
-                        style = MaterialTheme.typography.body2,
-                        color = MaterialTheme.colors.onSurface
-                    )
-
-                    Text(
-                        text = workout.duration,
-                        style = MaterialTheme.typography.body2,
-                        color = MaterialTheme.colors.onSurface
-                    )
-                }
-            }
-
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colors.primary
-            ) {
-                Text(
-                    text = "${workout.performance}% Performance",
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    color = MaterialTheme.colors.onPrimary,
-                    style = MaterialTheme.typography.subtitle1
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun SessionItem(session: Session) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(
-                    text = session.name,
-                    style = MaterialTheme.typography.body1,
-                    fontWeight = FontWeight.Medium
-                )
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = session.date,
-                        style = MaterialTheme.typography.body2,
-                        color = MaterialTheme.colors.onSurface
-                    )
-
-                    Text(
-                        text = "•",
-                        style = MaterialTheme.typography.body2,
-                        color = MaterialTheme.colors.onSurface
-                    )
-
-                    Text(
-                        text = session.time,
-                        style = MaterialTheme.typography.body2,
-                        color = MaterialTheme.colors.onSurface
-                    )
-
-                    Text(
-                        text = "•",
-                        style = MaterialTheme.typography.body2,
-                        color = MaterialTheme.colors.onSurface
-                    )
-
-                    Text(
-                        text = session.duration,
-                        style = MaterialTheme.typography.body2,
-                        color = MaterialTheme.colors.onSurface
-                    )
-                }
-            }
-
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colors.surface
-            ) {
-                Text(
-                    text = session.type.replaceFirstChar { it.uppercase() },
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    style = MaterialTheme.typography.subtitle1
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun WorkoutsTab(workoutHistory: List<Workout2>) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Workout History",
-                style = MaterialTheme.typography.h5,
-                fontWeight = FontWeight.Medium
-            )
-
-            Button(onClick = { /* Assign workout action */ }) {
-                Icon(
-                    imageVector = FitMeIcons.Weight,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("Assign Workout")
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(1.dp)
-        ) {
-            items(workoutHistory) { workout ->
-                WorkoutHistoryItem(workout = workout)
-            }
-        }
-    }
-}
-
-@Composable
-fun WorkoutHistoryItem(workout: Workout2) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colors.surface
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(
-                    text = workout.name,
-                    style = MaterialTheme.typography.body1,
-                    fontWeight = FontWeight.Medium
-                )
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = FitMeIcons.Calendar,
-                            contentDescription = null,
-                            modifier = Modifier.size(12.dp),
-                            tint = MaterialTheme.colors.onSurface
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = workout.date,
-                            style = MaterialTheme.typography.body2,
-                            color = MaterialTheme.colors.onSurface
-                        )
-                    }
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = FitMeIcons.Calendar,
-                            contentDescription = null,
-                            modifier = Modifier.size(12.dp),
-                            tint = MaterialTheme.colors.onSurface
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = workout.duration,
-                            style = MaterialTheme.typography.body2,
-                            color = MaterialTheme.colors.onSurface
-                        )
-                    }
-
-                    Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colors.surface
-                    ) {
-                        Text(
-                            text = workout.type.replaceFirstChar { it.uppercase() },
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                            style = MaterialTheme.typography.subtitle2
-                        )
-                    }
-                }
-            }
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = "Performance",
-                        style = MaterialTheme.typography.body2,
-                        fontWeight = FontWeight.Medium
-                    )
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        LinearProgressIndicator(
-                            progress = workout.performance / 100f,
-                            modifier = Modifier.width(100.dp)
-                        )
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        Text(
-                            text = "${workout.performance}%",
-                            style = MaterialTheme.typography.body2,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                }
-
-                IconButton(onClick = { /* View details action */ }) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = "View details"
-                    )
-                }
-            }
-        }
-
-        Divider()
-    }
-}
 
 @Composable
 fun NutritionTab(nutritionLogs: List<NutritionLog>) {

@@ -18,8 +18,7 @@ fun NutritionTemplateCard(
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(12.dp)
+        modifier = modifier
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Column(modifier = Modifier.weight(1f)) {

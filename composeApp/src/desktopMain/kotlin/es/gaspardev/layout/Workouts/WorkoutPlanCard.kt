@@ -10,11 +10,13 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import es.gaspardev.components.AssistChip
 import es.gaspardev.components.DifficultyBadge
+import es.gaspardev.components.DropdownMenuButton
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.pages.WorkoutPlan
 
@@ -25,8 +27,7 @@ fun WorkoutPlanCard(plan: WorkoutPlan) {
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        backgroundColor = MaterialTheme.colors.secondaryVariant,
+        backgroundColor = Color.White,
         elevation = 4.dp
     ) {
         Column(
@@ -42,7 +43,7 @@ fun WorkoutPlanCard(plan: WorkoutPlan) {
                 ) {
                     Text(
                         text = plan.name,
-                        style = MaterialTheme.typography.h4,
+                        style = MaterialTheme.typography.h3,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(Modifier.height(4.dp))
@@ -55,34 +56,16 @@ fun WorkoutPlanCard(plan: WorkoutPlan) {
                     )
                 }
 
-                Box {
-                    IconButton(
-                        onClick = { showDropdown = true }
-                    ) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Actions")
-                    }
-
-                    DropdownMenu(
-                        expanded = showDropdown,
-                        onDismissRequest = { showDropdown = false }
-                    ) {
-                        DropdownMenuItem(
-                            onClick = { /* Edit action */ }
-                        ) { Text("Edit Plan") }
-                        DropdownMenuItem(
-                            onClick = { /* Duplicate action */ }
-                        ) { Text("Duplicate Plan") }
-                        DropdownMenuItem(
-                            onClick = { /* Assign action */ }
-                        ) { Text("Assign to Athlete") }
-                        Divider()
-                        DropdownMenuItem(
-                            onClick = { /* Delete action */ }
-                        ) {
-                            Text("Delete Plan", color = MaterialTheme.colors.error)
+                DropdownMenuButton(
+                    items = listOf("Edit Plan", "Duplicate Plan", "Assign to Athlete", "Delete Plan"),
+                    onItemSelected = { index ->
+                        when (index) {
+                            0 -> {}
+                            1 -> {}
+                            else -> {}
                         }
-                    }
-                }
+                    },
+                )
             }
 
             Spacer(Modifier.height(16.dp))

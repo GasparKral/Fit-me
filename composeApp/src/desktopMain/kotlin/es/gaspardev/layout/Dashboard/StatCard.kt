@@ -30,7 +30,7 @@ fun StatCard(
             ) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.h6,
+                    style = MaterialTheme.typography.h3,
                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                 )
                 Icon(
@@ -43,15 +43,15 @@ fun StatCard(
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = value,
-                style = MaterialTheme.typography.h2,
+                style = MaterialTheme.typography.h1,
                 fontWeight = FontWeight.Bold
             )
             Text(
                 text = description,
-                style = MaterialTheme.typography.body1,
+                style = MaterialTheme.typography.subtitle1,
                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
             )
-            if (footer != null) footer.invoke()
+            footer?.invoke()
         }
     }
 }

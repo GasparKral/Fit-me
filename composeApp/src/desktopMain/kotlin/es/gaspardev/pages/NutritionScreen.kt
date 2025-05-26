@@ -22,6 +22,9 @@ import es.gaspardev.core.LocalRouter
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.nutrition.NutritionPlanCard
 import es.gaspardev.layout.nutrition.NutritionTemplateCard
+import fit_me.composeapp.generated.resources.Res
+import fit_me.composeapp.generated.resources.filters
+import org.jetbrains.compose.resources.stringResource
 
 // Data classes
 data class NutritionPlan(
@@ -100,129 +103,136 @@ fun NutritionScreen() {
          .padding(16.dp)
          .verticalScroll(scrollState)
    ) {
-      // Header
-      Row(
-         modifier = Modifier.fillMaxWidth(),
-         horizontalArrangement = Arrangement.SpaceBetween,
-         verticalAlignment = Alignment.CenterVertically
-      ) {
-         Column {
-            Text(
-               text = "Nutrition Plans",
-               style = MaterialTheme.typography.subtitle1,
-               fontWeight = FontWeight.Bold
-            )
-            Text(
-               text = "Create and manage nutrition plans for your athletes",
-               style = MaterialTheme.typography.body1
-            )
-         }
-         Button(onClick = { isModalOpen = true }) {
-            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-            Text("Create Nutrition Plan")
-         }
-      }
+      Card {
+         Column(modifier = Modifier.padding(16.dp)) {
+            // Header
+            Row(
+               modifier = Modifier.fillMaxWidth(),
+               horizontalArrangement = Arrangement.SpaceBetween,
+               verticalAlignment = Alignment.CenterVertically
+            ) {
+               Column {
+                  Text(
+                     text = "Nutrition Plans",
+                     style = MaterialTheme.typography.subtitle1,
+                     fontWeight = FontWeight.Bold
+                  )
+                  Text(
+                     text = "Create and manage nutrition plans for your athletes",
+                     style = MaterialTheme.typography.body1
+                  )
+               }
+               Button(onClick = { isModalOpen = true }) {
+                  Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                  Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                  Text("Create Nutrition Plan")
+               }
+            }
 
-      Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(24.dp))
 
-      // Search + Filter
-      Row(
-         modifier = Modifier.fillMaxWidth(),
-         verticalAlignment = Alignment.CenterVertically,
-         horizontalArrangement = Arrangement.spacedBy(8.dp)
-      ) {
-         OutlinedTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            placeholder = { Text("Search plans...") },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-            modifier = Modifier.weight(1f)
-         )
-         OutlinedButton(
-            onClick = { /* TODO: implement filter logic */ },
-            shape = RoundedCornerShape(10.dp)
-         ) {
-            Icon(Icons.Default.AddCircle, contentDescription = null, modifier = Modifier.size(16.dp))
-            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-            Text("Filters")
-         }
-      }
-
-      Spacer(Modifier.height(16.dp))
-
-      // Tabs
-      val tabs = listOf("All", "Weight Loss", "Muscle Gain", "Maintenance")
-      ScrollableTabRow(
-         selectedTabIndex = tabs.indexOfFirst { it.equals(activeTab, ignoreCase = true) },
-         edgePadding = 0.dp,
-         modifier = Modifier.fillMaxWidth()
-      ) {
-         tabs.forEachIndexed { index, tab ->
-            Tab(
-               selected = tab.equals(activeTab, ignoreCase = true),
-               onClick = { activeTab = tab.lowercase() },
-               text = { Text(tab) }
-            )
-         }
-      }
-
-      Spacer(Modifier.height(16.dp))
-
-      // Nutrition Plans
-      if (filteredPlans.isEmpty()) {
-         Column(
-            modifier = Modifier
-               .fillMaxWidth()
-               .padding(vertical = 48.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-         ) {
-            Icon(
-               FitMeIcons.Nutrition,
-               contentDescription = null,
-               tint = Color.LightGray,
-               modifier = Modifier.size(72.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("No plans found", style = MaterialTheme.typography.subtitle1)
-            Text("Try adjusting your search or filters.", style = MaterialTheme.typography.body2)
-         }
-      } else {
-         LazyVerticalGrid(
-            columns = GridCells.Fixed(4),
-            modifier = Modifier.heightIn(max = 800.dp, min = 400.dp).padding(vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-         ) {
-            items(filteredPlans) { plan ->
-               NutritionPlanCard(plan)
+            // Search + Filter
+            Row(
+               modifier = Modifier.fillMaxWidth(),
+               verticalAlignment = Alignment.CenterVertically,
+               horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+               OutlinedTextField(
+                  value = searchQuery,
+                  onValueChange = { searchQuery = it },
+                  placeholder = { Text("Search plans...") },
+                  leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                  modifier = Modifier.weight(1f)
+               )
+               OutlinedButton(
+                  onClick = { /* TODO: implement filter logic */ },
+                  shape = RoundedCornerShape(10.dp)
+               ) {
+                  Icon(Icons.Default.AddCircle, contentDescription = null, modifier = Modifier.size(16.dp))
+                  Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                  Text(stringResource(Res.string.filters))
+               }
             }
          }
       }
+      Spacer(Modifier.height(12.dp))
 
-      Spacer(Modifier.height(32.dp))
+      Card {
+         Column {
+            // Tabs
+            val tabs = listOf("All", "Weight Loss", "Muscle Gain", "Maintenance")
+            ScrollableTabRow(
+               selectedTabIndex = tabs.indexOfFirst { it.equals(activeTab, ignoreCase = true) },
+               edgePadding = 0.dp,
+               modifier = Modifier.fillMaxWidth()
+            ) {
+               tabs.forEachIndexed { index, tab ->
+                  Tab(
+                     selected = tab.equals(activeTab, ignoreCase = true),
+                     onClick = { activeTab = tab.lowercase() },
+                     text = { Text(tab) }
+                  )
+               }
+            }
 
-      // Templates section
-      Text(
-         text = "Nutrition Templates",
-         style = MaterialTheme.typography.subtitle1,
-         fontWeight = FontWeight.Bold
-      )
+            Spacer(Modifier.height(16.dp))
 
-      Spacer(Modifier.height(16.dp))
+            // Nutrition Plans
+            if (filteredPlans.isEmpty()) {
+               Column(
+                  modifier = Modifier
+                     .fillMaxWidth()
+                     .padding(vertical = 48.dp),
+                  horizontalAlignment = Alignment.CenterHorizontally
+               ) {
+                  Icon(
+                     FitMeIcons.Nutrition,
+                     contentDescription = null,
+                     modifier = Modifier.size(72.dp),
+                     tint = Color.LightGray
+                  )
+                  Spacer(modifier = Modifier.height(16.dp))
+                  Text("No plans found", style = MaterialTheme.typography.subtitle1)
+                  Text("Try adjusting your search or filters.", style = MaterialTheme.typography.body2)
+               }
+            } else {
+               LazyVerticalGrid(
+                  columns = GridCells.Fixed(4),
+                  modifier = Modifier.heightIn(max = 800.dp, min = 400.dp).padding(12.dp),
+                  verticalArrangement = Arrangement.spacedBy(16.dp),
+                  horizontalArrangement = Arrangement.spacedBy(16.dp)
+               ) {
+                  items(filteredPlans) { plan ->
+                     NutritionPlanCard(plan)
+                  }
+               }
+            }
 
-      LazyVerticalGrid(
-         columns = GridCells.Fixed(4),
-         modifier = Modifier.heightIn(max = 800.dp, min = 400.dp).padding(vertical = 12.dp),
-         verticalArrangement = Arrangement.spacedBy(16.dp),
-         horizontalArrangement = Arrangement.spacedBy(16.dp)
-      ) {
-         items(nutritionTemplates) { templatePlan ->
-            NutritionTemplateCard(templatePlan)
+            Spacer(Modifier.height(32.dp))
+
+            // Templates section
+            Text(
+               text = "Nutrition Templates",
+               style = MaterialTheme.typography.h2,
+               fontWeight = FontWeight.Bold,
+               modifier = Modifier.padding(bottom = 16.dp, start = 12.dp)
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+            LazyVerticalGrid(
+               columns = GridCells.Fixed(4),
+               modifier = Modifier.heightIn(max = 800.dp, min = 400.dp).padding(12.dp),
+               verticalArrangement = Arrangement.spacedBy(16.dp),
+               horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+               items(nutritionTemplates) { templatePlan ->
+                  NutritionTemplateCard(templatePlan)
+               }
+            }
          }
       }
    }
-
 }
 
 

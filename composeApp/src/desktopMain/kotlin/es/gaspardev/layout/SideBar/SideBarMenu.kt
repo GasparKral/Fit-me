@@ -73,8 +73,7 @@ fun SideBarMenu(controller: RouterState) {
             Text(
                 color = MaterialTheme.colors.primary,
                 text = "Fit-Me",
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.h2
             )
         }
 

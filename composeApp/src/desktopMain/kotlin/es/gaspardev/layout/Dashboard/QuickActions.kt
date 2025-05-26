@@ -1,6 +1,5 @@
 package es.gaspardev.layout.dashboard
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -16,20 +15,16 @@ import es.gaspardev.core.Route
 import es.gaspardev.core.RouterState
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.pages.Routes
-import es.gaspardev.pages.test
+import es.gaspardev.pages.agregateNewSportman
 import fit_me.composeapp.generated.resources.*
-import fit_me.composeapp.generated.resources.Res
-import fit_me.composeapp.generated.resources.add_athlete_action
-import fit_me.composeapp.generated.resources.create_workout
-import kotlin.reflect.KFunction
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import kotlin.reflect.KFunction
 
 @Composable
 fun QuickActions(controller: RouterState) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = 4.dp
+        modifier = Modifier.fillMaxWidth()
     ) {
         Column {
             // Header
@@ -38,13 +33,13 @@ fun QuickActions(controller: RouterState) {
             ) {
                 Text(
                     text = stringResource(Res.string.quick_actions_title),
-                    style = MaterialTheme.typography.h6,
+                    style = MaterialTheme.typography.h2,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = stringResource(Res.string.quick_actions_subtitle),
-                    style = MaterialTheme.typography.body2,
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                    style = MaterialTheme.typography.subtitle2.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.8f)
                 )
             }
 
@@ -62,8 +57,7 @@ fun QuickActions(controller: RouterState) {
                         onClick = {
                             if (action.route != null) controller.navigateToWithAction(
                                 action.route,
-                                action.action,
-                                null
+                                action.action
                             ) else action.action.call()
                         }
                     ) {
@@ -81,7 +75,7 @@ fun QuickActions(controller: RouterState) {
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = stringResource(action.labelRes),
-                                style = MaterialTheme.typography.body2,
+                                style = MaterialTheme.typography.body1,
                                 color = MaterialTheme.colors.onPrimary
                             )
                         }
@@ -104,7 +98,7 @@ val quickActions = listOf(
         route = Routes.Athletes,
         icon = FitMeIcons.Athlets,
         labelRes = Res.string.add_athlete_action,
-        action = ::test
+        action = ::agregateNewSportman
     ),
     QuickAction(
         route = Routes.Workouts,
@@ -116,18 +110,18 @@ val quickActions = listOf(
         route = Routes.Nutrition,
         icon = FitMeIcons.Nutrition,
         labelRes = Res.string.create_diet,
-        action = ::test
+        action = ::agregateNewSportman
     ),
     QuickAction(
         route = Routes.Calendar,
         icon = FitMeIcons.Calendar,
         labelRes = Res.string.schedule_session,
-        action = ::test
+        action = ::agregateNewSportman
     ),
     QuickAction(
         route = Routes.Messages,
         icon = FitMeIcons.Messages,
         labelRes = Res.string.send_message,
-        action = ::test
+        action = ::agregateNewSportman
     )
 )

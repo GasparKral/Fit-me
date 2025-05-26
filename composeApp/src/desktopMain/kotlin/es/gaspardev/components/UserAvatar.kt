@@ -16,85 +16,154 @@ import es.gaspardev.core.domain.entities.User
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 
+enum class LayoutDirection {
+    Horizontal, Vertical
+}
 
 @Composable
 fun UserAvatar(
     user: User,
+    layoutDirection: LayoutDirection = LayoutDirection.Horizontal,
     subtitleContent: (@Composable () -> Unit)? = null,
     extraSubtitleContent: (@Composable () -> Unit)? = null,
     rightContent: (@Composable () -> Unit)? = null
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        // Left side - Avatar and info
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.weight(1f)
-        ) {
-            Box(
+    // Contenedor principal que puede ser Row o Column
+    when (layoutDirection) {
+        LayoutDirection.Horizontal -> {
+            Row(
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colors.primary.copy(alpha = 0.1f)),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                user.userImage?.let { image ->
-                    @Suppress("DEPRECATION")
-                    KamelImage(
-                        resource = asyncPainterResource(image.src),
-                        contentDescription = "Avatar of ${user.name}",
-                        modifier = Modifier.size(200.dp),
-                        contentScale = ContentScale.Fit,
-                        onLoading = { it ->
-                            Text(
-                                text = user.getInitials(),
-                                style = MaterialTheme.typography.subtitle1,
-                                color = MaterialTheme.colors.primary
-                            )
-                        },
-                        onFailure = { it ->
-                            Text(
-                                text = user.getInitials(),
-                                style = MaterialTheme.typography.subtitle1,
-                                color = MaterialTheme.colors.primary
-                            )
-                        }
+                MainContent(
+                    user = user,
+                    subtitleContent = subtitleContent,
+                    extraSubtitleContent = extraSubtitleContent,
+                    isHorizontal = true
+                )
+
+                if (rightContent != null) {
+                    rightContent.invoke()
+                }
+            }
+        }
+
+        LayoutDirection.Vertical -> {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                MainContent(
+                    user = user,
+                    subtitleContent = subtitleContent,
+                    extraSubtitleContent = extraSubtitleContent,
+                    isHorizontal = false
+                )
+
+                if (rightContent != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    rightContent.invoke()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MainContent(
+    user: User,
+    subtitleContent: (@Composable () -> Unit)?,
+    extraSubtitleContent: (@Composable () -> Unit)?,
+    isHorizontal: Boolean
+) {
+    if (isHorizontal) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AvatarContent(user)
+            Spacer(modifier = Modifier.width(12.dp))
+            TextContent(user, subtitleContent, extraSubtitleContent)
+        }
+    } else {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            AvatarContent(user)
+            Spacer(modifier = Modifier.height(12.dp))
+            TextContent(user, subtitleContent, extraSubtitleContent)
+        }
+    }
+}
+
+@Composable
+private fun AvatarContent(user: User) {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colors.primary.copy(alpha = 0.1f)),
+        contentAlignment = Alignment.Center
+    ) {
+        user.userImage?.let { image ->
+            @Suppress("DEPRECATION")
+            KamelImage(
+                resource = asyncPainterResource(image.src),
+                contentDescription = "Avatar of ${user.name}",
+                modifier = Modifier.size(200.dp),
+                contentScale = ContentScale.Fit,
+                onLoading = {
+                    Text(
+                        text = user.getInitials(),
+                        style = MaterialTheme.typography.subtitle1,
+                        color = MaterialTheme.colors.primary
                     )
-                } ?: run {
+                },
+                onFailure = {
                     Text(
                         text = user.getInitials(),
                         style = MaterialTheme.typography.subtitle1,
                         color = MaterialTheme.colors.primary
                     )
                 }
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = user.name,
-                        style = MaterialTheme.typography.subtitle1,
-                        fontWeight = FontWeight.Medium
-                    )
-                    if (subtitleContent != null) {
-                        subtitleContent.invoke()
-                    }
-                }
-                if (extraSubtitleContent != null) {
-                    extraSubtitleContent.invoke()
-                }
-            }
-        }
-
-        if (rightContent != null) {
-            rightContent.invoke()
+            )
+        } ?: run {
+            Text(
+                text = user.getInitials(),
+                style = MaterialTheme.typography.subtitle1,
+                color = MaterialTheme.colors.primary
+            )
         }
     }
 }
+
+@Composable
+private fun TextContent(
+    user: User,
+    subtitleContent: (@Composable () -> Unit)?,
+    extraSubtitleContent: (@Composable () -> Unit)?,
+    isHorizontal: Boolean = true
+) {
+    Column(
+        horizontalAlignment = if (isHorizontal) Alignment.Start else Alignment.CenterHorizontally
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = user.name,
+                style = MaterialTheme.typography.subtitle1,
+                fontWeight = FontWeight.Medium
+            )
+            if (subtitleContent != null) {
+                subtitleContent.invoke()
+            }
+        }
+        if (extraSubtitleContent != null) {
+            extraSubtitleContent.invoke()
+        }
+    }
+}
+

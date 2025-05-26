@@ -91,8 +91,7 @@ fun LoginScreen() {
 
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White),
+            .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -112,13 +111,12 @@ fun LoginScreen() {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 "Fit-me",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.h1,
                 color = MaterialTheme.colors.primary
             )
             Text(
                 stringResource(Res.string.inicio_de_sesion_portal),
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.subtitle1,
                 color = MaterialTheme.colors.onSurface
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -126,12 +124,11 @@ fun LoginScreen() {
             Card(
                 modifier = Modifier
                     .width(450.dp)
-                    .padding(16.dp)
-                    .border(1.dp, Color(0xFFD9D9D9), RoundedCornerShape(12.dp)),
-                elevation = 0.dp
+                    .padding(24.dp),
+                backgroundColor = MaterialTheme.colors.surface
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(stringResource(Res.string.inicio_de_sesion), fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(Res.string.inicio_de_sesion), style = MaterialTheme.typography.subtitle2)
                     Spacer(modifier = Modifier.height(16.dp))
 
                     if (error.isNotEmpty()) {
@@ -196,7 +193,10 @@ fun LoginScreen() {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(checked = rememberMe, onCheckedChange = { rememberMe = it })
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(stringResource(Res.string.inicio_de_sesion_recuerdame))
+                        Text(
+                            stringResource(Res.string.inicio_de_sesion_recuerdame),
+                            style = MaterialTheme.typography.subtitle2
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))

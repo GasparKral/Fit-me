@@ -1,25 +1,129 @@
 package es.gaspardev.pages
 
-
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowColumn
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.kdroid.composenotification.builder.ExperimentalNotificationsApi
+import com.kdroid.composenotification.builder.Notification
+import es.gaspardev.SCREEN_HEIGHT
 import es.gaspardev.core.LocalRouter
+import es.gaspardev.core.domain.dtos.QrData
+import es.gaspardev.core.infrastructure.repositories.TrainerRepositoryImp
 import es.gaspardev.layout.athletes.SportsmanCard
 import es.gaspardev.states.LoggedTrainer
+import es.gaspardev.utils.QrGenerator
+import es.gaspardev.utils.saveQrToDesktop
+import fit_me.composeapp.generated.resources.Res
+import fit_me.composeapp.generated.resources.add_athlete
+import fit_me.composeapp.generated.resources.athlete_search_query
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
+import java.io.File
 
 
-fun test() {}
+@OptIn(ExperimentalNotificationsApi::class)
+suspend fun agregateNewSportman() {
+    TrainerRepositoryImp().generateRegistrationKey(LoggedTrainer.state.trainer!!).fold(
+        { value ->
+            try {
+                saveQrToDesktop(
+                    QrGenerator.generateQrBitmap(
+                        QrData(value),
+                        300
+                    ),
+                    "Clave de Usuario"
+                )
+                Notification(
+                    title = "Se ha generado una Clave",
+                    message = "Se ha generado el código QR para registro en su escritorio",
+                    largeImage = File(
+                        System.getProperty("user.home"),
+                        "Desktop${File.separatorChar}Clave de Usuario"
+                    ).absolutePath
+                )
+            } catch (e: Exception) {
+                Notification(
+                    title = "Error en la generación de Clave",
+                    message = "No se ha podido generar el código QR para registro",
+                    largeImage = File(
+                        System.getProperty("user.home"),
+                        "Desktop${File.separatorChar}Clave de Usuario"
+                    ).absolutePath
+                )
+            }
+        },
+        {
+            Notification(
+                title = "Error en la petición de generación de clave de registro",
+                message = "No se ha podido generar el código QR para registro",
+                largeImage = File(
+                    System.getProperty("user.home"),
+                    "Desktop${File.separatorChar}Clave de Usuario"
+                ).absolutePath
+            )
+        }
+    )
+}
 
-@OptIn(ExperimentalLayoutApi::class)
+
 @Composable
 fun AthletesScreen() {
-
+    val scope = rememberCoroutineScope()
     val controller = LocalRouter.current
+    val sportsmanList = LoggedTrainer.state.trainer!!.sportmans
+    var searchQuery by remember { mutableStateOf("") }
 
-    FlowColumn {
-        LoggedTrainer.state.trainer!!.sportmans.forEach {
-            SportsmanCard(it)
+    Column(Modifier.fillMaxSize().padding(12.dp)) {
+
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp)) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Clientes", style = MaterialTheme.typography.subtitle1)
+
+                    OutlinedButton(
+                        onClick = {
+                            scope.launch {
+                                agregateNewSportman()
+                            }
+                        },
+                        content = { Text(stringResource(Res.string.add_athlete)) }
+                    )
+                }
+                Spacer(Modifier.height(24.dp))
+                Row {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        placeholder = { Text(stringResource(Res.string.athlete_search_query)) },
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        LazyVerticalGrid(
+            modifier = Modifier.heightIn(max = SCREEN_HEIGHT).fillMaxSize(),
+            columns = GridCells.Adaptive(minSize = 275.dp),
+            contentPadding = PaddingValues(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(sportsmanList.filter { sportsman -> sportsman.user.name.contains(searchQuery, true) }) { sportsman ->
+                SportsmanCard(
+                    sportsman = sportsman,
+                    onClick = { controller.navigateTo(Routes.AthleteInfo.load(sportsman)) }
+                )
+            }
         }
     }
 

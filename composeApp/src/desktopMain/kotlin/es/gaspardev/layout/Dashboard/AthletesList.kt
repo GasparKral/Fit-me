@@ -12,8 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import es.gaspardev.components.LastActiveText
 import es.gaspardev.components.UserAvatar
 import es.gaspardev.core.LocalRouter
+import es.gaspardev.core.RouterState
 import es.gaspardev.core.domain.entities.Sportsman
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.pages.Routes
@@ -21,6 +23,7 @@ import es.gaspardev.states.LoggedTrainer
 import fit_me.composeapp.generated.resources.Res
 import fit_me.composeapp.generated.resources.active
 import fit_me.composeapp.generated.resources.inactive
+import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -34,7 +37,7 @@ fun AthletesList() {
 
         if (LoggedTrainer.state.trainer != null) {
             LoggedTrainer.state.trainer!!.sportmans.take(5).forEach { athlete ->
-                AthleteListItem(athlete = athlete)
+                AthleteListItem(athlete, router)
             }
         }
 
@@ -51,7 +54,7 @@ fun AthletesList() {
 }
 
 @Composable
-fun AthleteListItem(athlete: Sportsman) {
+fun AthleteListItem(athlete: Sportsman, router: RouterState) {
     var showDropdown by remember { mutableStateOf(false) }
 
     Row(
@@ -63,7 +66,7 @@ fun AthleteListItem(athlete: Sportsman) {
     ) {
         UserAvatar(
             athlete.user,
-            {
+            subtitleContent = {
                 if (athlete.user.status.needsAttetion) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Box(
@@ -81,15 +84,14 @@ fun AthleteListItem(athlete: Sportsman) {
                     }
                 }
             },
-            {
+            extraSubtitleContent = {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        text = "Last active: ${athlete.user.status.lastActive}",
-                        style = MaterialTheme.typography.caption,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                    LastActiveText(
+                        lastActive = athlete.user.status.lastActive,
+                        timeZone = TimeZone.UTC
                     )
 
                     Box(
@@ -114,7 +116,7 @@ fun AthleteListItem(athlete: Sportsman) {
                     }
                 }
             },
-            {
+            rightContent = {
                 // Right side - Progress and actions
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -126,27 +128,17 @@ fun AthleteListItem(athlete: Sportsman) {
                         fontWeight = FontWeight.Medium
                     )
 
-                    IconButton(
-                        onClick = { /* Workout */ },
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = FitMeIcons.Weight,
-                            contentDescription = "Workout",
-                            tint = MaterialTheme.colors.primary
-                        )
-                    }
+                    Icon(
+                        imageVector = FitMeIcons.Weight,
+                        contentDescription = "Workout",
+                        tint = if (athlete.workouts == null) MaterialTheme.colors.onSurface.copy(.6f) else MaterialTheme.colors.primary
+                    )
 
-                    IconButton(
-                        onClick = { /* Nutrition */ },
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = FitMeIcons.Nutrition,
-                            contentDescription = "Nutrition",
-                            tint = MaterialTheme.colors.primary
-                        )
-                    }
+                    Icon(
+                        imageVector = FitMeIcons.Nutrition,
+                        contentDescription = "Nutrition",
+                        tint = if (athlete.diet == null) MaterialTheme.colors.onSurface.copy(.6f) else MaterialTheme.colors.primary
+                    )
 
                     IconButton(
                         onClick = { /* Message */ },
@@ -176,29 +168,29 @@ fun AthleteListItem(athlete: Sportsman) {
                             onDismissRequest = { showDropdown = false }
                         ) {
                             DropdownMenuItem(onClick = {
-                                /* View Profile */
+                                router.navigateTo(Routes.AthleteInfo.load(athlete))
                                 showDropdown = false
                             }) {
-                                Text("View Profile")
+                                Text("View Profile", style = MaterialTheme.typography.caption)
                             }
                             Divider()
                             DropdownMenuItem(onClick = {
                                 /* Edit Workout Plan */
                                 showDropdown = false
                             }) {
-                                Text("Edit Workout Plan")
+                                Text("Edit Workout Plan", style = MaterialTheme.typography.caption)
                             }
                             DropdownMenuItem(onClick = {
                                 /* Edit Nutrition Plan */
                                 showDropdown = false
                             }) {
-                                Text("Edit Nutrition Plan")
+                                Text("Edit Nutrition Plan", style = MaterialTheme.typography.caption)
                             }
                             DropdownMenuItem(onClick = {
                                 /* Send Message */
                                 showDropdown = false
                             }) {
-                                Text("Send Message")
+                                Text("Send Message", style = MaterialTheme.typography.caption)
                             }
                         }
                     }

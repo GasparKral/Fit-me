@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import es.gaspardev.components.AssistChip
 import es.gaspardev.components.DifficultyBadge
+import es.gaspardev.components.DropdownMenuButton
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.pages.NutritionPlan
 
@@ -25,8 +26,7 @@ fun NutritionPlanCard(
     onEdit: () -> Unit*/
 ) {
     Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(12.dp)
+        modifier = modifier
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
