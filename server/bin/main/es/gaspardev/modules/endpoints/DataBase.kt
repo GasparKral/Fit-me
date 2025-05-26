@@ -6,9 +6,11 @@ import es.gaspardev.utils.DATA_BASE_PORT
 import es.gaspardev.utils.DATA_BASE_USERNAME
 import io.ktor.server.application.*
 import kotlinx.coroutines.Dispatchers
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.dao.Entity
+import org.jetbrains.exposed.dao.EntityClass
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.vendors.*
 
 fun Application.configureDatabases() {
     Database.connect(
@@ -22,3 +24,9 @@ fun Application.configureDatabases() {
 suspend fun <T> suspendTransaction(block: Transaction.() -> T): T =
     newSuspendedTransaction(Dispatchers.IO, statement = block)
 
+
+abstract class BaseDao<T : Entity<ID>, ID : Comparable<ID>>(
+    entityClass: EntityClass<ID, T>
+) {
+    protected val dao: EntityClass<ID, T> = entityClass
+}
