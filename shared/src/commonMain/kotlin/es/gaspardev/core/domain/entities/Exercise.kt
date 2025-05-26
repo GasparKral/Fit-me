@@ -24,7 +24,7 @@ data class WorkoutExercise(
     val base: ExerciseBase,
     val reps: Int,
     val sets: Int,
-    val note: Note? = null,
+    val note: List<Note> = listOf(),
     private var optionalExercises: MutableList<WorkoutExercise>? = null,
     val isOption: Boolean
 ) {

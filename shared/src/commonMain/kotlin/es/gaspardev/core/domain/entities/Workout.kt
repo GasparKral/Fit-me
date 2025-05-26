@@ -4,6 +4,8 @@ import es.gaspardev.enums.WeekDay
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 @Serializable
 data class Workout(
@@ -11,7 +13,7 @@ data class Workout(
     val description: String?,
     val notes: List<Note>,
     val exercises: Map<WeekDay, List<WorkoutExercise>>,
-    val duration: Duration? = Duration.parse("W01"),
+    val duration: Duration? = 7.toDuration(DurationUnit.DAYS),
     val initalDate: Instant
 ) {
     companion object {

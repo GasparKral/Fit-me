@@ -29,13 +29,16 @@ kotlin {
             implementation(libs.ktor.ktor.client.logging)
             implementation(libs.io.ktor.ktor.client.content.negotiation2)
             implementation(libs.postgresql)
+
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
         androidMain.dependencies {
             implementation(libs.kotlinx.coroutines.core)
-
+        }
+        jvmMain.dependencies {
+            implementation(libs.core) // Para generación de QR
         }
     }
 
@@ -54,5 +57,5 @@ android {
 }
 dependencies {
     implementation(libs.androidx.annotation.jvm)
+    implementation(libs.androidx.ui.graphics.android)
 }
- 

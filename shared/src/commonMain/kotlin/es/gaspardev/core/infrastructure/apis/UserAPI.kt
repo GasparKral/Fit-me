@@ -39,15 +39,7 @@ class UserAPI(override val apiPath: String = SERVER_HTTPS_DIR + User.URLPATH) : 
     // TODO: CAMBIAR A USER EN VEZ DE LIST<USER>
     override suspend fun get(route: String, vararg params: String?): Either<Exception, User> {
         // Filter non-null parameters and construct the query string
-        val queryString = params.filterNotNull()
-            .joinToString("&") { it }
-
-        // Concatenate the route with the query string
-        val url: String = if (queryString.isNotEmpty()) {
-            if (route.contains("?")) "$route&$queryString" else "$route?$queryString"
-        } else {
-            route
-        }
+        val url = buildUrlWithParams(route, params)
 
         return try {
             val response = httpClient.get(url)
@@ -76,16 +68,7 @@ class UserAPI(override val apiPath: String = SERVER_HTTPS_DIR + User.URLPATH) : 
 
 
     override suspend fun delete(route: String, vararg params: String?): Either.Failure<Exception>? {
-        // Filter non-null parameters and construct the query string
-        val queryString = params.filterNotNull()
-            .joinToString("&") { "param=$it" }
-
-        // Concatenate the route with the query string
-        val url: String = if (queryString.isNotEmpty()) {
-            if (route.contains("?")) "$route&$queryString" else "$route?$queryString"
-        } else {
-            route
-        }
+        val url = buildUrlWithParams(route, params)
 
         return try {
             val response = httpClient.delete(url)

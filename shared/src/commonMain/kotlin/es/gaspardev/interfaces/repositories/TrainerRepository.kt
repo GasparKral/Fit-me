@@ -1,11 +1,11 @@
 package es.gaspardev.interfaces.repositories
 
 import es.gaspardev.auxliars.Either
+import es.gaspardev.core.domain.dtos.DashboardChartInfo
 import es.gaspardev.core.domain.dtos.RegisterTrainerData
 import es.gaspardev.core.domain.dtos.TrainerPatchDTO
 import es.gaspardev.core.domain.entities.Trainer
 import es.gaspardev.core.infrastructure.apis.TrainerAPI
-import kotlinx.datetime.Instant
 
 interface TrainerRepository : UserRepository<Trainer> {
 
@@ -23,5 +23,6 @@ interface TrainerRepository : UserRepository<Trainer> {
     suspend fun getNewSposrtsman(trainer: Trainer): Int
     suspend fun getNewActivePlans(trainer: Trainer): Int
     suspend fun getNewMessages(trainer: Trainer): Int
-    suspend fun getDashboardChartData(trainer: Trainer): Array<List<Pair<Instant, Long>>>
+    suspend fun getDashboardChartData(trainer: Trainer): DashboardChartInfo
+    suspend fun generateRegistrationKey(trainer: Trainer): Either<Exception, String>
 }

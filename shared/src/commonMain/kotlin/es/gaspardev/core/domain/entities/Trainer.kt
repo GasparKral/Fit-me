@@ -5,13 +5,14 @@ import kotlinx.serialization.Serializable
 @Serializable
 class Trainer(
     val user: User,
-    var specialization: String,
-    var yearsOfExperience: Int,
-    var bio: String,
+    var specialization: String = "",
+    var yearsOfExperience: Int = 0,
+    var bio: String = "",
     private var _rawSocialLinks: Map<String, String>,  // Private backing property
-    var availability: WeeklyAvailability,
-    val certifications: List<Certification>,
-    val sportmans: List<Sportsman>
+    var availability: WeeklyAvailability = WeeklyAvailability(mapOf()),
+    val certifications: List<Certification> = listOf(),
+    val sportmans: List<Sportsman> = listOf(),
+    val sessions: List<Session> = listOf()
 ) {
     companion object {
         const val URLPATH = "/users/trainer"

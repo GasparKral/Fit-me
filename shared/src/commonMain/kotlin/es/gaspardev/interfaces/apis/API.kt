@@ -14,9 +14,19 @@ abstract class API<ApiType> where ApiType : Any {
 
     protected val httpClient = HttpClient(CIO) {
         install(ContentNegotiation) {
-            json(Json { prettyPrint = true; isLenient = true; ignoreUnknownKeys = true })
+            json(Json { prettyPrint = true; isLenient = true; ignoreUnknownKeys = true; });
         }
     }
+
+    protected fun buildUrlWithParams(route: String, params: Array<out String?>): String {
+        val queryString = params.filterNotNull().joinToString("&") { it }
+        return if (queryString.isNotEmpty()) {
+            if (route.contains("?")) "$route&$queryString" else "$route?$queryString"
+        } else {
+            route
+        }
+    }
+
 
     operator fun invoke() {
         this.httpClient.close()

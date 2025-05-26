@@ -1,22 +1,21 @@
 package es.gaspardev.core.infrastructure.repositories
 
 import es.gaspardev.auxliars.Either
+import es.gaspardev.core.domain.dtos.DashboardChartInfo
 import es.gaspardev.core.domain.dtos.LoginUserInfo
 import es.gaspardev.core.domain.dtos.RegisterTrainerData
 import es.gaspardev.core.domain.dtos.TrainerPatchDTO
 import es.gaspardev.core.domain.entities.Trainer
 import es.gaspardev.interfaces.repositories.TrainerRepository
-import kotlinx.datetime.Instant
-import kotlinx.serialization.Serializable
 
 class TrainerRepositoryImp : TrainerRepository {
     private suspend fun getIntValueForTrainer(endpoint: String, trainer: Trainer): Int {
         var result = 0
         TrainerRepository.API.getSingleValue<Int>(
-            Trainer.URLPATH + endpoint,
+            endpoint,
             params = arrayOf("trainer_id=" + trainer.user.id)
         ).fold(
-            { value -> result = value as Int },
+            { value -> result = value },
             { /* en caso de error, result sigue siendo 0 */ }
         )
         return result
@@ -50,17 +49,24 @@ class TrainerRepositoryImp : TrainerRepository {
         return getIntValueForTrainer("/data/new_messages", trainer)
     }
 
-    override suspend fun getDashboardChartData(trainer: Trainer): Array<List<Pair<Instant, Long>>> {
-        var returnValue: Array<List<Pair<Instant, Long>>> = arrayOf()
+    override suspend fun getDashboardChartData(trainer: Trainer): DashboardChartInfo {
+        var returnValue = DashboardChartInfo()
 
-        TrainerRepository.API.getSingleValue<Array<List<Pair<Instant, Long>>>>(
-            "data/dashboardChartInfo",
+        TrainerRepository.API.getSingleValue<DashboardChartInfo>(
+            "/data/dashboardChartInfo",
             params = arrayOf("trainer_id=" + trainer.user.id)
         ).fold(
             { value -> returnValue = value },
-            { }
+            { err -> throw err }
         )
         return returnValue
+    }
+
+    override suspend fun generateRegistrationKey(trainer: Trainer): Either<Exception, String> {
+        return TrainerRepository.API.getSingleValue<String>(
+            "key_gen",
+            params = arrayOf("trainer_id=" + trainer.user.id)
+        )
     }
 
     override suspend fun registerTrainer(newSportsmanData: RegisterTrainerData): Either<Exception, Trainer> {
