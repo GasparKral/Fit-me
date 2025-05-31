@@ -38,7 +38,6 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.kotlin.reflect)
             implementation(libs.chart)
-            implementation(libs.compose.native.notification.jvm)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
@@ -46,6 +45,7 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.router.compose.jvm)
             implementation(libs.kotlin.kamel.image.ext.jvm)
+            implementation(libs.compose.sonner)
         }
     }
 }

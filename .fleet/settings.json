@@ -3,6 +3,10 @@
         {
             "type": "add",
             "pluginName": "fleet.amper"
+        },
+        {
+            "type": "add",
+            "pluginName": "fleet.mercury"
         }
     ],
     "prettier.mode": "Enabled",

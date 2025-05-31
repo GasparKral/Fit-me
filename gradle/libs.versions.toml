@@ -15,6 +15,7 @@ chart = "1.1.0"
 coilComposeBase = "2.7.0"
 compose-multiplatform = "1.7.0"
 composeNativeNotificationJvm = "0.2.0"
+composeSonner = "0.3.10"
 constraintlayoutCompose = "1.1.1"
 core = "3.5.1"
 exposedCore = "0.43.0"
@@ -59,6 +60,7 @@ annotationJvm = "1.9.1"
 constraintlayout = "2.2.1"
 routerComposeJvm = "1.0.2"
 uiGraphicsAndroid = "1.8.2"
+navigationRuntimeAndroid = "2.9.0"
 
 
 
@@ -69,6 +71,7 @@ androidx-material3-android = { module = "androidx.compose.material3:material3-an
 chart = { module = "io.github.thechance101:chart", version.ref = "chart" }
 coil-compose-base = { module = "io.coil-kt:coil-compose-base", version.ref = "coilComposeBase" }
 compose-native-notification-jvm = { module = "io.github.kdroidfilter:compose-native-notification-jvm", version.ref = "composeNativeNotificationJvm" }
+compose-sonner = { module = "io.github.brdominguez:compose-sonner", version.ref = "composeSonner" }
 core = { module = "com.google.zxing:core", version.ref = "core" }
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposedCore" }
 exposed-core-v0610 = { module = "org.jetbrains.exposed:exposed-core", version.ref = "jetbrainsExposedCore" }
@@ -137,6 +140,7 @@ postgresql-v4275 = { module = "org.postgresql:postgresql", version.ref = "postgr
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 router-compose-jvm = { module = "es.gaspardev:router-compose-jvm", version.ref = "routerComposeJvm" }
 androidx-ui-graphics-android = { group = "androidx.compose.ui", name = "ui-graphics-android", version.ref = "uiGraphicsAndroid" }
+androidx-navigation-runtime-android = { group = "androidx.navigation", name = "navigation-runtime-android", version.ref = "navigationRuntimeAndroid" }
 
 
 [plugins]
