@@ -1,14 +1,12 @@
 package es.gaspardev.modules.endpoints
 
 import es.gaspardev.core.domain.dtos.DashboardChartInfo
-import es.gaspardev.core.domain.entities.Trainer
-import es.gaspardev.db.*
-import es.gaspardev.db.mappings.diets.CompletedDietDao
-import es.gaspardev.db.mappings.diets.CompletedDietEntity
-import es.gaspardev.db.mappings.users.TrainerDao
-import es.gaspardev.db.mappings.users.TrainerEntity
-import es.gaspardev.db.mappings.workouts.CompletedWorkoutDao
-import es.gaspardev.db.mappings.workouts.CompletedWorkoutEntity
+import es.gaspardev.core.domain.entities.users.Athlete
+import es.gaspardev.core.domain.entities.users.Trainer
+import es.gaspardev.database.daos.*
+import es.gaspardev.database.entities.MessageEntity
+import es.gaspardev.database.entities.TrainerEntity
+import es.gaspardev.enums.MessageStatus
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -17,10 +15,9 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimePeriod
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
-import org.jetbrains.exposed.sql.JoinType
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.transactions.transaction
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 fun Application.trainer() {
 
@@ -32,19 +29,15 @@ fun Application.trainer() {
             val userPasswordHash = call.request.queryParameters["userPassword"]
 
             if (userIdentification != null && userPasswordHash != null) {
-                val trainer = suspendTransaction {
-                    TrainerEntity.all().firstOrNull {
-                        (it.user.email == userIdentification || it.user.name == userIdentification) &&
-                                it.user.password == userPasswordHash
-                    }?.let {
-                        TrainerDao().toDomain(
-                            it
-                        )
-                    }
+                var trainer: Trainer? = null
+                var athletes: List<Athlete> = listOf()
+                suspendTransaction {
+                    trainer = TrainerDao().findTrainerByCredencials(userIdentification, userPasswordHash)?.toModel()
+                    athletes = TrainerDao().getAthletes(trainer?.user?.id.toString()).map { it.toModel() }
                 }
 
                 if (trainer != null) {
-                    call.respond(trainer)
+                    call.respond(Pair(trainer!!, athletes))
                 } else {
                     call.respondText("Entrenador no encontrado", status = HttpStatusCode.NotFound)
                 }
@@ -54,61 +47,138 @@ fun Application.trainer() {
         }
 
         // NECESITAN ATENCION
-        get(Trainer.URLPATH + "/pending") {
+        get("${Trainer.URLPATH}/data/pending") {
             val trainerID = call.request.queryParameters["trainer_id"]
+                ?: return@get call.respondText("Parámetro trainer_id requerido", status = HttpStatusCode.BadRequest)
 
-            if (trainerID != null) {
-                val value = suspendTransaction {
-                    UsersTable.join(SportsmenTable, JoinType.INNER, UsersTable.id, SportsmenTable.userId).selectAll()
-                        .where(
-                            SportsmenTable.trainerId eq trainerID.toInt() and
-                                    UsersTable.needsAttention
-                        ).count()
-                }
-                call.respond(value)
-            } else {
-                call.respondText("Parámetros requeridos faltantes", status = HttpStatusCode.BadRequest)
-            }
+            val value = AthleteDao().needAssistant(trainerID)
+            call.respond(value)
         }
 
         // DATOS DASHBOARD ENTRENADOR
-        get(Trainer.URLPATH + "/data/dashboardChartInfo") {
+        get("${Trainer.URLPATH}/data/dashboardChartInfo") {
             val trainerID = call.request.queryParameters["trainer_id"]
+                ?: return@get call.respondText("Parámetro trainer_id requerido", status = HttpStatusCode.BadRequest)
 
-            if (trainerID != null) {
+            try {
                 val now = Clock.System.now()
                 val oneMonthAgo = now.minus(DateTimePeriod(months = 1), TimeZone.currentSystemDefault())
-                try {
 
-                    val completedWorkouts = suspendTransaction {
-                        CompletedWorkoutEntity
-                            .all()
-                            .filter {
-                                it.completedAt in oneMonthAgo..now &&
-                                        it.sportsman.trainer?.user?.id?.value == trainerID.toInt()
-                            }
-                            .map {
-                                CompletedWorkoutDao().toDomain(it)
-                            }
-                    }
-
-                    val completedDiets = suspendTransaction {
-                        CompletedDietEntity.all()
-                            .filter {
-                                it.completeAt in oneMonthAgo..now &&
-                                        it.sportsman.trainer?.user?.id?.value == trainerID.toInt()
-                            }.map {
-                                CompletedDietDao().toDomain(it)
-                            }
-                    }
-
-                    call.respond(DashboardChartInfo(completedWorkouts, completedDiets))
-
-                } catch (e: Exception) {
-                    call.respondText(e.message!!, status = HttpStatusCode.ExpectationFailed)
+                val result = transaction {
+                    val workouts =
+                        WorkoutDao().getCompletedWorkoutsInTimeRange(oneMonthAgo, now, trainerID)
+                    val diets = DietDao().getCompletedDietsInTimeRange(oneMonthAgo, now, trainerID)
+                    DashboardChartInfo(workouts, listOf())
                 }
-            } else {
-                call.respondText("Parámetros requeridos faltantes", status = HttpStatusCode.BadRequest)
+                call.respond(result)
+
+            } catch (e: Exception) {
+                call.respondText(e.message!!, status = HttpStatusCode.ExpectationFailed)
+            }
+
+        }
+
+        get("${Trainer.URLPATH}/data/plans") {
+            val trainerID = call.request.queryParameters["trainer_id"]
+                ?: return@get call.respondText("Parámetro trainer_id requerido", status = HttpStatusCode.BadRequest)
+
+            try {
+                val result = transaction {
+                    val workouts = TrainerDao().getAthletes(trainerID).mapNotNull { it.workout }.count()
+                    val diet = TrainerDao().getAthletes(trainerID).mapNotNull { it.diet }.count()
+                    workouts + diet
+                }
+                call.respond(result)
+            } catch (e: Exception) {
+                call.respondText(e.message!!, status = HttpStatusCode.ExpectationFailed)
+            }
+        }
+
+        get("${Trainer.URLPATH}/data/session") {
+            val trainerID = call.request.queryParameters["trainer_id"]
+                ?: return@get call.respondText("Parámetro trainer_id requerido", status = HttpStatusCode.BadRequest)
+
+            try {
+                val result = transaction {
+                    TrainerEntity.all()
+                        .first { it.user.id.value == trainerID.toInt() }.sessions.count {
+                            !it.completed && it.dateTime in Clock.System.now()..Clock.System.now()
+                                .plus(2.toDuration(DurationUnit.DAYS))
+                        }
+                }
+                call.respond(result)
+            } catch (e: Exception) {
+                call.respondText(e.message!!, status = HttpStatusCode.ExpectationFailed)
+            }
+        }
+        get("${Trainer.URLPATH}/data/messages") {
+            val trainerID = call.request.queryParameters["trainer_id"]
+                ?: return@get call.respondText("Parámetro trainer_id requerido", status = HttpStatusCode.BadRequest)
+
+            try {
+                val result = transaction {
+                    MessageEntity.all()
+                        .count { it.status == MessageStatus.DELIVERED && it.conversation.trainer.id.value == trainerID.toInt() }
+                }
+                call.respond(result)
+            } catch (e: Exception) {
+                call.respondText(e.message!!, status = HttpStatusCode.ExpectationFailed)
+            }
+        }
+        get("${Trainer.URLPATH}/data/new_athletes") {
+            val trainerID = call.request.queryParameters["trainer_id"]
+                ?: return@get call.respondText("Parámetro trainer_id requerido", status = HttpStatusCode.BadRequest)
+
+            val result = transaction {
+                TrainerDao().getAthletes(trainerID).count {
+                    it.trainingSince in Clock.System.now()
+                        .minus(1.toDuration(DurationUnit.DAYS))..Clock.System.now()
+                }
+            }
+            call.respond(result)
+            try {
+            } catch (e: Exception) {
+                call.respondText(e.message!!, status = HttpStatusCode.ExpectationFailed)
+            }
+        }
+        get("${Trainer.URLPATH}/data/new_active_plans") {
+            val trainerID = call.request.queryParameters["trainer_id"]
+                ?: return@get call.respondText("Parámetro trainer_id requerido", status = HttpStatusCode.BadRequest)
+
+            try {
+                val result = transaction {
+                    val workouts = TrainerDao().getAthletes(trainerID)
+                        .map {
+                            it.workout != null && it.trainingSince in Clock.System.now()
+                                .minus(30.toDuration(DurationUnit.DAYS))..Clock.System.now()
+                        }.count()
+                    val diet = TrainerDao().getAthletes(trainerID).map {
+                        it.diet != null && it.trainingSince in Clock.System.now()
+                            .minus(30.toDuration(DurationUnit.DAYS))..Clock.System.now()
+                    }.count()
+
+                    workouts + diet
+                }
+                call.respond(result)
+            } catch (e: Exception) {
+                call.respondText(e.message!!, status = HttpStatusCode.ExpectationFailed)
+            }
+        }
+        get("${Trainer.URLPATH}/data/new_messages") {
+            val trainerID = call.request.queryParameters["trainer_id"]
+                ?: return@get call.respondText("Parámetro trainer_id requerido", status = HttpStatusCode.BadRequest)
+
+            try {
+                val result = transaction {
+                    MessageEntity.all()
+                        .count {
+                            it.status == MessageStatus.DELIVERED && it.conversation.trainer.id.value == trainerID.toInt() && it.sentAt in Clock.System.now()
+                                .minus(1.toDuration(DurationUnit.DAYS))..Clock.System.now()
+                        }
+                }
+                call.respond(result)
+            } catch (e: Exception) {
+                call.respondText(e.message!!, status = HttpStatusCode.ExpectationFailed)
             }
         }
 

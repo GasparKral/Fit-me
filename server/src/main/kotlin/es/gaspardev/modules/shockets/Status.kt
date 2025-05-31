@@ -1,6 +1,5 @@
 package es.gaspardev.modules.shockets
 
-import es.gaspardev.core.domain.entities.Social
 import io.ktor.serialization.kotlinx.*
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
