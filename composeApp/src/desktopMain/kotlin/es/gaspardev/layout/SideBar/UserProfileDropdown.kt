@@ -54,7 +54,7 @@ fun UserProfileDropdown(
                 // User info
                 Column {
                     Text(
-                        text = LoggedTrainer.state.trainer!!.user.name,
+                        text = LoggedTrainer.state.trainer!!.user.fullname,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium
                     )

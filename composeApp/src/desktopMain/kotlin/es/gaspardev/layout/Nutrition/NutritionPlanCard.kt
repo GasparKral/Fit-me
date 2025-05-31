@@ -1,7 +1,6 @@
 package es.gaspardev.layout.nutrition
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
@@ -12,15 +11,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import es.gaspardev.components.AssistChip
-import es.gaspardev.components.DifficultyBadge
 import es.gaspardev.components.DropdownMenuButton
+import es.gaspardev.core.domain.entities.diets.DietPlan
 import es.gaspardev.icons.FitMeIcons
-import es.gaspardev.pages.NutritionPlan
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun NutritionPlanCard(
-    plan: NutritionPlan,
+    plan: DietPlan,
     modifier: Modifier = Modifier,
     /*onViewDetails: () -> Unit,
     onEdit: () -> Unit*/
@@ -68,7 +66,7 @@ fun NutritionPlanCard(
             ) {
                 AssistChip(
                     {},
-                    label = { Text(plan.type) },
+                    label = { Text(plan.type.toString()) },
                     leadingIcon = { Icon(FitMeIcons.Nutrition, "Icons of ${plan.type}") })
                 AssistChip(
                     {},
@@ -76,9 +74,8 @@ fun NutritionPlanCard(
                     leadingIcon = { Icon(FitMeIcons.Calendar, "Icons of ${plan.duration}") })
                 AssistChip(
                     {},
-                    label = { Text("${plan.mealsPerDay} meals/day") },
+                    label = { Text("${plan.dishes.values.sumOf { it.size }} meals/day") },
                     leadingIcon = { Icon(Icons.Default.Refresh, "Icons of meals per day") })
-                DifficultyBadge(plan.difficulty)
             }
 
             Row(
@@ -88,11 +85,7 @@ fun NutritionPlanCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "${plan.recipes} recipes",
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
-                )
-                Text(
-                    text = "${plan.caloriesPerDay} calories/day",
+                    text = "${plan.dishes.values.size} dishes",
                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                 )
             }
@@ -112,7 +105,7 @@ fun NutritionPlanCard(
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
-                        text = "Assigned to ${plan.assignedCount} athletes",
+                        text = "Assigned to ${plan.asignedCount} athletes",
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
                         modifier = Modifier.padding(start = 4.dp)
                     )

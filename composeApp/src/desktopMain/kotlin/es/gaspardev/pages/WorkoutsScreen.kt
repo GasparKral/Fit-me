@@ -20,89 +20,91 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import es.gaspardev.core.LocalRouter
+import es.gaspardev.core.domain.entities.workouts.WorkoutPlan
+import es.gaspardev.core.domain.entities.workouts.WorkoutTemplate
+import es.gaspardev.core.domain.usecases.create.CreateNewWorkout
+import es.gaspardev.core.domain.usecases.read.GetTrainerWorkoutsPlans
+import es.gaspardev.core.domain.usecases.read.GetTrainerWorkoutsTemplates
+import es.gaspardev.core.infrastructure.repositories.WorkoutRespositoryImp
+import es.gaspardev.enums.WorkoutType
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
-import es.gaspardev.layout.FloatingDialog
+import es.gaspardev.layout.dialogs.WorkoutCreationDialog
 import es.gaspardev.layout.workouts.WorkoutPlanCard
-import es.gaspardev.layout.workouts.WorkoutPlanForm
-import es.gaspardev.layout.workouts.WorkoutPlanFormData
 import es.gaspardev.layout.workouts.WorkoutTemplateCard
+import es.gaspardev.states.LoggedTrainer
 import fit_me.composeapp.generated.resources.Res
+import fit_me.composeapp.generated.resources.all
 import fit_me.composeapp.generated.resources.filters
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+
 
 @Composable
 fun WorkoutsScreen() {
 
-    val controller = LocalRouter.current
+    LocalRouter.current
+    val scope = rememberCoroutineScope()
+    val tabs = listOf(
+        WorkoutType.ALL to stringResource(Res.string.all),
+        WorkoutType.STRENGTH to "Strength",
+        WorkoutType.CARDIO to "Cardio",
+        WorkoutType.CORE to "Core",
+        WorkoutType.FLEXIBILITY to "Flexibility",
+        WorkoutType.FULL_BODY to "Full Body",
+        WorkoutType.LOWER_BODY to "Lower Body",
+        WorkoutType.UPPER_BODY to "Upper Body"
+    )
 
     var searchQuery by remember { mutableStateOf("") }
-    var activeTab by remember { mutableStateOf("all") }
+    var activeTab by remember { mutableStateOf(WorkoutType.ALL) }
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
 
-    val workoutPlans = remember {
-        listOf(
-            WorkoutPlan(
-                id = "1",
-                name = "Strength Building Program",
-                description = "A comprehensive program focused on building overall strength",
-                type = "strength",
-                duration = "8 weeks",
-                frequency = "4 days/week",
-                difficulty = "intermediate",
-                assignedCount = 8,
-                lastUpdated = "2 days ago",
-                exercises = 24
-            ),
-            // ... other workout plans
+    var workoutPlans: MutableList<WorkoutPlan> = remember { mutableListOf() }
+    var workoutTemplates: MutableList<WorkoutTemplate> = remember { mutableListOf() }
+
+    LaunchedEffect(Unit) {
+        val trainer = LoggedTrainer.state.trainer!!
+
+        GetTrainerWorkoutsPlans(WorkoutRespositoryImp()).run(trainer).fold(
+            { value -> workoutPlans = value.toMutableList() }
+        )
+
+        GetTrainerWorkoutsTemplates(WorkoutRespositoryImp()).run(trainer).fold(
+            { value -> workoutTemplates = value.toMutableList() }
         )
     }
-
-    val workoutTemplates = remember {
-        listOf(
-            WorkoutTemplate(
-                id = "t1",
-                name = "5x5 Strength Program",
-                description = "Classic 5x5 strength building template",
-                type = "strength",
-                difficulty = "intermediate",
-                exercises = 15
-            ),
-            // ... other templates
-        )
-    }
-
-    LaunchedEffect(Unit, {
-        WorkoutRespositoryImp()
-    })
-
-    var formData by remember { mutableStateOf(WorkoutPlanFormData()) }
 
     val filteredWorkouts = workoutPlans.filter { plan ->
         val matchesSearch = plan.name.contains(searchQuery, ignoreCase = true) ||
                 plan.description.contains(searchQuery, ignoreCase = true)
 
-        if (activeTab == "all") matchesSearch else matchesSearch && plan.type == activeTab
+        if (activeTab == WorkoutType.ALL) {
+            matchesSearch
+        } else {
+            matchesSearch && plan.type == activeTab
+        }
     }
-    val scrollState = rememberScrollState()
-    VerticalScrollbar(
-        adapter = rememberScrollbarAdapter(scrollState)
-    )
-    FloatingDialog {
-        WorkoutPlanForm(
-            formData = formData,
-            onFormChange = { field, value ->
-                formData = when (field) {
-                    "name" -> formData.copy(name = value)
-                    "description" -> formData.copy(description = value)
-                    "type" -> formData.copy(type = value)
-                    "difficulty" -> formData.copy(difficulty = value)
-                    "duration" -> formData.copy(duration = value)
-                    "frequency" -> formData.copy(frequency = value)
-                    else -> formData
+
+    if (showErrorDialog) {
+        AlertDialog(
+            title = { Text("Error al crear la rutina") },
+            text = { Text(errorMessage) },
+            onDismissRequest = { showErrorDialog = false },
+            confirmButton = {
+                Button(onClick = { showErrorDialog = false }) {
+                    Text("Cerrar")
                 }
             }
         )
     }
+
+    val scrollState = rememberScrollState()
+    VerticalScrollbar(
+        adapter = rememberScrollbarAdapter(scrollState)
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -131,13 +133,42 @@ fun WorkoutsScreen() {
                     }
 
                     Button(
-                        onClick = { DialogState.open() },
+                        onClick = {
+                            DialogState.openWith {
+                                WorkoutCreationDialog { workout ->
+                                    // Launch coroutine for suspend function
+                                    scope.launch {
+                                        CreateNewWorkout().run(Pair(workout, LoggedTrainer.state.trainer!!)).fold(
+                                            { // Success
+                                                workoutPlans.addLast(
+                                                    WorkoutPlan(
+                                                        name = workout.name,
+                                                        description = workout.description,
+                                                        type = workout.workoutType,
+                                                        duration = workout.duration.toIsoString(),
+                                                        frequency = workout.exercises.keys.count().toString(),
+                                                        difficulty = workout.difficulty,
+                                                        assignedCount = 0,
+                                                        exercises = workout.exercises
+                                                    )
+                                                )
+                                            },
+                                            { err -> // Error
+                                                errorMessage = err.message ?: "Unknown error"
+                                                showErrorDialog = true
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        },
                         contentPadding = ButtonDefaults.ContentPadding
                     ) {
                         Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                         Text("Create Workout Plan")
                     }
+
                 }
 
                 Spacer(Modifier.height(24.dp))
@@ -172,40 +203,17 @@ fun WorkoutsScreen() {
         }
         Spacer(Modifier.height(12.dp))
 
-        Card {
+        Card(Modifier.fillMaxSize()) {
             Column {
                 // Tabs section
                 ScrollableTabRow(
-                    selectedTabIndex = when (activeTab) {
-                        "all" -> 0
-                        "strength" -> 1
-                        "cardio" -> 2
-                        "full-body" -> 3
-                        "core" -> 4
-                        else -> 0
-                    },
+                    selectedTabIndex = tabs.indexOfFirst { it.first == activeTab }.takeIf { it >= 0 } ?: 0,
                     edgePadding = 0.dp
                 ) {
-                    listOf("All Plans", "Strength", "Cardio", "Full Body", "Core").forEachIndexed { index, title ->
+                    tabs.forEachIndexed { _, (workoutType, title) ->
                         Tab(
-                            selected = activeTab == when (index) {
-                                0 -> "all"
-                                1 -> "strength"
-                                2 -> "cardio"
-                                3 -> "full-body"
-                                4 -> "core"
-                                else -> "all"
-                            },
-                            onClick = {
-                                activeTab = when (index) {
-                                    0 -> "all"
-                                    1 -> "strength"
-                                    2 -> "cardio"
-                                    3 -> "full-body"
-                                    4 -> "core"
-                                    else -> "all"
-                                }
-                            },
+                            selected = activeTab == workoutType,
+                            onClick = { activeTab = workoutType },
                             text = { Text(title) }
                         )
                     }
@@ -252,7 +260,9 @@ fun WorkoutsScreen() {
                         )
                         Spacer(Modifier.height(16.dp))
                         Button(
-                            onClick = { DialogState.open() },
+                            onClick = {
+                                DialogState.openWith { WorkoutCreationDialog(onCreatePlan = { }) }
+                            },
                             contentPadding = ButtonDefaults.ContentPadding
                         ) {
                             Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
@@ -289,24 +299,4 @@ fun WorkoutsScreen() {
 
 }
 
-data class WorkoutPlan(
-    val id: String,
-    val name: String,
-    val description: String,
-    val type: String,
-    val duration: String,
-    val frequency: String,
-    val difficulty: String,
-    val assignedCount: Int,
-    val lastUpdated: String,
-    val exercises: Int
-)
 
-data class WorkoutTemplate(
-    val id: String,
-    val name: String,
-    val description: String,
-    val type: String,
-    val difficulty: String,
-    val exercises: Int
-)

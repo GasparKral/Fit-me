@@ -20,7 +20,11 @@ fun StatCard(
     label: String,
     modifier: Modifier = Modifier
 ) {
-    Card(modifier = modifier) {
+    Card(
+        modifier = modifier,
+        backgroundColor = MaterialTheme.colors.primaryVariant.copy(alpha = 0.1f),
+        elevation = 0.dp
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

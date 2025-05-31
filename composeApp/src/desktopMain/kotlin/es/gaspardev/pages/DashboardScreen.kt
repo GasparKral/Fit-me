@@ -1,12 +1,9 @@
 package es.gaspardev.pages
 
-import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -19,28 +16,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import es.gaspardev.core.Action
 import es.gaspardev.core.LocalRouter
 import es.gaspardev.core.domain.dtos.TrainerDashBoardInfo
 import es.gaspardev.core.domain.usecases.read.LoadDashboardInfo
 import es.gaspardev.icons.FitMeIcons
-import es.gaspardev.layout.dashboard.*
+import es.gaspardev.layout.dashboard.AthletesList
+import es.gaspardev.layout.dashboard.QuickActions
+import es.gaspardev.layout.dashboard.StatCard
+import es.gaspardev.layout.dashboard.StatisticsChart
 import es.gaspardev.states.LoggedTrainer
 import fit_me.composeapp.generated.resources.*
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun DashboardScreen() {
 
     val router = LocalRouter.current
-    var info: TrainerDashBoardInfo = TrainerDashBoardInfo()
-    val scope = rememberCoroutineScope()
+    var info = TrainerDashBoardInfo()
 
     LaunchedEffect(LoggedTrainer.state.trainer) {
         LoggedTrainer.state.trainer?.let {
             LoadDashboardInfo().run(it).fold(
                 { res -> info = res },
-                {}
+                { _ -> }
             )
         }
     }
@@ -48,7 +47,7 @@ fun DashboardScreen() {
     val statisticsCardInfo = listOf(
         Triple(
             stringResource(Res.string.total_athletes),
-            "${LoggedTrainer.state.trainer!!.sportmans.size}",
+            "${LoggedTrainer.state.athletes!!.size}",
             String.format(stringResource(Res.string.total_athletes_description), info.newsSportsman)
         ) to Icons.Filled.Person,
         Triple(
@@ -70,163 +69,177 @@ fun DashboardScreen() {
 
 
     val scrollState = rememberScrollState()
-    VerticalScrollbar(
-        adapter = rememberScrollbarAdapter(scrollState)
-    )
-    Column(
-        modifier = Modifier
-            .verticalScroll(scrollState)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
-    ) {
-        Card(
-            backgroundColor = MaterialTheme.colors.primary,
-            contentColor = MaterialTheme.colors.onPrimary,
-            modifier = Modifier.fillMaxWidth()
+    Box {
+        VerticalScrollbar(
+            adapter = rememberScrollbarAdapter(scrollState),
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxHeight()
+                .padding(horizontal = 4.dp, vertical = 16.dp),
+            style = LocalScrollbarStyle.current.copy(
+                hoverColor = MaterialTheme.colors.primaryVariant,
+                unhoverColor = MaterialTheme.colors.primary
+            )
+        )
+        Column(
+            modifier = Modifier
+                .verticalScroll(scrollState)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+            Card(
+                backgroundColor = MaterialTheme.colors.primary,
+                contentColor = MaterialTheme.colors.onPrimary,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Column {
-                    Text(
-                        text = stringResource(Res.string.dashboard_bienvenida) + " " + LoggedTrainer.state.trainer!!.user.name,
-                        style = MaterialTheme.typography.h1,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = String.format(
-                            stringResource(Res.string.dashboard_pendientes),
-                            info.pendingWorkouts
-                        ),
-                        color = MaterialTheme.colors.onPrimary,
-                        style = MaterialTheme.typography.subtitle1
-                    )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Text(
+                            text = stringResource(Res.string.dashboard_bienvenida) + " " + LoggedTrainer.state.trainer!!.user.fullname,
+                            style = MaterialTheme.typography.h1,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = String.format(
+                                stringResource(Res.string.dashboard_pendientes),
+                                info.pendingWorkouts
+                            ),
+                            color = MaterialTheme.colors.onPrimary,
+                            style = MaterialTheme.typography.subtitle1
+                        )
+                    }
                 }
             }
-        }
 
-        // Quick Actions
-        QuickActions(router)
+            // Quick Actions
+            QuickActions(router)
 
-        // Stats Cards
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(4),
-            modifier = Modifier.fillMaxWidth().heightIn(max = 300.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            statisticsCardInfo.forEach { (data, icon) ->
-                item {
-                    StatCard(
-                        title = data.first,
-                        value = data.second,
-                        description = data.third,
-                        icon = icon,
-                        footer = {
-                            if (data.first == stringResource(Res.string.unread_messages)) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                TextButton(
-                                    onClick = { router.navigateTo(Routes.Messages) },
-                                    colors = ButtonDefaults.textButtonColors(
-                                        contentColor = MaterialTheme.colors.primary
-                                    )
-                                ) {
-                                    Text(stringResource(Res.string.view_messages))
+            // Stats Cards
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(4),
+                modifier = Modifier.fillMaxWidth().heightIn(max = 300.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                statisticsCardInfo.forEach { (data, icon) ->
+                    item {
+                        StatCard(
+                            title = data.first,
+                            value = data.second,
+                            description = data.third,
+                            icon = icon,
+                            footer = {
+                                if (data.first == stringResource(Res.string.unread_messages)) {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    TextButton(
+                                        onClick = { router.navigateTo(Routes.Messages) },
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = MaterialTheme.colors.primary
+                                        )
+                                    ) {
+                                        Text(stringResource(Res.string.view_messages))
+                                    }
                                 }
                             }
-                        }
-                    )
-                }
-            }
-        }
-
-        // Performance and Athletes Section
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Performance Overview
-            Card(
-                modifier = Modifier.weight(4f)
-            ) {
-                Column {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Text(
-                                text = stringResource(Res.string.performance_overview),
-                                style = MaterialTheme.typography.h1,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = stringResource(Res.string.performance_description),
-                                style = MaterialTheme.typography.subtitle1,
-                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
-                            )
-                        }
+                        )
                     }
-                    // Chart would go here
-                    StatisticsChart()
                 }
             }
 
-            // Your Athletes
-            Card(
-                modifier = Modifier.weight(3f)
+            // Performance and Athletes Section
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Column {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Text(
-                                text = stringResource(Res.string.your_athletes),
-                                style = MaterialTheme.typography.h1,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = stringResource(Res.string.athletes_description),
-                                style = MaterialTheme.typography.subtitle1,
-                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
-                            )
-                        }
-                        Button(
-                            onClick = { scope.launch { agregateNewSportman() } },
-                            colors = ButtonDefaults.buttonColors(
-                                backgroundColor = MaterialTheme.colors.primary,
-                                contentColor = MaterialTheme.colors.onPrimary
-                            )
+                // Performance Overview
+                Card(
+                    modifier = Modifier.weight(4f)
+                ) {
+                    Column {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Add",
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(stringResource(Res.string.add_athlete))
-
+                            Column {
+                                Text(
+                                    text = stringResource(Res.string.performance_overview),
+                                    style = MaterialTheme.typography.h1,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = stringResource(Res.string.performance_description),
+                                    style = MaterialTheme.typography.subtitle1,
+                                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                                )
+                            }
                         }
+                        // Chart would go here
+                        StatisticsChart()
                     }
-                    // Athletes list would go here
-                    AthletesList()
+                }
+
+                // Your Athletes
+                Card(
+                    modifier = Modifier.weight(3f)
+                ) {
+                    Column {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(
+                                    text = stringResource(Res.string.your_athletes),
+                                    style = MaterialTheme.typography.h1,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = stringResource(Res.string.athletes_description),
+                                    style = MaterialTheme.typography.subtitle1,
+                                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                                )
+                            }
+                            Button(
+                                onClick = {
+                                    router.executeAction(Action.SuspendAction {
+                                        router.navigateTo(Routes.Athletes)
+                                        agregateNewSportman()
+                                    })
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    backgroundColor = MaterialTheme.colors.primary,
+                                    contentColor = MaterialTheme.colors.onPrimary
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "Add",
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(stringResource(Res.string.add_athlete))
+
+                            }
+                        }
+                        // Athletes list would go here
+                        AthletesList()
+                    }
                 }
             }
         }
+
     }
 
 }
-
-

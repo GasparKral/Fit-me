@@ -1,16 +1,22 @@
 <resources>
     <!-- ============ GENERAL ============ -->
     <string name="app_name">Fit-me</string>
+    <string name="window_title">Fit-me</string>
     <string name="active">Activo</string>
     <string name="inactive">Desconectado</string>
     <string name="actions">Acciones</string>
     <string name="filters">Filtros</string>
+    <string name="all">Todos</string>
 
     <!-- ============ PLACEHOLDERS ============= -->
-
     <string name="athlete_search_query">¿Buscas a alguien?</string>
 
     <!-- ============ LOGIN ============ -->
+    <string name="fit_me_icon_description">Icono de Fit-Me</string>
+    <string name="app_title_display">Fit-me</string>
+    <string name="signing_in">Iniciando sesión...</string>
+    <string name="sign_in">Iniciar sesión</string>
+    <string name="login_error_generic">Ha ocurrido un error</string>
     <string name="inicio_de_sesion">Inicia Sesión en tu cuenta</string>
     <string name="inicio_de_sesion_portal">Portal de Entrenadores</string>
     <string name="inicio_de_sesion-usuario">Usuario o e-mail</string>
@@ -31,7 +37,6 @@
     <string name="send_message">Enviar Mensaje</string>
 
     <!-- ============ STATISTICS CARDS ============ -->
-    <string name="total_athletes">Total de Deportistas</string>
     <string name="total_athletes_description">+%d respecto al mes pasado</string>
     <string name="active_plans">Planes Activos</string>
     <string name="active_plans_description">+%d respecto al mes pasado</string>
@@ -63,14 +68,12 @@
     <string name="current_plans">Planes actuales</string>
     <string name="no_workout_plan_assigned">No hay rutina asignada</string>
     <string name="no_diet_plan_assigned">No hay dieta asignada</string>
-    <string name="measurements">Medidas</string>
-    <string name="height">Altura</string>
-    <string name="weight">Peso</string>
+    <string name="upcoming_sessions_tab">Proximas sesiones</string>
+    <string name="avg_performance">Rendimineto General</string>
+    <string name="diet_adherence">Dietas Finalizadas</string>
     <string name="body_fat">Porcentaje de grasa corporal</string>
     <string name="last_update">Última actualización</string>
     <string name="schedule">Agendar un entrenamiento</string>
-
-
 
     <!-- Días de la semana -->
     <string name="day_monday">Lunes</string>
@@ -183,7 +186,6 @@
     <string name="body_measurements">Medidas corporales</string>
     <string name="weight">Peso</string>
     <string name="height">Altura</string>
-    <string name="body_fat">Grasa corporal</string>
     <string name="muscle_mass">Masa muscular</string>
     <string name="last_updated">Última actualización</string>
 
@@ -301,7 +303,6 @@
     <string name="updated_at">Actualizado el</string>
 
     <!-- Mensajes -->
-    <string name="message">Mensaje</string>
     <string name="sender_name">Nombre del remitente</string>
     <string name="content">Contenido</string>
     <string name="timestamp">Marca de tiempo</string>
@@ -323,7 +324,6 @@
     <string name="completed_workouts">Entrenamientos completados</string>
     <string name="average_rating">Calificación promedio</string>
     <string name="monthly_revenue">Ingresos mensuales</string>
-    <string name="recent_activities">Actividades recientes</string>
 
     <!-- Actividad reciente -->
     <string name="recent_activity">Actividad reciente</string>
@@ -420,7 +420,6 @@
     <!-- Respuesta de API -->
     <string name="api_response">Respuesta de API</string>
     <string name="data">Datos</string>
-    <string name="message">Mensaje</string>
     <string name="errors">Errores</string>
 
     <!-- Respuesta paginada -->
@@ -488,5 +487,24 @@
     <string name="period_week">semana</string>
     <string name="period_month">mes</string>
     <string name="period_year">año</string>
+    <string name="click_me">¡Haz clic aquí!</string>
 
+    <!-- ============ DIFFICULTY STATES ============ -->
+    <string name="difficulty_beginner_label">Principiante</string>
+    <string name="difficulty_intermediate_label">Intermedio</string>
+    <string name="difficulty_advanced_label">Avanzado</string>
+
+    <!-- ============ UI ELEMENTS ============ -->
+    <string name="more_options">Más opciones</string>
+    <string name="last_connection">Última conexión:</string>
+    <string name="avatar_of">Avatar de %s</string>
+    <string name="age_years">%d años</string>
+    <string name="progress">Progreso</string>
+
+    <!-- ============ ATHLETE OVERVIEW ============ -->
+    <string name="stats">Estadísticas</string>
+    <string name="workouts_completed">Entrenamientos Completados</string>
+    <string name="no_appointment">Sin cita</string>
+    <string name="performance">Rendimiento</string>
+    <string name="view_details">Ver detalles</string>
 </resources>

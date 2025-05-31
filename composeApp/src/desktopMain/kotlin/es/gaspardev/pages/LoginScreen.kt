@@ -1,7 +1,6 @@
 package es.gaspardev.pages
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,13 +16,12 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.gaspardev.core.LocalRouter
-import es.gaspardev.core.domain.dtos.LoginUserInfo
+import es.gaspardev.core.domain.dtos.LoginCredentials
 import es.gaspardev.core.domain.usecases.read.LogInUser
 import es.gaspardev.core.infrastructure.memo.CacheManager
 import es.gaspardev.core.infrastructure.memo.CacheRef
@@ -31,6 +29,10 @@ import es.gaspardev.core.infrastructure.repositories.TrainerRepositoryImp
 import es.gaspardev.states.LoggedTrainer
 import es.gaspardev.utils.encrypt
 import fit_me.composeapp.generated.resources.*
+import fit_me.composeapp.generated.resources.Res
+import fit_me.composeapp.generated.resources.Weights
+import fit_me.composeapp.generated.resources.fit_me_icon_description
+import fit_me.composeapp.generated.resources.login_error_generic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -40,6 +42,8 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun LoginScreen() {
+
+    val genericError = stringResource(Res.string.login_error_generic)
 
     val controller = LocalRouter.current
 
@@ -66,14 +70,14 @@ fun LoginScreen() {
         isLoading = true
 
         CoroutineScope(Dispatchers.IO).launch {
-            LogInUser(TrainerRepositoryImp()).run(LoginUserInfo(username, encrypt(password)))
+            LogInUser(TrainerRepositoryImp()).run(LoginCredentials(username, encrypt(password)))
                 .fold(
                     onSuccess = { result ->
                         withContext(Dispatchers.Main) {
                             isLoading = false
-                            LoggedTrainer.state.trainer = result
+                            LoggedTrainer.login(result.first, result.second)
                             if (rememberMe) {
-                                CacheManager.saveValue(CacheRef.RememberUserName, result.user.name)
+                                CacheManager.saveValue(CacheRef.RememberUserName, result.first.user.fullname)
                             }
                             controller.navigateTo(Routes.Dashboard)
                         }
@@ -81,8 +85,9 @@ fun LoginScreen() {
                     onFailure = { throwable ->
                         withContext(Dispatchers.Main) {
                             isLoading = false
-                            error = throwable.message ?: "An error occurred"
+                            error = throwable.message ?: genericError
                             println("Login failed: ${throwable.message}")
+                            throw throwable
                         }
                     }
                 )
@@ -104,13 +109,13 @@ fun LoginScreen() {
             ) {
                 Icon(
                     painterResource(Res.drawable.Weights),
-                    "Fit-Me Icon",
+                    stringResource(Res.string.fit_me_icon_description),
                     tint = MaterialTheme.colors.onPrimary
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                "Fit-me",
+                stringResource(Res.string.app_title_display),
                 style = MaterialTheme.typography.h1,
                 color = MaterialTheme.colors.primary
             )
@@ -206,7 +211,7 @@ fun LoginScreen() {
                         modifier = Modifier.fillMaxWidth(),
                         enabled = !isLoading
                     ) {
-                        Text(if (isLoading) "Signing in..." else "Sign in")
+                        Text(if (isLoading) stringResource(Res.string.signing_in) else stringResource(Res.string.sign_in))
                     }
 
                 }

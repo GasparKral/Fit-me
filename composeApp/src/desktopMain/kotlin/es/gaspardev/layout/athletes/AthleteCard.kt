@@ -18,15 +18,18 @@ import es.gaspardev.components.LastActiveText
 import es.gaspardev.components.LayoutDirection
 import es.gaspardev.components.ProgressBar
 import es.gaspardev.components.UserAvatar
-import es.gaspardev.core.domain.entities.Sportsman
+import es.gaspardev.core.domain.entities.users.Athlete
+import es.gaspardev.enums.StatusState
 import es.gaspardev.icons.FitMeIcons
 import fit_me.composeapp.generated.resources.Res
 import fit_me.composeapp.generated.resources.active
+import fit_me.composeapp.generated.resources.age_years
+import fit_me.composeapp.generated.resources.progress
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun SportsmanCard(
-    sportsman: Sportsman,
+fun AthleteCard(
+    athlete: Athlete,
     onClick: () -> Unit
 ) {
     Card(
@@ -53,7 +56,7 @@ fun SportsmanCard(
                 ) {
                     Icon(FitMeIcons.Athlets, "", tint = MaterialTheme.colors.onPrimary)
                     Text(
-                        text = if (sportsman.sex) "Hombre" else "Mujer",
+                        text = athlete.sex.toString(),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colors.onPrimary
@@ -65,7 +68,7 @@ fun SportsmanCard(
                     color = MaterialTheme.colors.background,
                     border = BorderStroke(1.dp, MaterialTheme.colors.primary)
                 ) {
-                    if (sportsman.user.status.status) {
+                    if (athlete.user.status.state == StatusState.ACTIVE) {
                         Text(
                             text = stringResource(Res.string.active),
                             style = MaterialTheme.typography.overline,
@@ -73,7 +76,7 @@ fun SportsmanCard(
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
                         )
                     } else {
-                        LastActiveText(sportsman.user.status.lastActive, textColor = MaterialTheme.colors.primary)
+                        LastActiveText(athlete.user.status.lastTimeActive, textColor = MaterialTheme.colors.primary)
                     }
                 }
 
@@ -87,9 +90,9 @@ fun SportsmanCard(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Avatar
-                UserAvatar(sportsman.user, LayoutDirection.Vertical, subtitleContent = {
+                UserAvatar(athlete.user, LayoutDirection.Vertical, subtitleContent = {
                     Text(
-                        text = sportsman.user.email,
+                        text = athlete.user.email,
                         fontSize = 12.sp,
                         color = MaterialTheme.colors.onSurface,
                         maxLines = 1,
@@ -105,7 +108,7 @@ fun SportsmanCard(
                     modifier = Modifier.padding(top = 6.dp)
                 ) {
                     Text(
-                        text = "${sportsman.age} años",
+                        text = stringResource(Res.string.age_years, athlete.age),
                         fontSize = 12.sp,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                     )
@@ -124,7 +127,7 @@ fun SportsmanCard(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    ProgressBar(75.toDouble(), label = { Text("Progreso", fontWeight = FontWeight.Bold) })
+                    ProgressBar(75.toDouble(), label = { Text(stringResource(Res.string.progress), fontWeight = FontWeight.Bold) })
                 }
             }
         }

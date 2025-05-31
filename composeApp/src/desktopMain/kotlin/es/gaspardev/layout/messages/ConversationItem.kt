@@ -17,8 +17,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.gaspardev.components.UserAvatar
-import es.gaspardev.pages.Conversation
-import es.gaspardev.pages.sampleUser
+import es.gaspardev.core.domain.entities.comunication.Conversation
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 @Composable
 fun ConversationItem(
@@ -35,8 +36,8 @@ fun ConversationItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box {
-            UserAvatar(sampleUser[0])
-            if (conversation.online) {
+            UserAvatar(conversation.trainer)
+            if (true) {
                 Box(
                     modifier = Modifier
                         .size(12.dp)
@@ -54,13 +55,13 @@ fun ConversationItem(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = conversation.name,
+                    text = conversation.athlete.fullname,
                     fontWeight = FontWeight.Medium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = conversation.time,
+                    text = conversation.id.toString(),
                     fontSize = 12.sp,
                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                 )
@@ -70,32 +71,13 @@ fun ConversationItem(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = conversation.lastMessage,
+                    text = conversation.lastMessage.toLocalDateTime(TimeZone.currentSystemDefault()).toString(),
                     fontSize = 14.sp,
                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
-                Row {
-                    if (conversation.important) {
-                        Box(
-                            modifier = Modifier
-                                .size(6.dp)
-                                .clip(CircleShape)
-                                .background(Color.Yellow)
-                        )
-                        Spacer(Modifier.width(4.dp))
-                    }
-                    if (conversation.unread) {
-                        Box(
-                            modifier = Modifier
-                                .size(6.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colors.primary)
-                        )
-                    }
-                }
             }
         }
     }

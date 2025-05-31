@@ -11,12 +11,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.gaspardev.components.UserAvatar
-import es.gaspardev.pages.Message
-import es.gaspardev.pages.sampleUser
+import es.gaspardev.core.domain.entities.comunication.Message
+import es.gaspardev.core.domain.entities.users.User
+import es.gaspardev.enums.MessageStatus
+import es.gaspardev.enums.MessageStatus.DELIVERED
+import es.gaspardev.enums.MessageStatus.READ
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 @Composable
-fun MessageBubble(message: Message) {
-    val isSent = message.senderId == "trainer"
+fun MessageBubble(message: Message, user: User) {
+    val isSent = message.messageStatus == MessageStatus.SENT
 
     Column(
         modifier = Modifier
@@ -29,7 +34,7 @@ fun MessageBubble(message: Message) {
             horizontalArrangement = if (isSent) Arrangement.End else Arrangement.Start
         ) {
             if (!isSent) {
-                UserAvatar(sampleUser[0])
+                UserAvatar(user)
                 Spacer(Modifier.width(8.dp))
             }
             Column(
@@ -51,14 +56,18 @@ fun MessageBubble(message: Message) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = message.timestamp,
+                        text = message.sendAt.toLocalDateTime(TimeZone.currentSystemDefault()).toString(),
                         fontSize = 12.sp,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                     )
                     if (isSent) {
                         Spacer(Modifier.width(4.dp))
                         Text(
-                            text = if (message.status == "read") "Read" else "Delivered",
+                            text = if (message.messageStatus == READ) {
+                                "Read"
+                            } else if (message.messageStatus == DELIVERED) {
+                                "Delivered"
+                            } else "Send",
                             fontSize = 12.sp,
                             color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                         )

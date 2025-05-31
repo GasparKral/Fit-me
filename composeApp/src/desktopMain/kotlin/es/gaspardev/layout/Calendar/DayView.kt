@@ -19,18 +19,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import es.gaspardev.core.domain.entities.comunication.Session
 import es.gaspardev.icons.FitMeIcons
-import es.gaspardev.pages.CalendarEvent
 import es.gaspardev.pages.getEventTypeColor
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 @Composable
 fun DayView(
-    date: LocalDate,
-    events: List<CalendarEvent>,
-    onEventClick: (CalendarEvent) -> Unit
+    date: Instant,
+    events: List<Session>,
+    onEventClick: (Session) -> Unit
 ) {
+    val timeZone = TimeZone.currentSystemDefault()
+    val localDate = date.toLocalDateTime(timeZone).date
     Column(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
@@ -43,11 +46,11 @@ fun DayView(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = date.dayOfWeek.toString(),
+                    text = localDate.dayOfWeek.name,
                     color = MaterialTheme.colors.secondary
                 )
                 Text(
-                    text = date.format(DateTimeFormatter.ofPattern("MMMM d, yyyy")),
+                    text = "${localDate.month.name} ${localDate.dayOfMonth}, ${localDate.year}",
                     color = MaterialTheme.colors.secondary
                 )
             }
@@ -72,7 +75,7 @@ fun DayView(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(events.sortedBy { it.startTime }) { event ->
+                items(events.sortedBy { it.dateTime }) { event ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -83,7 +86,7 @@ fun DayView(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(getEventTypeColor(event.type))
+                                    .background(getEventTypeColor(event.sessionType))
                                     .padding(16.dp)
                             ) {
                                 Column {
@@ -104,8 +107,11 @@ fun DayView(
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Text(
-                                            text = "${event.startTime.format(DateTimeFormatter.ofPattern("HH:mm"))} - ${
-                                                event.endTime.format(DateTimeFormatter.ofPattern("HH:mm"))
+                                            text = "${
+                                                event.dateTime.toLocalDateTime(timeZone).time.toString().substring(0, 5)
+                                            } - ${
+                                                event.dateTime.plus(event.expectedDuration)
+                                                    .toLocalDateTime(timeZone).time.toString().substring(0, 5)
                                             }",
                                             color = Color.White
                                         )
@@ -124,7 +130,7 @@ fun DayView(
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Text(event.athleteName)
+                                    Text(event.with)
                                 }
 
                                 Spacer(modifier = Modifier.height(8.dp))
@@ -139,10 +145,9 @@ fun DayView(
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Location: ${event.location}")
                                 }
 
-                                if (event.notes.isNotEmpty()) {
+                                if (event.notes.isNotEmpty() == true) {
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Text(
                                         text = "Notes: ${event.notes}",

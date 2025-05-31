@@ -16,7 +16,7 @@ import es.gaspardev.SCREEN_HEIGHT
 import es.gaspardev.core.LocalRouter
 import es.gaspardev.core.domain.dtos.QrData
 import es.gaspardev.core.infrastructure.repositories.TrainerRepositoryImp
-import es.gaspardev.layout.athletes.SportsmanCard
+import es.gaspardev.layout.athletes.AthleteCard
 import es.gaspardev.states.LoggedTrainer
 import es.gaspardev.utils.QrGenerator
 import es.gaspardev.utils.saveQrToDesktop
@@ -77,7 +77,7 @@ suspend fun agregateNewSportman() {
 fun AthletesScreen() {
     val scope = rememberCoroutineScope()
     val controller = LocalRouter.current
-    val sportsmanList = LoggedTrainer.state.trainer!!.sportmans
+    val sportsmanList = LoggedTrainer.state.athletes!!
     var searchQuery by remember { mutableStateOf("") }
 
     Column(Modifier.fillMaxSize().padding(12.dp)) {
@@ -118,9 +118,14 @@ fun AthletesScreen() {
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(sportsmanList.filter { sportsman -> sportsman.user.name.contains(searchQuery, true) }) { sportsman ->
-                SportsmanCard(
-                    sportsman = sportsman,
+            items(sportsmanList.filter { sportsman ->
+                sportsman.user.fullname.contains(
+                    searchQuery,
+                    true
+                )
+            }) { sportsman ->
+                AthleteCard(
+                    athlete = sportsman,
                     onClick = { controller.navigateTo(Routes.AthleteInfo.load(sportsman)) }
                 )
             }

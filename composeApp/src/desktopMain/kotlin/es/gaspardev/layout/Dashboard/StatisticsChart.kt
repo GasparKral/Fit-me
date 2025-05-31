@@ -23,12 +23,9 @@ import es.gaspardev.components.formatDateTime
 import es.gaspardev.core.domain.dtos.DashboardChartInfo
 import es.gaspardev.core.domain.usecases.read.LoadDashboarChartInfo
 import es.gaspardev.states.LoggedTrainer
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Clock.System.now
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import java.time.temporal.ChronoUnit
 import kotlin.time.Duration.Companion.days
 
 data class ChartData(
@@ -141,7 +138,7 @@ fun StatisticsChart() {
 }
 
 fun mapToChartData(data: DashboardChartInfo): List<ChartData> {
-    val workoutList = data.workouts.groupBy { it.completedAt }
+    val workoutList = data.workouts.groupBy { it.completeAt }
     val nutritionList = data.diets.groupBy { it.completeAt }
 
     // Asegura que ambas listas estén alineadas por índice

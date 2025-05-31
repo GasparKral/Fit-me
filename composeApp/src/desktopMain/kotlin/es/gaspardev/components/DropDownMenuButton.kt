@@ -10,13 +10,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import fit_me.composeapp.generated.resources.Res
 import fit_me.composeapp.generated.resources.actions
+import fit_me.composeapp.generated.resources.more_options
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun DropdownMenuButton(
     items: List<String>,
     onItemSelected: (Int) -> Unit,
-    icon: @Composable () -> Unit = { Icon(Icons.Default.MoreVert, contentDescription = "More options") },
+    icon: @Composable () -> Unit = { Icon(Icons.Default.MoreVert, contentDescription = stringResource(Res.string.more_options)) },
     label: (@Composable () -> Unit)? = {
         Text(
             text = stringResource(Res.string.actions),

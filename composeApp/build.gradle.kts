@@ -80,6 +80,7 @@ android {
 dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.androidx.material3.android)
+    implementation(libs.androidx.navigation.runtime.android)
     debugImplementation(compose.uiTooling)
     implementation(kotlin("reflect"))
 }

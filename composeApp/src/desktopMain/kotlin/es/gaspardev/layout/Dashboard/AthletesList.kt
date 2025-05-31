@@ -12,11 +12,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import es.gaspardev.components.DropdownMenuButton
 import es.gaspardev.components.LastActiveText
 import es.gaspardev.components.UserAvatar
 import es.gaspardev.core.LocalRouter
 import es.gaspardev.core.RouterState
-import es.gaspardev.core.domain.entities.Sportsman
+import es.gaspardev.core.domain.entities.users.Athlete
+import es.gaspardev.enums.StatusState
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.pages.Routes
 import es.gaspardev.states.LoggedTrainer
@@ -36,7 +38,7 @@ fun AthletesList() {
     ) {
 
         if (LoggedTrainer.state.trainer != null) {
-            LoggedTrainer.state.trainer!!.sportmans.take(5).forEach { athlete ->
+            LoggedTrainer.state.athletes!!.take(5).forEach { athlete ->
                 AthleteListItem(athlete, router)
             }
         }
@@ -54,7 +56,7 @@ fun AthletesList() {
 }
 
 @Composable
-fun AthleteListItem(athlete: Sportsman, router: RouterState) {
+fun AthleteListItem(athlete: Athlete, router: RouterState) {
     var showDropdown by remember { mutableStateOf(false) }
 
     Row(
@@ -67,7 +69,7 @@ fun AthleteListItem(athlete: Sportsman, router: RouterState) {
         UserAvatar(
             athlete.user,
             subtitleContent = {
-                if (athlete.user.status.needsAttetion) {
+                if (athlete.needAssistant) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Box(
                         modifier = Modifier
@@ -90,7 +92,7 @@ fun AthleteListItem(athlete: Sportsman, router: RouterState) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     LastActiveText(
-                        lastActive = athlete.user.status.lastActive,
+                        lastActive = athlete.user.status.lastTimeActive,
                         timeZone = TimeZone.UTC
                     )
 
@@ -98,17 +100,19 @@ fun AthleteListItem(athlete: Sportsman, router: RouterState) {
                         modifier = Modifier
                             .clip(RoundedCornerShape(4.dp))
                             .background(
-                                if (athlete.user.status.status) MaterialTheme.colors.primary.copy(alpha = 0.1f)
+                                if (athlete.user.status.state == StatusState.ACTIVE) MaterialTheme.colors.primary.copy(
+                                    alpha = 0.1f
+                                )
                                 else MaterialTheme.colors.onSurface.copy(alpha = 0.1f)
                             ),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = if (athlete.user.status.status) stringResource(Res.string.active) else stringResource(
+                            text = if (athlete.user.status.state == StatusState.ACTIVE) stringResource(Res.string.active) else stringResource(
                                 Res.string.inactive
                             ),
                             style = MaterialTheme.typography.overline,
-                            color = if (athlete.user.status.status) MaterialTheme.colors.primary else MaterialTheme.colors.onSurface.copy(
+                            color = if (athlete.user.status.state == StatusState.ACTIVE) MaterialTheme.colors.primary else MaterialTheme.colors.onSurface.copy(
                                 alpha = 0.6f
                             ),
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
@@ -123,7 +127,7 @@ fun AthleteListItem(athlete: Sportsman, router: RouterState) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "${athlete.getWorkoutProgression()}%",
+                        text = "${athlete.getOverallProgression()}%",
                         style = MaterialTheme.typography.body2,
                         fontWeight = FontWeight.Medium
                     )
@@ -131,7 +135,7 @@ fun AthleteListItem(athlete: Sportsman, router: RouterState) {
                     Icon(
                         imageVector = FitMeIcons.Weight,
                         contentDescription = "Workout",
-                        tint = if (athlete.workouts == null) MaterialTheme.colors.onSurface.copy(.6f) else MaterialTheme.colors.primary
+                        tint = if (athlete.workout == null) MaterialTheme.colors.onSurface.copy(.6f) else MaterialTheme.colors.primary
                     )
 
                     Icon(
@@ -141,7 +145,7 @@ fun AthleteListItem(athlete: Sportsman, router: RouterState) {
                     )
 
                     IconButton(
-                        onClick = { /* Message */ },
+                        onClick = { router.navigateTo(Routes.Messages) },
                         modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
@@ -152,47 +156,28 @@ fun AthleteListItem(athlete: Sportsman, router: RouterState) {
                     }
 
                     Box {
-                        IconButton(
-                            onClick = { showDropdown = true },
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "More options",
-                                tint = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
-                            )
-                        }
+                        DropdownMenuButton(
+                            items = listOf("Ver Perfil", "Editar Rutina", "Editar Dieta"),
+                            onItemSelected = { index ->
+                                when (index) {
+                                    0 -> {
+                                        router.navigateTo(Routes.AthleteInfo.load(athlete))
+                                        showDropdown = false
+                                    }
 
-                        DropdownMenu(
-                            expanded = showDropdown,
-                            onDismissRequest = { showDropdown = false }
-                        ) {
-                            DropdownMenuItem(onClick = {
-                                router.navigateTo(Routes.AthleteInfo.load(athlete))
-                                showDropdown = false
-                            }) {
-                                Text("View Profile", style = MaterialTheme.typography.caption)
+                                    1 -> {
+                                        /* Edit Workout Plan */
+                                        showDropdown = false
+                                    }
+
+                                    2 -> {
+                                        /* Edit Nutrition Plan */
+                                        showDropdown = false
+                                    }
+                                }
                             }
-                            Divider()
-                            DropdownMenuItem(onClick = {
-                                /* Edit Workout Plan */
-                                showDropdown = false
-                            }) {
-                                Text("Edit Workout Plan", style = MaterialTheme.typography.caption)
-                            }
-                            DropdownMenuItem(onClick = {
-                                /* Edit Nutrition Plan */
-                                showDropdown = false
-                            }) {
-                                Text("Edit Nutrition Plan", style = MaterialTheme.typography.caption)
-                            }
-                            DropdownMenuItem(onClick = {
-                                /* Send Message */
-                                showDropdown = false
-                            }) {
-                                Text("Send Message", style = MaterialTheme.typography.caption)
-                            }
-                        }
+                        )
+
                     }
                 }
             }

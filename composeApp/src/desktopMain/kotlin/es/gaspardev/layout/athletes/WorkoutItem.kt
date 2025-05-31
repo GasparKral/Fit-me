@@ -11,10 +11,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import es.gaspardev.pages.Workout2
+import es.gaspardev.core.domain.entities.workouts.Workout
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 @Composable
-fun WorkoutItem(workout: Workout2) {
+fun WorkoutItem(workout: Workout) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -39,7 +41,7 @@ fun WorkoutItem(workout: Workout2) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = workout.date,
+                        text = workout.startAt.toLocalDateTime(TimeZone.currentSystemDefault()).date.toString(),
                         style = MaterialTheme.typography.body2,
                         color = MaterialTheme.colors.onSurface
                     )
@@ -51,7 +53,7 @@ fun WorkoutItem(workout: Workout2) {
                     )
 
                     Text(
-                        text = workout.duration,
+                        text = workout.duration.toIsoString(),
                         style = MaterialTheme.typography.body2,
                         color = MaterialTheme.colors.onSurface
                     )
@@ -63,7 +65,7 @@ fun WorkoutItem(workout: Workout2) {
                 color = MaterialTheme.colors.primary
             ) {
                 Text(
-                    text = "${workout.performance}% Performance",
+                    text = "${workout.getWorkoutProgression()}% Performance",
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                     color = MaterialTheme.colors.onPrimary,
                     style = MaterialTheme.typography.subtitle1

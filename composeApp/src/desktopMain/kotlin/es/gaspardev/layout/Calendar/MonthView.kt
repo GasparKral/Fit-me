@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
@@ -23,18 +22,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import es.gaspardev.pages.CalendarEvent
+import es.gaspardev.core.domain.entities.comunication.Session
 import es.gaspardev.pages.getEventTypeColor
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import kotlinx.datetime.*
 
 @Composable
 fun MonthView(
-    currentDate: LocalDate,
-    days: List<LocalDate>,
-    events: List<CalendarEvent>,
-    onEventClick: (CalendarEvent) -> Unit
+    currentDate: Instant,
+    days: List<Instant>,
+    events: List<Session>,
+    onEventClick: (Session) -> Unit
 ) {
+    val timeZone = TimeZone.currentSystemDefault()
+    val currentLocalDate = currentDate.toLocalDateTime(timeZone).date
+    val today = Clock.System.now().toLocalDateTime(timeZone).date
+
     Column(modifier = Modifier.fillMaxSize()) {
         // Weekday headers
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -53,12 +55,18 @@ fun MonthView(
         // Calendar grid
         LazyVerticalGrid(
             columns = GridCells.Fixed(7),
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
         ) {
             items(days) { day ->
-                val isCurrentMonth = day.month == currentDate.month
-                val isToday = day == LocalDate.now()
-                val dayEvents = events.filter { it.date == day }
+                val localDay = day.toLocalDateTime(timeZone).date
+                val isCurrentMonth = localDay.month == currentLocalDate.month
+                val isToday = localDay == today
+
+                val dayEvents = events.filter {
+                    it.dateTime.toLocalDateTime(timeZone).date == localDay
+                }
 
                 Box(
                     modifier = Modifier
@@ -76,12 +84,11 @@ fun MonthView(
                 ) {
                     Column(modifier = Modifier.fillMaxSize()) {
                         Text(
-                            text = day.dayOfMonth.toString(),
+                            text = localDay.dayOfMonth.toString(),
                             modifier = Modifier
                                 .align(Alignment.End)
                                 .background(
-                                    if (isToday) MaterialTheme.colors.primary
-                                    else Color.Transparent,
+                                    if (isToday) MaterialTheme.colors.primary else Color.Transparent,
                                     CircleShape
                                 )
                                 .padding(4.dp)
@@ -93,13 +100,15 @@ fun MonthView(
                         )
 
                         LazyColumn(modifier = Modifier.weight(1f)) {
-                            items(dayEvents.take(3)) { event ->
+                            this@LazyVerticalGrid.items(dayEvents.take(3)) { event ->
                                 Text(
-                                    text = "${event.startTime.format(DateTimeFormatter.ofPattern("HH:mm"))} ${event.title}",
+                                    text = "${
+                                        event.dateTime.toLocalDateTime(timeZone).time.toString().substring(0, 5)
+                                    } ${event.title}",
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clip(RoundedCornerShape(4.dp))
-                                        .background(getEventTypeColor(event.type))
+                                        .background(getEventTypeColor(event.sessionType))
                                         .clickable { onEventClick(event) }
                                         .padding(4.dp),
                                     color = Color.White,
@@ -130,3 +139,5 @@ fun MonthView(
         }
     }
 }
+
+

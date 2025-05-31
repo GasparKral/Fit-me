@@ -1,5 +1,6 @@
 package es.gaspardev.pages
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -17,113 +18,124 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.gaspardev.components.UserAvatar
-import es.gaspardev.core.domain.entities.User
-import es.gaspardev.core.domain.entities.UserStatus
+import es.gaspardev.components.MessageBubble
+import es.gaspardev.core.domain.entities.comunication.Conversation
+import es.gaspardev.enums.MessageStatus
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.messages.ConversationItem
-import es.gaspardev.layout.messages.MessageBubble
-import es.gaspardev.layout.messages.MessageDialog
-import kotlinx.datetime.Clock
-
-
-// Data classes
-data class Message(
-    val id: String,
-    val conversationId: String,
-    val senderId: String,
-    val senderName: String,
-    val senderImage: String,
-    val senderInitials: String,
-    val content: String,
-    val timestamp: String,
-    val status: String
-)
-
-data class Conversation(
-    val id: String,
-    val name: String,
-    val image: String,
-    val initials: String,
-    val lastMessage: String,
-    val time: String,
-    val unread: Boolean,
-    val online: Boolean,
-    val important: Boolean
-)
-
-// Sample data
-val sampleMessages = listOf(
-    Message(
-        id = "1",
-        conversationId = "1",
-        senderId = "trainer",
-        senderName = "You",
-        senderImage = "",
-        senderInitials = "TR",
-        content = "Hi Carlos, how's your progress with the new workout plan?",
-        timestamp = "10:00 AM",
-        status = "read"
-    ),
-    // Add other messages...
-)
-
-val sampleConversations = listOf(
-    Conversation(
-        id = "1",
-        name = "Carlos Rodriguez",
-        image = "",
-        initials = "CR",
-        lastMessage = "I completed the workout plan you sent. It was great!",
-        time = "10:30 AM",
-        unread = true,
-        online = true,
-        important = false
-    ),
-    // Add other conversations...
-)
-
-val sampleUser = listOf(
-    User(
-        name = "Carlos Rodriguez",
-        email = "carlos.rodriguez@example.com",
-        phone = null,
-        userImage = null,
-        id = 1,
-        creationTime = Clock.System.now(),
-        status = UserStatus()
-    )
-)
+import es.gaspardev.states.ConversationsState
+import es.gaspardev.core.infrastructure.shockets.ChatWebShocket
+import es.gaspardev.core.domain.entities.comunication.Message
+import es.gaspardev.states.LoggedTrainer
+import fit_me.composeapp.generated.resources.Res
+import fit_me.composeapp.generated.resources.all
+import fit_me.composeapp.generated.resources.unread_messages
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun MessagesScreen() {
     var searchQuery by remember { mutableStateOf("") }
-    var selectedConversation by remember { mutableStateOf<String?>("1") }
+    var selectedConversation by remember { mutableStateOf<Conversation?>(null) }
     var isModalOpen by remember { mutableStateOf(false) }
     var messageText by remember { mutableStateOf("") }
-    var activeTab by remember { mutableStateOf("all") }
 
-    fun handleSendMessage() {
-        if (messageText.trim().isEmpty()) return
-        println("Sending message: $messageText")
-        messageText = ""
+    // WebSocket states
+    var webSocket by remember { mutableStateOf<ChatWebShocket?>(null) }
+    var isConnected by remember { mutableStateOf(false) }
+    var currentMessages by remember { mutableStateOf<List<Message>>(listOf()) }
+    var connectionError by remember { mutableStateOf<String?>(null) }
+
+    val scope = rememberCoroutineScope()
+
+    // WebSocket connection management
+    fun connectToConversation(conversation: Conversation) {
+        // Limpiar estado anterior
+        webSocket?.dispose()
+        connectionError = null
+        isConnected = false
+        currentMessages = emptyList()
+        messageText = "" // Limpiar el input de texto
+
+        webSocket = ChatWebShocket(
+            userId = LoggedTrainer.state.trainer!!.user.id.toString(),
+            conversationId = conversation.id,
+            onMessageReceived = { message ->
+                // Evitar duplicados - verificar si el mensaje ya existe
+                val messageExists = currentMessages.any {
+                    it.sendAt == message.sendAt && it.userName == message.userName && it.content == message.content
+                }
+                if (!messageExists) {
+                    currentMessages = currentMessages + message
+                }
+            },
+            onStatusUpdate = { status ->
+                // TODO: Actualizar estado específico del mensaje
+                println("Message status updated: $status")
+                // Nota: Aquí necesitarías más información para identificar qué mensaje actualizar
+                // Por ahora solo lo logueamos
+            },
+            onConnectionEvent = { connected ->
+                isConnected = connected
+                if (connected) {
+                    connectionError = null
+                }
+            },
+            onError = { error ->
+                connectionError = error
+                println("WebSocket error: $error")
+            }
+        )
+
+        // Cargar mensajes existentes de la conversación primero
+        currentMessages = conversation.messages.toList()
+
+        // Luego conectar al WebSocket
+        webSocket?.connect()
     }
 
-    MessageDialog(
-        onDismiss = {},
-        onSend = { ok, ko -> }
+    fun handleSendMessage() {
+        if (messageText.trim().isEmpty() || !isConnected) return
+
+        scope.launch {
+            val success = webSocket?.sendMessage(messageText.trim()) ?: false
+            if (success) {
+                messageText = ""
+            } else {
+                connectionError = "Failed to send message. Check your connection."
+            }
+        }
+    }
+
+    // Cleanup cuando se cierre la pantalla
+    DisposableEffect(Unit) {
+        onDispose {
+            webSocket?.dispose()
+        }
+    }
+
+    val tabs = listOf(
+        MessageStatus.ALL to stringResource(Res.string.all),
+        MessageStatus.DELIVERED to stringResource(Res.string.unread_messages),
+        MessageStatus.READ to "Leidos"
     )
+
+
+    var activeTab by remember { mutableStateOf(MessageStatus.ALL) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Row(modifier = Modifier.fillMaxSize()) {
             Card(
+                shape = RectangleShape,
                 modifier = Modifier
-                    .width(300.dp).border(1.dp, MaterialTheme.colors.primary).fillMaxHeight()
+                    .width(300.dp).fillMaxHeight()
             ) {
                 // Conversations sidebar
                 Column(
@@ -160,7 +172,8 @@ fun MessagesScreen() {
                         onValueChange = { searchQuery = it },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
+                            .padding(horizontal = 12.dp)
+                            .height(24.dp),
                         placeholder = { Text("Search conversations...") },
                         leadingIcon = {
                             Icon(Icons.Default.Search, contentDescription = "Search")
@@ -168,45 +181,44 @@ fun MessagesScreen() {
                         singleLine = true
                     )
 
+                    Spacer(Modifier.height(8.dp))
+
                     TabRow(
-                        selectedTabIndex = when (activeTab) {
-                            "all" -> 0
-                            "unread" -> 1
-                            "important" -> 2
-                            else -> 0
-                        },
+                        selectedTabIndex = tabs.indexOfFirst { it.first == activeTab }.takeIf { it >= 0 } ?: 0,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        listOf("All", "Unread", "Important").forEachIndexed { index, title ->
+                        tabs.forEachIndexed { _, (type, title) ->
                             Tab(
-                                selected = when (index) {
-                                    0 -> activeTab == "all"
-                                    1 -> activeTab == "unread"
-                                    2 -> activeTab == "important"
-                                    else -> false
-                                },
-                                onClick = {
-                                    activeTab = when (index) {
-                                        0 -> "all"
-                                        1 -> "unread"
-                                        2 -> "important"
-                                        else -> "all"
-                                    }
-                                },
+                                selected = activeTab == type,
+                                onClick = { activeTab = type },
                                 text = { Text(title) }
                             )
                         }
                     }
 
                     LazyColumn(modifier = Modifier.weight(1f)) {
-                        items(sampleConversations.filter {
-                            it.name.contains(searchQuery, ignoreCase = true) ||
-                                    it.lastMessage.contains(searchQuery, ignoreCase = true)
+                        items(ConversationsState.state.filter { it ->
+                            when (activeTab) {
+                                MessageStatus.ALL -> {
+                                    true
+                                }
+
+                                MessageStatus.DELIVERED -> {
+                                    it.messages.minByOrNull { it.sendAt }!!.messageStatus == MessageStatus.DELIVERED
+                                }
+
+                                else -> {
+                                    it.messages.minByOrNull { it.sendAt }!!.messageStatus == MessageStatus.READ
+                                }
+                            }
                         }) { conversation ->
                             ConversationItem(
                                 conversation = conversation,
-                                isSelected = selectedConversation == conversation.id,
-                                onClick = { selectedConversation = conversation.id }
+                                isSelected = selectedConversation == conversation,
+                                onClick = {
+                                    selectedConversation = conversation
+                                    connectToConversation(conversation)
+                                }
                             )
                         }
                     }
@@ -218,58 +230,122 @@ fun MessagesScreen() {
                 if (selectedConversation != null) {
                     Column(modifier = Modifier.fillMaxSize()) {
                         // Header
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                // Avatar with online indicator
-                                Box {
-                                    UserAvatar(sampleUser[0])
-                                    if (sampleConversations.first { it.id == selectedConversation }.online) {
+                        Column {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    // Avatar with online indicator
+                                    Box {
+                                        UserAvatar(selectedConversation!!.trainer)
+                                        // Indicator de conexión WebSocket
                                         Box(
                                             modifier = Modifier
                                                 .size(12.dp)
                                                 .clip(CircleShape)
-                                                .background(Color.Green)
+                                                .background(
+                                                    when {
+                                                        isConnected -> Color.Green
+                                                        connectionError != null -> Color.Red
+                                                        else -> Color.Gray
+                                                    }
+                                                )
                                                 .align(Alignment.BottomEnd)
                                                 .border(2.dp, MaterialTheme.colors.surface, CircleShape)
                                         )
                                     }
+                                    Spacer(Modifier.width(12.dp))
+                                    Column {
+                                        Text(
+                                            text = selectedConversation!!.trainer.fullname,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                        Text(
+                                            text = when {
+                                                connectionError != null -> "Connection error"
+                                                else -> webSocket?.getConnectionStatus() ?: "Disconnected"
+                                            },
+                                            fontSize = 12.sp,
+                                            color = when {
+                                                isConnected -> Color.Green
+                                                connectionError != null -> Color.Red
+                                                else -> MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                                            }
+                                        )
+                                    }
                                 }
-                                Spacer(Modifier.width(12.dp))
-                                Column {
-                                    Text(
-                                        text = sampleConversations.first { it.id == selectedConversation }.name,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                    Text(
-                                        text = "Last active: Just now",
-                                        fontSize = 12.sp,
-                                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
-                                    )
+                                Row {
+                                    // Reconnect button if there's an error
+                                    if (connectionError != null) {
+                                        IconButton(
+                                            onClick = {
+                                                selectedConversation?.let { connectToConversation(it) }
+                                            }
+                                        ) {
+                                            Icon(Icons.Default.Refresh, contentDescription = "Reconnect")
+                                        }
+                                    }
+                                    IconButton(onClick = { /* Handle call */ }) {
+                                        Icon(Icons.Default.Call, contentDescription = "Call")
+                                    }
+                                    IconButton(onClick = { /* Handle video */ }) {
+                                        Icon(FitMeIcons.Messages, contentDescription = "Video")
+                                    }
+                                    IconButton(onClick = { /* Handle info */ }) {
+                                        Icon(Icons.Default.Info, contentDescription = "Info")
+                                    }
+                                    IconButton(onClick = { /* Handle more */ }) {
+                                        Icon(Icons.Default.MoreVert, contentDescription = "More")
+                                    }
                                 }
                             }
-                            Row {
-                                IconButton(onClick = { /* Handle call */ }) {
-                                    Icon(Icons.Default.Call, contentDescription = "Call")
+
+                            // Error banner
+                            connectionError?.let { error ->
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp),
+                                    backgroundColor = Color.Red.copy(alpha = 0.1f),
+                                    border = BorderStroke(1.dp, Color.Red.copy(alpha = 0.3f))
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(12.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Warning,
+                                            contentDescription = "Error",
+                                            tint = Color.Red,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(
+                                            text = error,
+                                            fontSize = 12.sp,
+                                            color = Color.Red,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        TextButton(
+                                            onClick = { connectionError = null }
+                                        ) {
+                                            Text("Dismiss", fontSize = 12.sp)
+                                        }
+                                    }
                                 }
-                                IconButton(onClick = { /* Handle video */ }) {
-                                    Icon(FitMeIcons.Messages, contentDescription = "Video")
-                                }
-                                IconButton(onClick = { /* Handle info */ }) {
-                                    Icon(Icons.Default.Info, contentDescription = "Info")
-                                }
-                                IconButton(onClick = { /* Handle more */ }) {
-                                    Icon(Icons.Default.MoreVert, contentDescription = "More")
-                                }
+                                Spacer(Modifier.height(8.dp))
                             }
                         }
 
-                        Divider()
+                        if (connectionError == null) {
+                            Divider()
+                        }
 
                         // Messages
                         LazyColumn(
@@ -277,7 +353,7 @@ fun MessagesScreen() {
                             contentPadding = PaddingValues(16.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items(sampleMessages.filter { it.conversationId == selectedConversation }) { message ->
+                            items(currentMessages) { message ->
                                 MessageBubble(message = message)
                             }
                         }
@@ -293,15 +369,34 @@ fun MessagesScreen() {
                                 value = messageText,
                                 onValueChange = { messageText = it },
                                 modifier = Modifier.weight(1f),
-                                placeholder = { Text("Type your message...") },
+                                placeholder = {
+                                    Text(
+                                        when {
+                                            !isConnected && connectionError != null -> "Connection error - cannot send messages"
+                                            !isConnected -> "Connecting..."
+                                            else -> "Type your message..."
+                                        }
+                                    )
+                                },
+                                enabled = isConnected,
                                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                                 keyboardActions = KeyboardActions(
-                                    onSend = { handleSendMessage() }
+                                    onSend = { if (isConnected) handleSendMessage() }
                                 ),
                                 trailingIcon = {
                                     Row {
-                                        IconButton(onClick = { /* Handle attachment */ }) {
-                                            Icon(Icons.Default.AccountBox, contentDescription = "Attach")
+                                        IconButton(
+                                            onClick = { /* Handle attachment */ },
+                                            enabled = isConnected
+                                        ) {
+                                            Icon(
+                                                Icons.Default.AccountBox,
+                                                contentDescription = "Attach",
+                                                tint = if (isConnected)
+                                                    MaterialTheme.colors.onSurface
+                                                else
+                                                    MaterialTheme.colors.onSurface.copy(alpha = 0.3f)
+                                            )
                                         }
                                     }
                                 }
@@ -311,9 +406,16 @@ fun MessagesScreen() {
                                 onClick = { handleSendMessage() },
                                 modifier = Modifier.size(48.dp),
                                 shape = CircleShape,
+                                enabled = isConnected && messageText.trim().isNotEmpty(),
                                 colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = MaterialTheme.colors.primary,
-                                    contentColor = MaterialTheme.colors.onPrimary
+                                    backgroundColor = if (isConnected && messageText.trim().isNotEmpty())
+                                        MaterialTheme.colors.primary
+                                    else
+                                        MaterialTheme.colors.onSurface.copy(alpha = 0.12f),
+                                    contentColor = if (isConnected && messageText.trim().isNotEmpty())
+                                        MaterialTheme.colors.onPrimary
+                                    else
+                                        MaterialTheme.colors.onSurface.copy(alpha = 0.3f)
                                 )
                             ) {
                                 Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send")
