@@ -2,17 +2,20 @@ package es.gaspardev.core.infrastructure.apis
 
 import API
 import es.gaspardev.auxliars.Either
-import es.gaspardev.core.domain.entities.User
-import es.gaspardev.utils.SERVER_HTTPS_DIR
+import es.gaspardev.core.domain.entities.users.User
+import es.gaspardev.utils.SERVER_ADRESS
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 
-class UserAPI(override val apiPath: String = SERVER_HTTPS_DIR + User.URLPATH) : API<User>() {
-    override suspend fun post(route: String, body: User): Either<Exception, User> {
+class UserAPI(override val apiPath: String = SERVER_ADRESS + User.URLPATH) : API<User>() {
+    override suspend fun post(segments: List<String>, body: User): Either<Exception, User> {
 
         return try {
-            val response = httpClient.post(route) {
+            val response = httpClient.post(apiPath) {
+                url {
+                    pathSegments = listOf("user") + segments
+                }
                 contentType(ContentType.Application.Json)
                 setBody(body)
             }
@@ -36,13 +39,14 @@ class UserAPI(override val apiPath: String = SERVER_HTTPS_DIR + User.URLPATH) : 
         }
     }
 
-    // TODO: CAMBIAR A USER EN VEZ DE LIST<USER>
-    override suspend fun get(route: String, vararg params: String?): Either<Exception, User> {
-        // Filter non-null parameters and construct the query string
-        val url = buildUrlWithParams(route, params)
-
+    override suspend fun get(segments: List<String>, vararg params: Pair<String, String>): Either<Exception, User> {
         return try {
-            val response = httpClient.get(url)
+            val response = httpClient.delete(apiPath) {
+                url {
+                    pathSegments = listOf("user") + segments
+                    params.forEach { parameters.append(it.first, it.second) }
+                }
+            }
 
             when (response.status) {
                 HttpStatusCode.OK -> {
@@ -62,16 +66,25 @@ class UserAPI(override val apiPath: String = SERVER_HTTPS_DIR + User.URLPATH) : 
         }
     }
 
-    override suspend fun getList(route: String, vararg params: String?): Either<Exception, List<User>> {
+    override suspend fun getList(
+        segments: List<String>,
+        vararg params: Pair<String, String>
+    ): Either<Exception, List<User>> {
         TODO("Not yet implemented")
     }
 
 
-    override suspend fun delete(route: String, vararg params: String?): Either.Failure<Exception>? {
-        val url = buildUrlWithParams(route, params)
-
+    override suspend fun delete(
+        segments: List<String>,
+        vararg params: Pair<String, String>
+    ): Either.Failure<Exception>? {
         return try {
-            val response = httpClient.delete(url)
+            val response = httpClient.delete(apiPath) {
+                url {
+                    pathSegments = listOf("user") + segments
+                    params.forEach { parameters.append(it.first, it.second) }
+                }
+            }
 
             when (response.status) {
                 HttpStatusCode.OK -> {
@@ -91,7 +104,7 @@ class UserAPI(override val apiPath: String = SERVER_HTTPS_DIR + User.URLPATH) : 
         }
     }
 
-    override suspend fun patch(route: String, body: Any): Either.Failure<Exception>? {
+    override suspend fun patch(segments: List<String>, body: User): Either.Failure<Exception>? {
         TODO("Not yet implemented")
     }
 

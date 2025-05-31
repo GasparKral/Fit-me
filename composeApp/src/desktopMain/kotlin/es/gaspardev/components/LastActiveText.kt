@@ -1,8 +1,6 @@
 package es.gaspardev.components
 
 import androidx.compose.foundation.layout.padding
-import kotlinx.datetime.*
-import kotlinx.datetime.format.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -10,6 +8,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import fit_me.composeapp.generated.resources.Res
+import fit_me.composeapp.generated.resources.last_connection
+import kotlinx.datetime.*
+import kotlinx.datetime.format.char
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun LastActiveText(
@@ -22,7 +25,7 @@ fun LastActiveText(
     val formattedTime = lastActive.toLocalDateTime(timeZone).formatDateTime()
 
     Text(
-        text = "Última conexión: $formattedTime",
+        text = "${stringResource(Res.string.last_connection)} $formattedTime",
         style = MaterialTheme.typography.caption,
         color = textColor,
         maxLines = 1,

@@ -19,22 +19,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import es.gaspardev.core.domain.entities.comunication.Session
 import es.gaspardev.icons.FitMeIcons
-import es.gaspardev.pages.CalendarEvent
 import es.gaspardev.pages.getEventTypeColor
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter.ofPattern
+import kotlinx.datetime.*
+
 
 @Composable
 fun WeekView(
-    days: List<LocalDate>,
-    events: List<CalendarEvent>,
-    onEventClick: (CalendarEvent) -> Unit
+    days: List<Instant>,
+    events: List<Session>,
+    onEventClick: (Session) -> Unit
 ) {
+    val timeZone = TimeZone.currentSystemDefault()
+    val today = Clock.System.now().toLocalDateTime(timeZone).date
+
     Row(modifier = Modifier.fillMaxSize()) {
         days.forEach { day ->
-            val isToday = day == LocalDate.now()
-            val dayEvents = events.filter { it.date == day }
+            val dayLocalDate = day.toLocalDateTime(timeZone).date
+            val isToday = dayLocalDate == today
+            val dayEvents = events.filter { event ->
+                event.dateTime.toLocalDateTime(timeZone).date == dayLocalDate
+            }
 
             Column(modifier = Modifier.weight(1f)) {
                 Box(
@@ -51,12 +57,12 @@ fun WeekView(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = day.dayOfWeek.toString().take(3),
+                            text = dayLocalDate.dayOfWeek.name,
                             color = if (isToday) MaterialTheme.colors.onPrimary
                             else MaterialTheme.colors.secondary
                         )
                         Text(
-                            text = day.dayOfMonth.toString(),
+                            text = dayLocalDate.dayOfMonth.toString(),
                             color = if (isToday) MaterialTheme.colors.onPrimary
                             else MaterialTheme.colors.secondary
                         )
@@ -91,7 +97,7 @@ fun WeekView(
                                     .fillMaxWidth()
                                     .padding(4.dp)
                                     .clickable { onEventClick(event) },
-                                backgroundColor = getEventTypeColor(event.type)
+                                backgroundColor = getEventTypeColor(event.sessionType)
 
                             ) {
                                 Column(modifier = Modifier.padding(8.dp)) {
@@ -112,8 +118,11 @@ fun WeekView(
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
-                                            text = "${event.startTime.format(ofPattern("HH:mm"))} - ${
-                                                event.endTime.format(ofPattern("HH:mm"))
+                                            text = "${
+                                                event.dateTime.toLocalDateTime(timeZone).time.toString().substring(0, 5)
+                                            } - ${
+                                                event.dateTime.plus(event.expectedDuration)
+                                                    .toLocalDateTime(timeZone).time.toString().substring(0, 5)
                                             }",
                                             fontSize = 12.sp,
                                             color = Color.White
@@ -131,7 +140,7 @@ fun WeekView(
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
-                                            text = event.athleteName,
+                                            text = event.with,
                                             fontSize = 12.sp,
                                             color = Color.White
                                         )

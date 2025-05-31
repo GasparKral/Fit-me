@@ -6,23 +6,72 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import es.gaspardev.core.Route
+import es.gaspardev.core.Action
 import es.gaspardev.core.RouterState
 import es.gaspardev.icons.FitMeIcons
+import es.gaspardev.layout.DialogState
+import es.gaspardev.layout.dialogs.DietCreationDialog
+import es.gaspardev.layout.dialogs.WorkoutCreationDialog
 import es.gaspardev.pages.Routes
 import es.gaspardev.pages.agregateNewSportman
 import fit_me.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import kotlin.reflect.KFunction
 
+@Immutable
+data class QuickAction(
+    val icon: ImageVector,
+    val labelRes: StringResource,
+    val actionType: Action
+)
+
+// Y también necesitarás actualizar el componente QuickActions:
 @Composable
 fun QuickActions(controller: RouterState) {
+
+    val quickActions = listOf(
+        QuickAction(
+            icon = FitMeIcons.Athlets,
+            labelRes = Res.string.add_athlete_action,
+            actionType = Action.SuspendAction {
+                controller.navigateTo(Routes.Athletes)
+                agregateNewSportman()
+            }
+        ),
+        QuickAction(
+            icon = FitMeIcons.Weight,
+            labelRes = Res.string.create_workout,
+            actionType = Action.SimpleAction {
+                controller.navigateTo(Routes.Workouts)
+                DialogState.openWith { WorkoutCreationDialog { } }
+            }
+        ),
+        QuickAction(
+            icon = FitMeIcons.Nutrition,
+            labelRes = Res.string.create_diet,
+            actionType = Action.SuspendAction {
+                controller.navigateTo(Routes.Nutrition)
+                DialogState.openWith { DietCreationDialog { } }
+            }
+        ),
+        QuickAction(
+            icon = FitMeIcons.Calendar,
+            labelRes = Res.string.schedule_session,
+            actionType = Action.SuspendAction { agregateNewSportman() }
+        ),
+        QuickAction(
+            icon = FitMeIcons.Messages,
+            labelRes = Res.string.send_message,
+            actionType = Action.SuspendAction { agregateNewSportman() }
+        )
+    )
+
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -55,10 +104,7 @@ fun QuickActions(controller: RouterState) {
                 items(quickActions) { action ->
                     Button(
                         onClick = {
-                            if (action.route != null) controller.navigateToWithAction(
-                                action.route,
-                                action.action
-                            ) else action.action.call()
+                            controller.executeAction(action.actionType)
                         }
                     ) {
                         Column(
@@ -86,42 +132,4 @@ fun QuickActions(controller: RouterState) {
     }
 }
 
-data class QuickAction(
-    val route: Route?,
-    val icon: ImageVector,
-    val labelRes: StringResource,
-    val action: KFunction<Unit>
-)
 
-val quickActions = listOf(
-    QuickAction(
-        route = Routes.Athletes,
-        icon = FitMeIcons.Athlets,
-        labelRes = Res.string.add_athlete_action,
-        action = ::agregateNewSportman
-    ),
-    QuickAction(
-        route = Routes.Workouts,
-        icon = FitMeIcons.Weight,
-        labelRes = Res.string.create_workout,
-        action = es.gaspardev.layout.DialogState::open
-    ),
-    QuickAction(
-        route = Routes.Nutrition,
-        icon = FitMeIcons.Nutrition,
-        labelRes = Res.string.create_diet,
-        action = ::agregateNewSportman
-    ),
-    QuickAction(
-        route = Routes.Calendar,
-        icon = FitMeIcons.Calendar,
-        labelRes = Res.string.schedule_session,
-        action = ::agregateNewSportman
-    ),
-    QuickAction(
-        route = Routes.Messages,
-        icon = FitMeIcons.Messages,
-        labelRes = Res.string.send_message,
-        action = ::agregateNewSportman
-    )
-)

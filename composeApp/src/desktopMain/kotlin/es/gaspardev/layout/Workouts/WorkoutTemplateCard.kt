@@ -1,10 +1,8 @@
 package es.gaspardev.layout.workouts
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -12,8 +10,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import es.gaspardev.components.AssistChip
 import es.gaspardev.components.DifficultyBadge
+import es.gaspardev.core.domain.entities.workouts.WorkoutTemplate
 import es.gaspardev.icons.FitMeIcons
-import es.gaspardev.pages.WorkoutTemplate
+import es.gaspardev.layout.DialogState
+import es.gaspardev.layout.dialogs.WorkoutCreationDialog
 
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -44,7 +44,7 @@ fun WorkoutTemplateCard(template: WorkoutTemplate) {
             }
 
             Spacer(Modifier.height(16.dp))
-            DifficultyBadge(template.difficulty)
+            DifficultyBadge(template.difficulty.toString())
             // Badges row
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -52,7 +52,7 @@ fun WorkoutTemplateCard(template: WorkoutTemplate) {
             ) {
                 AssistChip(
                     onClick = {},
-                    label = { Text(template.type) },
+                    label = { Text(template.workoutType.toString()) },
                     leadingIcon = {
                         Icon(
                             FitMeIcons.Weight,
@@ -79,7 +79,7 @@ fun WorkoutTemplateCard(template: WorkoutTemplate) {
             Spacer(Modifier.height(12.dp))
 
             Button(
-                onClick = { /* Use template action */ },
+                onClick = { DialogState.openWith { WorkoutCreationDialog(template, {}) } },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Use Template")

@@ -2,22 +2,26 @@ package es.gaspardev.core.infrastructure.apis
 
 import API
 import es.gaspardev.auxliars.Either
-import es.gaspardev.core.domain.entities.Trainer
-import es.gaspardev.utils.SERVER_HTTPS_DIR
+import es.gaspardev.core.domain.entities.users.Trainer
+import es.gaspardev.utils.SERVER_ADRESS
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 
-class TrainerAPI(override val apiPath: String = SERVER_HTTPS_DIR + Trainer.URLPATH) : API<Trainer>() {
-    override suspend fun post(route: String, body: Trainer): Either<Exception, Trainer> {
+class TrainerAPI(override val apiPath: String = SERVER_ADRESS + Trainer.URLPATH) : API<Trainer>() {
+    override suspend fun post(segments: List<String>, body: Trainer): Either<Exception, Trainer> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun get(route: String, vararg params: String?): Either<Exception, Trainer> {
-        val url: String = buildUrlWithParams(route, params)
+    override suspend fun get(segments: List<String>, vararg params: Pair<String, String>): Either<Exception, Trainer> {
         return try {
-            val response = httpClient.get(url)
+            val response = httpClient.get(apiPath) {
+                url {
+                    pathSegments = Trainer.URLPATH.split("/").filter { it.isNotEmpty() } + segments
+                    params.forEach { parameters.append(it.first, it.second) }
+                }
+            }
 
             when (response.status) {
                 HttpStatusCode.OK -> {
@@ -38,13 +42,16 @@ class TrainerAPI(override val apiPath: String = SERVER_HTTPS_DIR + Trainer.URLPA
     }
 
     suspend inline fun <reified T : Any> getSingleValue(
-        route: String,
-        vararg params: String?
+        fragment: List<String>,
+        vararg params: Pair<String, String>
     ): Either<Exception, T> {
-        val url: String = `access$buildUrlWithParams`(route, params)
-
         return try {
-            val response = `access$httpClient`.get(url)
+            val response = `access$httpClient`.get(`access$apiPath`) {
+                url {
+                    pathSegments = Trainer.URLPATH.split("/").filter { it.isNotEmpty() } + fragment
+                    params.forEach { parameters.append(it.first, it.second) }
+                }
+            }
             when (response.status) {
                 HttpStatusCode.OK -> {
                     Either.Success(response.body())
@@ -63,17 +70,55 @@ class TrainerAPI(override val apiPath: String = SERVER_HTTPS_DIR + Trainer.URLPA
         }
     }
 
-    override suspend fun getList(route: String, vararg params: String?): Either<Exception, List<Trainer>> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun delete(route: String, vararg params: String?): Either.Failure<Exception>? {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun patch(route: String, body: Any): Either.Failure<Exception>? {
+    suspend inline fun <reified T : Any> getGenericList(
+        fragment: List<String>,
+        vararg params: Pair<String, String>
+    ): Either<Exception, List<T>> {
         return try {
-            val response = httpClient.patch("$apiPath/$route") {
+            val response = `access$httpClient`.get(`access$apiPath`) {
+                url {
+                    pathSegments = Trainer.URLPATH.split("/").filter { it.isNotEmpty() } + fragment
+                    params.forEach { parameters.append(it.first, it.second) }
+                }
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    Either.Success(response.body())
+                }
+
+                HttpStatusCode.RequestTimeout -> {
+                    Either.Failure(Exception("Fallo en la conexión"))
+                }
+
+                else -> {
+                    Either.Failure(Exception("Unexpected status code: ${response.status}"))
+                }
+            }
+        } catch (e: Exception) {
+            Either.Failure(e)
+        }
+    }
+
+    override suspend fun getList(
+        segments: List<String>,
+        vararg params: Pair<String, String>
+    ): Either<Exception, List<Trainer>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun delete(
+        segments: List<String>,
+        vararg params: Pair<String, String>
+    ): Either.Failure<Exception>? {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun patch(segments: List<String>, body: Trainer): Either.Failure<Exception>? {
+        return try {
+            val response = httpClient.patch(apiPath) {
+                url {
+                    pathSegments = Trainer.URLPATH.split("/").filter { it.isNotEmpty() } + segments
+                }
                 contentType(ContentType.Application.Json)
                 setBody(body)
             }

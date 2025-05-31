@@ -11,7 +11,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import es.gaspardev.pages.Session
+import es.gaspardev.core.domain.entities.comunication.Session
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 @Composable
 fun SessionItem(session: Session) {
@@ -29,7 +31,7 @@ fun SessionItem(session: Session) {
         ) {
             Column {
                 Text(
-                    text = session.name,
+                    text = session.title,
                     style = MaterialTheme.typography.body1,
                     fontWeight = FontWeight.Medium
                 )
@@ -39,7 +41,7 @@ fun SessionItem(session: Session) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = session.date,
+                        text = session.dateTime.toLocalDateTime(TimeZone.currentSystemDefault()).date.toString(),
                         style = MaterialTheme.typography.body2,
                         color = MaterialTheme.colors.onSurface
                     )
@@ -51,7 +53,7 @@ fun SessionItem(session: Session) {
                     )
 
                     Text(
-                        text = session.time,
+                        text = session.dateTime.toLocalDateTime(TimeZone.currentSystemDefault()).time.toString(),
                         style = MaterialTheme.typography.body2,
                         color = MaterialTheme.colors.onSurface
                     )
@@ -63,7 +65,7 @@ fun SessionItem(session: Session) {
                     )
 
                     Text(
-                        text = session.duration,
+                        text = session.expectedDuration.toIsoString(),
                         style = MaterialTheme.typography.body2,
                         color = MaterialTheme.colors.onSurface
                     )
@@ -75,7 +77,7 @@ fun SessionItem(session: Session) {
                 color = MaterialTheme.colors.surface
             ) {
                 Text(
-                    text = session.type.replaceFirstChar { it.uppercase() },
+                    text = session.sessionType.name,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                     style = MaterialTheme.typography.subtitle1
                 )

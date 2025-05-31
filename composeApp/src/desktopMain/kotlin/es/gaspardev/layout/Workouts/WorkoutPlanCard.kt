@@ -1,10 +1,8 @@
 package es.gaspardev.layout.workouts
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.*
@@ -17,8 +15,8 @@ import androidx.compose.ui.unit.dp
 import es.gaspardev.components.AssistChip
 import es.gaspardev.components.DifficultyBadge
 import es.gaspardev.components.DropdownMenuButton
+import es.gaspardev.core.domain.entities.workouts.WorkoutPlan
 import es.gaspardev.icons.FitMeIcons
-import es.gaspardev.pages.WorkoutPlan
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -69,7 +67,7 @@ fun WorkoutPlanCard(plan: WorkoutPlan) {
             }
 
             Spacer(Modifier.height(16.dp))
-            DifficultyBadge(plan.difficulty)
+            DifficultyBadge(plan.difficulty.toString())
             // Badges row
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -77,7 +75,7 @@ fun WorkoutPlanCard(plan: WorkoutPlan) {
             ) {
                 AssistChip(
                     onClick = {},
-                    label = { Text(plan.type) },
+                    label = { Text(plan.type.toString()) },
                     leadingIcon = {
                         Icon(
                             FitMeIcons.Weight,
@@ -121,11 +119,6 @@ fun WorkoutPlanCard(plan: WorkoutPlan) {
             ) {
                 Text(
                     text = "${plan.exercises} exercises",
-                    style = MaterialTheme.typography.body2,
-                    color = MaterialTheme.colors.onSurface
-                )
-                Text(
-                    text = "Updated ${plan.lastUpdated}",
                     style = MaterialTheme.typography.body2,
                     color = MaterialTheme.colors.onSurface
                 )

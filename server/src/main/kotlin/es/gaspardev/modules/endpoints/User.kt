@@ -1,8 +1,8 @@
 package es.gaspardev.modules.endpoints
 
-import es.gaspardev.core.domain.entities.User
-import es.gaspardev.db.RegistKeyTable
-import es.gaspardev.db.TrainersTable
+import es.gaspardev.core.domain.entities.users.User
+import es.gaspardev.database.RegistKeyTable
+import es.gaspardev.database.Trainers
 import es.gaspardev.utils.encrypt
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -17,15 +17,15 @@ fun Application.user() {
         get(User.URLPATH + "/key_gen") {
             val trainerID = call.request.queryParameters["trainer_id"]
             if (trainerID != null) {
-                val key = encrypt(trainerID + Clock.System.now().toString())
+                val keyValue = encrypt(trainerID + Clock.System.now().toString())
                 suspendTransaction {
                     RegistKeyTable.insert {
-                        it[RegistKeyTable.key] = key
+                        it[key] = keyValue
                         it[trainer] =
-                            TrainersTable.select(TrainersTable.id).where(TrainersTable.userId eq trainerID.toInt())
+                            Trainers.select(Trainers.id).where(Trainers.id eq trainerID.toInt())
                     }
                 }
-                call.respond(key)
+                call.respond(keyValue)
             } else {
                 call.respondText("Parámetros requeridos faltantes", status = HttpStatusCode.BadRequest)
             }

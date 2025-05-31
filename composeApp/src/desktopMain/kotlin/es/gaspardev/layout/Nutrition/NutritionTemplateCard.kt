@@ -8,13 +8,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import es.gaspardev.components.DifficultyBadge
+import es.gaspardev.core.domain.entities.diets.DietTemplate
 import es.gaspardev.icons.FitMeIcons
-import es.gaspardev.pages.NutritionTemplate
+import es.gaspardev.layout.DialogState
+import es.gaspardev.layout.dialogs.DietCreationDialog
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun NutritionTemplateCard(
-    template: NutritionTemplate,
+    template: DietTemplate,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -41,18 +43,17 @@ fun NutritionTemplateCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                PlanBadge(icon = FitMeIcons.Nutrition, text = template.type)
-                DifficultyBadge(template.difficulty)
+                PlanBadge(icon = FitMeIcons.Nutrition, text = template.dietType.toString())
             }
 
             Text(
-                text = "${template.recipes} recipes",
+                text = "${template.dishes.values.size} dishes",
                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier.padding(top = 16.dp)
             )
 
             Button(
-                onClick = {},
+                onClick = { DialogState.openWith { DietCreationDialog(template) { } } },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp),

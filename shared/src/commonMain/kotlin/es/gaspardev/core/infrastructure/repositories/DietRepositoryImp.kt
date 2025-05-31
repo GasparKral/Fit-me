@@ -1,0 +1,47 @@
+package es.gaspardev.core.infrastructure.repositories
+
+import es.gaspardev.auxliars.Either
+import es.gaspardev.core.domain.entities.diets.CompletionDietStatistics
+import es.gaspardev.core.domain.entities.diets.Diet
+import es.gaspardev.core.domain.entities.diets.DietPlan
+import es.gaspardev.core.domain.entities.diets.DietTemplate
+import es.gaspardev.core.domain.entities.users.Athlete
+import es.gaspardev.core.domain.entities.users.Trainer
+import es.gaspardev.interfaces.repositories.DietRepository
+
+class DietRepositoryImp : DietRepository {
+    override suspend fun getDiets(trainer: Trainer): Either<Exception, List<Diet>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getDietsPlans(trainer: Trainer): Either<Exception, List<DietPlan>> {
+        return DietRepository.API.getGenericList<DietPlan>(
+            listOf("plans"),
+            params = arrayOf(Pair("trainer_id", trainer.user.id.toString()))
+        )
+    }
+
+    override suspend fun getDietsTemplates(trainer: Trainer): Either<Exception, List<DietTemplate>> {
+        return DietRepository.API.getGenericList<DietTemplate>(
+            listOf("templates"),
+            params = arrayOf(Pair("trainer_id", trainer.user.id.toString()))
+        )
+    }
+
+    override suspend fun getDietsHistory(athlete: Athlete): Either<Exception, List<CompletionDietStatistics>> {
+        return DietRepository.API.getGenericList<CompletionDietStatistics>(
+            listOf("data", "history"),
+            params = arrayOf(Pair("trainer_id", athlete.user.id.toString()))
+        )
+    }
+
+    override suspend fun createDiet(diet: Diet, trainer: Trainer): Either<Exception, Boolean> {
+        val result = DietRepository.API.post(
+            listOf("create"),
+            Pair(diet, trainer)
+        )
+
+        return if (result.isFailure) Either.Failure(result.getError()!!) else Either.Success(true)
+    }
+
+}

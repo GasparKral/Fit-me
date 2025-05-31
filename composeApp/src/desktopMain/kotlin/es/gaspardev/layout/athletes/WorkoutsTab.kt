@@ -12,12 +12,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import es.gaspardev.core.domain.entities.workouts.Workout
 import es.gaspardev.icons.FitMeIcons
-import es.gaspardev.pages.Workout2
 
 
 @Composable
-fun WorkoutsTab(workoutHistory: List<Workout2>) {
+fun WorkoutsTab(workoutHistory: List<Workout>) {
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier.fillMaxWidth(),

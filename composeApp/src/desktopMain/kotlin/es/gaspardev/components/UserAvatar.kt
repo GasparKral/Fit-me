@@ -12,9 +12,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import es.gaspardev.core.domain.entities.User
+import es.gaspardev.core.domain.entities.users.User
+import fit_me.composeapp.generated.resources.Res
+import fit_me.composeapp.generated.resources.avatar_of
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
+import org.jetbrains.compose.resources.stringResource
 
 enum class LayoutDirection {
     Horizontal, Vertical
@@ -109,11 +112,11 @@ private fun AvatarContent(user: User) {
             .background(MaterialTheme.colors.primary.copy(alpha = 0.1f)),
         contentAlignment = Alignment.Center
     ) {
-        user.userImage?.let { image ->
+        user.userImageURL?.let { image ->
             @Suppress("DEPRECATION")
             KamelImage(
-                resource = asyncPainterResource(image.src),
-                contentDescription = "Avatar of ${user.name}",
+                resource = asyncPainterResource(image),
+                contentDescription = stringResource(Res.string.avatar_of, user.fullname),
                 modifier = Modifier.size(200.dp),
                 contentScale = ContentScale.Fit,
                 onLoading = {
@@ -153,7 +156,7 @@ private fun TextContent(
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = user.name,
+                text = user.fullname,
                 style = MaterialTheme.typography.subtitle1,
                 fontWeight = FontWeight.Medium
             )

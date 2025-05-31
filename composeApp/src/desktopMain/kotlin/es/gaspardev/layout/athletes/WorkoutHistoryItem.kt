@@ -10,12 +10,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import es.gaspardev.core.domain.entities.workouts.Workout
 import es.gaspardev.icons.FitMeIcons
-import es.gaspardev.pages.Workout2
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 
 @Composable
-fun WorkoutHistoryItem(workout: Workout2) {
+fun WorkoutHistoryItem(workout: Workout) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colors.surface
@@ -47,7 +49,7 @@ fun WorkoutHistoryItem(workout: Workout2) {
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = workout.date,
+                            text = workout.startAt.toLocalDateTime(TimeZone.currentSystemDefault()).date.toString(),
                             style = MaterialTheme.typography.body2,
                             color = MaterialTheme.colors.onSurface
                         )
@@ -62,7 +64,7 @@ fun WorkoutHistoryItem(workout: Workout2) {
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = workout.duration,
+                            text = workout.duration.toIsoString(),
                             style = MaterialTheme.typography.body2,
                             color = MaterialTheme.colors.onSurface
                         )
@@ -73,7 +75,7 @@ fun WorkoutHistoryItem(workout: Workout2) {
                         color = MaterialTheme.colors.surface
                     ) {
                         Text(
-                            text = workout.type.replaceFirstChar { it.uppercase() },
+                            text = workout.workoutType.name,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                             style = MaterialTheme.typography.subtitle2
                         )
@@ -91,14 +93,14 @@ fun WorkoutHistoryItem(workout: Workout2) {
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         LinearProgressIndicator(
-                            progress = workout.performance / 100f,
+                            progress = workout.getWorkoutProgression().toFloat() / 100f,
                             modifier = Modifier.width(100.dp)
                         )
 
                         Spacer(modifier = Modifier.width(8.dp))
 
                         Text(
-                            text = "${workout.performance}%",
+                            text = "${workout.getWorkoutProgression()}%",
                             style = MaterialTheme.typography.body2,
                             fontWeight = FontWeight.Medium
                         )

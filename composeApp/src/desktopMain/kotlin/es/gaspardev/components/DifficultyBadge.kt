@@ -4,9 +4,20 @@ import androidx.compose.material.Badge
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import fit_me.composeapp.generated.resources.Res
+import fit_me.composeapp.generated.resources.difficulty_advanced_label
+import fit_me.composeapp.generated.resources.difficulty_beginner_label
+import fit_me.composeapp.generated.resources.difficulty_intermediate_label
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun DifficultyBadge(difficulty: String) {
+    val difficultyText = when (difficulty) {
+        "beginner" -> stringResource(Res.string.difficulty_beginner_label)
+        "intermediate" -> stringResource(Res.string.difficulty_intermediate_label)
+        "advanced" -> stringResource(Res.string.difficulty_advanced_label)
+        else -> difficulty.replaceFirstChar { it.uppercase() }
+    }
 
     Badge(
         backgroundColor = when (difficulty) {
@@ -22,6 +33,6 @@ fun DifficultyBadge(difficulty: String) {
             else -> Color(0xFF424242)
         }
     ) {
-        Text(difficulty.replaceFirstChar { it.uppercase() })
+        Text(difficultyText)
     }
 }

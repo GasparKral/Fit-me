@@ -14,15 +14,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.gaspardev.layout.statistics.StatCard
 import es.gaspardev.layout.statistics.StatisticCard
+import es.gaspardev.states.LoggedTrainer
 
 
 @Composable
 fun StatisticsScreen() {
-    var selectedAthlete by remember { mutableStateOf(sampleAthletes[0].id) }
+    val selectedAthlete by remember { mutableStateOf(LoggedTrainer.state.athletes?.first()!!) }
     var timeRange by remember { mutableStateOf("6months") }
     var activeTab by remember { mutableStateOf("strength") }
 
-    val athlete = sampleAthletes.find { it.id == selectedAthlete } ?: sampleAthletes[0]
+    val athlete = LoggedTrainer.state.athletes?.find { it == selectedAthlete } ?: LoggedTrainer.state.athletes?.first()
 
     LazyColumn(
         modifier = Modifier
@@ -70,7 +71,7 @@ fun StatisticsScreen() {
                 var expanded by remember { mutableStateOf(false) }
                 Box(modifier = Modifier.weight(1f)) {
                     OutlinedTextField(
-                        value = athlete.name,
+                        value = athlete!!.user.fullname,
                         onValueChange = {},
                         readOnly = true,
                         modifier = Modifier.fillMaxWidth(),

@@ -6,10 +6,6 @@
 -- Crear esquema fit_me si no existe
 CREATE SCHEMA IF NOT EXISTS fit_me;
 
--- Crear extensiones necesarias
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-
 -- Configurar permisos del esquema
 GRANT USAGE ON SCHEMA fit_me TO PUBLIC;
 GRANT CREATE ON SCHEMA fit_me TO PUBLIC;

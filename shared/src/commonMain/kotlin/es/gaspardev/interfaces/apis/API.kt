@@ -21,7 +21,7 @@ abstract class API<ApiType> where ApiType : Any {
     protected fun buildUrlWithParams(route: String, params: Array<out String?>): String {
         val queryString = params.filterNotNull().joinToString("&") { it }
         return if (queryString.isNotEmpty()) {
-            if (route.contains("?")) "$route&$queryString" else "$route?$queryString"
+            if (route.contains("?")) "$apiPath&$queryString" else "$apiPath?$queryString"
         } else {
             route
         }
@@ -33,15 +33,27 @@ abstract class API<ApiType> where ApiType : Any {
     }
 
     abstract suspend fun post(
-        route: String = apiPath,
-        body: ApiType
+        segments: List<String> = listOf(),
+        body: Any
     ): Either<Exception, ApiType>
 
-    abstract suspend fun get(route: String = apiPath, vararg params: String?): Either<Exception, ApiType>
+    abstract suspend fun get(
+        segments: List<String> = listOf(),
+        vararg params: Pair<String, String>
+    ): Either<Exception, ApiType>
 
-    abstract suspend fun getList(route: String = apiPath, vararg params: String?): Either<Exception, List<ApiType>>
+    abstract suspend fun getList(
+        segments: List<String> = listOf(),
+        vararg params: Pair<String, String>
+    ): Either<Exception, List<ApiType>>
 
-    abstract suspend fun delete(route: String = apiPath, vararg params: String?): Either.Failure<Exception>?
+    abstract suspend fun delete(
+        segments: List<String> = listOf(),
+        vararg params: Pair<String, String>
+    ): Either.Failure<Exception>?
 
-    abstract suspend fun patch(route: String = apiPath, body: Any): Either.Failure<Exception>?
+    abstract suspend fun patch(
+        segments: List<String> = listOf(),
+        body: Any
+    ): Either.Failure<Exception>?
 }

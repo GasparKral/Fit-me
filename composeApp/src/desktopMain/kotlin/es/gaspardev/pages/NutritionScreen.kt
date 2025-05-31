@@ -19,82 +19,69 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import es.gaspardev.core.LocalRouter
+import es.gaspardev.core.domain.entities.diets.DietPlan
+import es.gaspardev.core.domain.entities.diets.DietTemplate
+import es.gaspardev.core.domain.usecases.read.GetTrainerDietsPlans
+import es.gaspardev.core.domain.usecases.read.GetTrainerDietsTemplates
+import es.gaspardev.enums.DietType
 import es.gaspardev.icons.FitMeIcons
+import es.gaspardev.layout.DialogState
+import es.gaspardev.layout.dialogs.DietCreationDialog
 import es.gaspardev.layout.nutrition.NutritionPlanCard
 import es.gaspardev.layout.nutrition.NutritionTemplateCard
+import es.gaspardev.states.LoggedTrainer
 import fit_me.composeapp.generated.resources.Res
+import fit_me.composeapp.generated.resources.all
 import fit_me.composeapp.generated.resources.filters
 import org.jetbrains.compose.resources.stringResource
-
-// Data classes
-data class NutritionPlan(
-   val id: String,
-   val name: String,
-   val description: String,
-   val type: String,
-   val duration: String,
-   val mealsPerDay: Int,
-   val caloriesPerDay: Int,
-   val difficulty: String,
-   val assignedCount: Int,
-   val lastUpdated: String,
-   val recipes: Int
-)
-
-data class NutritionTemplate(
-   val id: String,
-   val name: String,
-   val description: String,
-   val type: String,
-   val difficulty: String,
-   val recipes: Int
-)
 
 @Composable
 fun NutritionScreen() {
 
    val controller = LocalRouter.current
+   val tabs = listOf(
+      DietType.ALL to stringResource(Res.string.all),
+      DietType.BALANCED to "Balanceado",
+      DietType.LOW_CARB to "Bajos Carbohidratos",
+      DietType.MUSCLE_GAIN to "Ganancia Muscular",
+      DietType.PERFORMANCE to "Rendimiento",
+      DietType.VEGAN to "Vegano",
+      DietType.VEGETARIAN to "Vegeratiano",
+      DietType.WEIGHT_LOSS to "Perdida de Peso"
+   )
 
    val scrollState = rememberScrollState()
    var searchQuery by remember { mutableStateOf("") }
-   var activeTab by remember { mutableStateOf("all") }
+   var activeTab by remember { mutableStateOf(DietType.ALL) }
    var isModalOpen by remember { mutableStateOf(false) }
 
-   // Sample data
-   val nutritionPlans = listOf(
-      NutritionPlan(
-         id = "1",
-         name = "Weight Loss Meal Plan",
-         description = "Calorie-controlled meal plan designed for sustainable weight loss",
-         type = "weight-loss",
-         duration = "12 weeks",
-         mealsPerDay = 5,
-         caloriesPerDay = 1800,
-         difficulty = "intermediate",
-         assignedCount = 10,
-         lastUpdated = "3 days ago",
-         recipes = 35
-      ),
-      // Add other plans...
-   )
 
-   val nutritionTemplates = listOf(
-      NutritionTemplate(
-         id = "t1",
-         name = "Mediterranean Diet",
-         description = "Heart-healthy eating plan based on Mediterranean cuisine",
-         type = "balanced",
-         difficulty = "beginner",
-         recipes = 18
-      ),
-      // Add other templates...
-   )
+   var nutritionPlans: List<DietPlan> = listOf()
+   var nutritionTemplates: List<DietTemplate> = listOf()
+
+   LaunchedEffect(Unit) {
+      val trainer = LoggedTrainer.state.trainer!!
+
+      GetTrainerDietsPlans().run(trainer).fold(
+         { value -> nutritionPlans = value },
+         { _ -> }
+      )
+
+      GetTrainerDietsTemplates().run(trainer).fold(
+         { value -> nutritionTemplates = value },
+         { _ -> }
+      )
+   }
 
    val filteredPlans = nutritionPlans.filter { plan ->
-      val matchesSearch =
-         plan.name.contains(searchQuery, ignoreCase = true) &&
-                 (activeTab == "all" || plan.type.equals(activeTab, ignoreCase = true))
-      if (activeTab == "all") matchesSearch else matchesSearch && plan.type == activeTab
+      val matchesSearch = plan.name.contains(searchQuery, ignoreCase = true) ||
+              plan.description.contains(searchQuery, ignoreCase = true)
+
+      if (activeTab == DietType.ALL) {
+         matchesSearch
+      } else {
+         matchesSearch && plan.type == activeTab
+      }
    }
 
    Column(
@@ -113,7 +100,7 @@ fun NutritionScreen() {
             ) {
                Column {
                   Text(
-                     text = "Nutrition Plans",
+                     text = "Diets Plans",
                      style = MaterialTheme.typography.subtitle1,
                      fontWeight = FontWeight.Bold
                   )
@@ -122,7 +109,9 @@ fun NutritionScreen() {
                      style = MaterialTheme.typography.body1
                   )
                }
-               Button(onClick = { isModalOpen = true }) {
+               Button(onClick = {
+                  DialogState.openWith { DietCreationDialog { } }
+               }) {
                   Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
                   Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                   Text("Create Nutrition Plan")
@@ -157,20 +146,17 @@ fun NutritionScreen() {
       }
       Spacer(Modifier.height(12.dp))
 
-      Card {
+      Card(Modifier.fillMaxSize()) {
          Column {
-            // Tabs
-            val tabs = listOf("All", "Weight Loss", "Muscle Gain", "Maintenance")
             ScrollableTabRow(
-               selectedTabIndex = tabs.indexOfFirst { it.equals(activeTab, ignoreCase = true) },
-               edgePadding = 0.dp,
-               modifier = Modifier.fillMaxWidth()
+               selectedTabIndex = tabs.indexOfFirst { it.first == activeTab }.takeIf { it >= 0 } ?: 0,
+               edgePadding = 0.dp
             ) {
-               tabs.forEachIndexed { index, tab ->
+               tabs.forEachIndexed { _, (workoutType, title) ->
                   Tab(
-                     selected = tab.equals(activeTab, ignoreCase = true),
-                     onClick = { activeTab = tab.lowercase() },
-                     text = { Text(tab) }
+                     selected = activeTab == workoutType,
+                     onClick = { activeTab = workoutType },
+                     text = { Text(title) }
                   )
                }
             }
@@ -192,8 +178,8 @@ fun NutritionScreen() {
                      tint = Color.LightGray
                   )
                   Spacer(modifier = Modifier.height(16.dp))
-                  Text("No plans found", style = MaterialTheme.typography.subtitle1)
-                  Text("Try adjusting your search or filters.", style = MaterialTheme.typography.body2)
+                  Text("No workout plans found", style = MaterialTheme.typography.subtitle1)
+                  Text("Try a different search term", style = MaterialTheme.typography.body2)
                }
             } else {
                LazyVerticalGrid(
