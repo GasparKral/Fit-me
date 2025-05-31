@@ -2,70 +2,72 @@ package es.gaspardev.core.infrastructure.repositories
 
 import es.gaspardev.auxliars.Either
 import es.gaspardev.core.domain.dtos.DashboardChartInfo
-import es.gaspardev.core.domain.dtos.LoginUserInfo
+import es.gaspardev.core.domain.dtos.LoginCredentials
 import es.gaspardev.core.domain.dtos.RegisterTrainerData
-import es.gaspardev.core.domain.dtos.TrainerPatchDTO
-import es.gaspardev.core.domain.entities.Trainer
+import es.gaspardev.core.domain.entities.users.Athlete
+import es.gaspardev.core.domain.entities.users.Trainer
 import es.gaspardev.interfaces.repositories.TrainerRepository
 
 class TrainerRepositoryImp : TrainerRepository {
-    private suspend fun getIntValueForTrainer(endpoint: String, trainer: Trainer): Int {
+    private suspend fun getIntValueForTrainer(fragment: List<String>, trainer: Trainer): Int {
         var result = 0
         TrainerRepository.API.getSingleValue<Int>(
-            endpoint,
-            params = arrayOf("trainer_id=" + trainer.user.id)
+            fragment,
+            params = arrayOf(Pair("trainer_id", trainer.user.id.toString()))
         ).fold(
             { value -> result = value },
-            { /* en caso de error, result sigue siendo 0 */ }
+            { _ -> }
         )
         return result
     }
 
     override suspend fun getPendingWorkouts(trainer: Trainer): Int {
-        return getIntValueForTrainer("/pending", trainer)
+        return getIntValueForTrainer(listOf("data", "pending"), trainer)
     }
 
     override suspend fun getActivePlans(trainer: Trainer): Int {
-        return getIntValueForTrainer("/data/plans", trainer)
+        return getIntValueForTrainer(listOf("data", "plans"), trainer)
     }
 
     override suspend fun getUpCommingSessions(trainer: Trainer): Int {
-        return getIntValueForTrainer("/data/session", trainer)
+        return getIntValueForTrainer(listOf("data", "session"), trainer)
     }
 
     override suspend fun getUnreadMessages(trainer: Trainer): Int {
-        return getIntValueForTrainer("/data/messages", trainer)
+        return getIntValueForTrainer(listOf("data", "messages"), trainer)
     }
 
-    override suspend fun getNewSposrtsman(trainer: Trainer): Int {
-        return getIntValueForTrainer("/data/new_athletes", trainer)
+    override suspend fun getNewAthlete(trainer: Trainer): Int {
+        return getIntValueForTrainer(listOf("data", "new_athletes"), trainer)
     }
 
     override suspend fun getNewActivePlans(trainer: Trainer): Int {
-        return getIntValueForTrainer("/data/new_active_plans", trainer)
+        return getIntValueForTrainer(listOf("data", "new_active_plans"), trainer)
     }
 
     override suspend fun getNewMessages(trainer: Trainer): Int {
-        return getIntValueForTrainer("/data/new_messages", trainer)
+        return getIntValueForTrainer(listOf("data", "new_messages"), trainer)
     }
 
     override suspend fun getDashboardChartData(trainer: Trainer): DashboardChartInfo {
         var returnValue = DashboardChartInfo()
 
         TrainerRepository.API.getSingleValue<DashboardChartInfo>(
-            "/data/dashboardChartInfo",
-            params = arrayOf("trainer_id=" + trainer.user.id)
+            listOf("data", "dashboardChartInfo"),
+            params = arrayOf(
+                Pair("trainer_id", trainer.user.id.toString())
+            )
         ).fold(
             { value -> returnValue = value },
-            { err -> throw err }
+            { _ -> }
         )
         return returnValue
     }
 
     override suspend fun generateRegistrationKey(trainer: Trainer): Either<Exception, String> {
         return TrainerRepository.API.getSingleValue<String>(
-            "key_gen",
-            params = arrayOf("trainer_id=" + trainer.user.id)
+            listOf("key_gen"),
+            params = arrayOf(Pair("trainer_id", trainer.user.id.toString()))
         )
     }
 
@@ -73,23 +75,23 @@ class TrainerRepositoryImp : TrainerRepository {
         TODO("Not yet implemented")
     }
 
-
-    override suspend fun updateTrainerInfo(info: TrainerPatchDTO): Either<Exception, Trainer> {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun deleteAccount(trainer: Trainer): Either.Failure<Exception>? {
         TODO("Not yet implemented")
     }
 
-    override suspend fun logIn(expectedUser: LoginUserInfo): Either<Exception, Trainer> {
-        return TrainerRepository.API.get(
+    override suspend fun logIn(expectedUser: LoginCredentials): Either<Exception, Pair<Trainer, List<Athlete>>> {
+        var result: Pair<Trainer, List<Athlete>>? = null
+
+        TrainerRepository.API.getSingleValue<Pair<Trainer, List<Athlete>>>(
+            listOf(),
             params = arrayOf(
-                "userIdentification=" + expectedUser.userIdetification,
-                "userPassword=" + expectedUser.userPassword
+                Pair("userIdentification", expectedUser.userIdetification),
+                Pair("userPassword", expectedUser.userPassword)
             )
+        ).fold(
+            { value -> result = value },
+            { err -> return Either.Failure(err) }
         )
+        return Either.Success(result!!)
     }
-
-
 }
