@@ -15,16 +15,37 @@ import androidx.compose.ui.unit.dp
 import es.gaspardev.components.AssistChip
 import es.gaspardev.components.DifficultyBadge
 import es.gaspardev.components.DropdownMenuButton
+import es.gaspardev.components.ToastManager
+import es.gaspardev.core.domain.entities.workouts.Workout
 import es.gaspardev.core.domain.entities.workouts.WorkoutPlan
+import es.gaspardev.core.domain.usecases.create.CreateNewWorkout
+import es.gaspardev.core.domain.usecases.delete.DeleteWorkout
+import es.gaspardev.core.domain.usecases.update.UpdateWorkout
+import es.gaspardev.enums.OpeningMode
 import es.gaspardev.icons.FitMeIcons
+import es.gaspardev.layout.DialogState
+import es.gaspardev.layout.dialogs.AsignDialog
+import es.gaspardev.layout.dialogs.WorkoutDialog
+import es.gaspardev.states.LoggedTrainer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
+import kotlin.time.Duration
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun WorkoutPlanCard(plan: WorkoutPlan) {
-    var showDropdown by remember { mutableStateOf(false) }
+fun WorkoutPlanCard(
+    plan: WorkoutPlan,
+    scope: CoroutineScope,
+    onDuplicationAction: (WorkoutPlan) -> Unit = {},
+    onAsign: (WorkoutPlan) -> Unit = {},
+    onEditAction: (WorkoutPlan) -> Unit = {},
+    onDeleteAction: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         backgroundColor = Color.White,
         elevation = 4.dp
     ) {
@@ -55,12 +76,93 @@ fun WorkoutPlanCard(plan: WorkoutPlan) {
                 }
 
                 DropdownMenuButton(
-                    items = listOf("Edit Plan", "Duplicate Plan", "Assign to Athlete", "Delete Plan"),
-                    onItemSelected = { index ->
+                    items = listOf(
+                        { Text("Edit Plan", style = MaterialTheme.typography.subtitle2) },
+                        { Text("Duplicate Plan", style = MaterialTheme.typography.subtitle2) },
+                        { Text("Assign to Athlete", style = MaterialTheme.typography.subtitle2) },
+                        { Text("Delete Plan", style = MaterialTheme.typography.subtitle2) }
+                    ),
+                    onItemSelected = { index, funtion ->
                         when (index) {
-                            0 -> {}
-                            1 -> {}
-                            else -> {}
+                            0 -> {
+                                DialogState.openWith {
+                                    WorkoutDialog(
+                                        Workout(
+                                            id = plan.workoutId,
+                                            name = plan.name,
+                                            description = plan.description,
+                                            difficulty = plan.difficulty,
+                                            duration = Duration.parse(plan.duration),
+                                            startAt = Instant.DISTANT_FUTURE,
+                                            workoutType = plan.type,
+                                            exercises = plan.exercises,
+                                            notes = listOf()
+                                        ),
+                                        mode = OpeningMode.EDIT
+                                    ) {
+                                        scope.launch {
+                                            UpdateWorkout().run(plan).fold(
+                                                { value -> onEditAction(value) },
+                                                { err -> ToastManager.showError(err.message!!) }
+                                            )
+                                        }
+                                    }
+                                }
+                                funtion(false)
+                            }
+
+                            1 -> {
+                                val workout = Workout(
+                                    id = null,
+                                    name = plan.name + " copy",
+                                    description = plan.description,
+                                    difficulty = plan.difficulty,
+                                    duration = Duration.parse(plan.duration),
+                                    startAt = Instant.DISTANT_FUTURE,
+                                    workoutType = plan.type,
+                                    exercises = plan.exercises,
+                                    notes = listOf()
+                                )
+
+                                scope.launch {
+                                    CreateNewWorkout().run(Pair(workout, LoggedTrainer.state.trainer!!)).fold(
+                                        { value ->
+                                            onDuplicationAction(
+                                                plan.copy(
+                                                    workoutId = value,
+                                                    name = plan.name + " copy"
+                                                )
+                                            )
+                                        },
+                                        { err -> ToastManager.showError(err.message!!) }
+                                    )
+                                }
+                                funtion(false)
+                            }
+
+                            2 -> {
+                                DialogState.openWith {
+                                    AsignDialog(
+                                        {
+                                            WorkoutPlanCard(
+                                                plan,
+                                                scope
+                                            )
+                                        }
+                                    ) { onAsign(plan.copy(asignedCount = plan.asignedCount + 1)) }
+                                }
+                                funtion(false)
+                            }
+
+                            3 -> {
+                                scope.launch {
+                                    DeleteWorkout().run(plan.workoutId).fold(
+                                        { onDeleteAction() },
+                                        { err -> ToastManager.showError(err.message!!) }
+                                    )
+                                }
+                                funtion(false)
+                            }
                         }
                     },
                 )
@@ -118,7 +220,7 @@ fun WorkoutPlanCard(plan: WorkoutPlan) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "${plan.exercises} exercises",
+                    text = "${plan.exercises.values.sumOf { it.size }} exercises",
                     style = MaterialTheme.typography.body2,
                     color = MaterialTheme.colors.onSurface
                 )
@@ -146,13 +248,37 @@ fun WorkoutPlanCard(plan: WorkoutPlan) {
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = "Assigned to ${plan.assignedCount} athletes",
+                        text = "Assigned to ${plan.asignedCount} athletes",
                         style = MaterialTheme.typography.body2,
                         color = MaterialTheme.colors.onSurface
                     )
                 }
 
-                TextButton(onClick = { /* View details action */ }) {
+                TextButton(onClick = {
+                    DialogState.openWith {
+                        WorkoutDialog(
+                            Workout(
+                                id = plan.workoutId,
+                                name = plan.name,
+                                description = plan.description,
+                                difficulty = plan.difficulty,
+                                duration = Duration.parse(plan.duration),
+                                startAt = Instant.DISTANT_FUTURE,
+                                workoutType = plan.type,
+                                exercises = plan.exercises,
+                                notes = listOf()
+                            ),
+                            mode = OpeningMode.VISUALIZE
+                        ) {
+                            scope.launch {
+                                UpdateWorkout().run(plan).fold(
+                                    { value -> onEditAction(value) },
+                                    { err -> ToastManager.showError(err.message!!) }
+                                )
+                            }
+                        }
+                    }
+                }) {
                     Text("View Details")
                 }
             }

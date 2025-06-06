@@ -8,11 +8,14 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.kdroid.composenotification.builder.ExperimentalNotificationsApi
-import com.kdroid.composenotification.builder.Notification
-import es.gaspardev.SCREEN_HEIGHT
+import com.dokar.sonner.ToastType
+import com.dokar.sonner.Toaster
+import com.dokar.sonner.ToasterState
+import com.dokar.sonner.rememberToasterState
 import es.gaspardev.core.LocalRouter
 import es.gaspardev.core.domain.dtos.QrData
 import es.gaspardev.core.infrastructure.repositories.TrainerRepositoryImp
@@ -23,74 +26,56 @@ import es.gaspardev.utils.saveQrToDesktop
 import fit_me.composeapp.generated.resources.Res
 import fit_me.composeapp.generated.resources.add_athlete
 import fit_me.composeapp.generated.resources.athlete_search_query
+import fit_me.composeapp.generated.resources.clients
+import fit_me.composeapp.generated.resources.qr_generated_successfully
+import fit_me.composeapp.generated.resources.qr_generation_error
+import fit_me.composeapp.generated.resources.key_creation_error
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import java.io.File
 
 
-@OptIn(ExperimentalNotificationsApi::class)
-suspend fun agregateNewSportman() {
+suspend fun agregateNewSportman(toaster: ToasterState) {
     TrainerRepositoryImp().generateRegistrationKey(LoggedTrainer.state.trainer!!).fold(
-        { value ->
+        { it ->
             try {
                 saveQrToDesktop(
                     QrGenerator.generateQrBitmap(
-                        QrData(value),
+                        QrData(it),
                         300
                     ),
                     "Clave de Usuario"
                 )
-                Notification(
-                    title = "Se ha generado una Clave",
-                    message = "Se ha generado el código QR para registro en su escritorio",
-                    largeImage = File(
-                        System.getProperty("user.home"),
-                        "Desktop${File.separatorChar}Clave de Usuario"
-                    ).absolutePath
-                )
+                toaster.show(Res.string.qr_generated_successfully, type = ToastType.Success)
             } catch (e: Exception) {
-                Notification(
-                    title = "Error en la generación de Clave",
-                    message = "No se ha podido generar el código QR para registro",
-                    largeImage = File(
-                        System.getProperty("user.home"),
-                        "Desktop${File.separatorChar}Clave de Usuario"
-                    ).absolutePath
-                )
+                toaster.show(Res.string.qr_generation_error, it)
             }
         },
-        {
-            Notification(
-                title = "Error en la petición de generación de clave de registro",
-                message = "No se ha podido generar el código QR para registro",
-                largeImage = File(
-                    System.getProperty("user.home"),
-                    "Desktop${File.separatorChar}Clave de Usuario"
-                ).absolutePath
-            )
-        }
+        { err -> toaster.show(Res.string.key_creation_error, err.message ?: "") }
     )
 }
 
 
 @Composable
-fun AthletesScreen() {
+fun AthletesScreen(
+    height: Dp
+) {
     val scope = rememberCoroutineScope()
+    val toaster = rememberToasterState()
     val controller = LocalRouter.current
     val sportsmanList = LoggedTrainer.state.athletes!!
     var searchQuery by remember { mutableStateOf("") }
 
     Column(Modifier.fillMaxSize().padding(12.dp)) {
-
+        Toaster(toaster, Modifier.align(Alignment.End))
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Clientes", style = MaterialTheme.typography.subtitle1)
+                    Text(stringResource(Res.string.clients), style = MaterialTheme.typography.subtitle1)
 
                     OutlinedButton(
                         onClick = {
                             scope.launch {
-                                agregateNewSportman()
+                                agregateNewSportman(toaster)
                             }
                         },
                         content = { Text(stringResource(Res.string.add_athlete)) }
@@ -112,7 +97,7 @@ fun AthletesScreen() {
         Spacer(Modifier.height(12.dp))
 
         LazyVerticalGrid(
-            modifier = Modifier.heightIn(max = SCREEN_HEIGHT).fillMaxSize(),
+            modifier = Modifier.heightIn(max = height).fillMaxSize(),
             columns = GridCells.Adaptive(minSize = 275.dp),
             contentPadding = PaddingValues(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),

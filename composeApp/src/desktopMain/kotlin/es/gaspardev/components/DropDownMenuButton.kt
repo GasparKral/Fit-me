@@ -15,9 +15,14 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun DropdownMenuButton(
-    items: List<String>,
-    onItemSelected: (Int) -> Unit,
-    icon: @Composable () -> Unit = { Icon(Icons.Default.MoreVert, contentDescription = stringResource(Res.string.more_options)) },
+    items: List<@Composable () -> Unit>,
+    onItemSelected: (Int, (Boolean) -> Unit) -> Unit,
+    icon: @Composable () -> Unit = {
+        Icon(
+            Icons.Default.MoreVert,
+            contentDescription = stringResource(Res.string.more_options)
+        )
+    },
     label: (@Composable () -> Unit)? = {
         Text(
             text = stringResource(Res.string.actions),
@@ -42,10 +47,9 @@ fun DropdownMenuButton(
             items.forEachIndexed { index, item ->
                 DropdownMenuItem(
                     onClick = {
-                        onItemSelected(index)
-                        expanded = false
+                        onItemSelected(index) { value -> expanded = value }
                     }
-                ) { Text(item, style = MaterialTheme.typography.subtitle2) }
+                ) { item.invoke() }
             }
         }
     }

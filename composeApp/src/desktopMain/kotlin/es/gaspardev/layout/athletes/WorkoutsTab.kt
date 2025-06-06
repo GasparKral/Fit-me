@@ -14,6 +14,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import es.gaspardev.core.domain.entities.workouts.Workout
 import es.gaspardev.icons.FitMeIcons
+import fit_me.composeapp.generated.resources.Res
+import fit_me.composeapp.generated.resources.assign_workout
+import fit_me.composeapp.generated.resources.workout_history
+import org.jetbrains.compose.resources.stringResource
 
 
 @Composable
@@ -25,7 +29,7 @@ fun WorkoutsTab(workoutHistory: List<Workout>) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Workout History",
+                text = stringResource(Res.string.workout_history),
                 style = MaterialTheme.typography.h5,
                 fontWeight = FontWeight.Medium
             )
@@ -37,7 +41,7 @@ fun WorkoutsTab(workoutHistory: List<Workout>) {
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Assign Workout")
+                Text(stringResource(Res.string.assign_workout))
             }
         }
 

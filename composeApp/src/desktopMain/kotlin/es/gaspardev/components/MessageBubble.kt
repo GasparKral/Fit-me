@@ -3,9 +3,11 @@ package es.gaspardev.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -14,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.gaspardev.core.domain.entities.comunication.Message
 import es.gaspardev.enums.MessageStatus
-import es.gaspardev.states.LoggedTrainer
+import es.gaspardev.enums.MessageType
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -22,9 +24,19 @@ import kotlinx.datetime.toLocalDateTime
 @Composable
 fun MessageBubble(
     message: Message,
-    currentUserId: String = LoggedTrainer.state.trainer!!.user.id.toString()
+    currentUserId: Int,
+    showStatus: Boolean = true,
+    onMessageRead: ((String) -> Unit)? = null,
+    onRetryMessage: ((String) -> Unit)? = null
 ) {
-    val isCurrentUser = message.userName == currentUserId
+    val isCurrentUser = message.senderId == currentUserId
+
+    // Marcar como leído si es necesario
+    LaunchedEffect(message.id) {
+        if (!isCurrentUser && message.messageStatus == MessageStatus.DELIVERED && onMessageRead != null) {
+            onMessageRead(message.id)
+        }
+    }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -38,10 +50,15 @@ fun MessageBubble(
             modifier = Modifier.widthIn(max = 280.dp),
             horizontalAlignment = if (isCurrentUser) Alignment.End else Alignment.Start
         ) {
+            // Bubble principal
             Box(
                 modifier = Modifier
                     .background(
-                        color = if (isCurrentUser) MaterialTheme.colors.primary else MaterialTheme.colors.surface,
+                        color = when {
+                            message.messageStatus == MessageStatus.FAILED -> Color.Red.copy(alpha = 0.7f)
+                            isCurrentUser -> MaterialTheme.colors.primary
+                            else -> MaterialTheme.colors.surface
+                        },
                         shape = RoundedCornerShape(
                             topStart = 16.dp,
                             topEnd = 16.dp,
@@ -51,29 +68,113 @@ fun MessageBubble(
                     )
                     .padding(12.dp)
             ) {
-                Text(
-                    text = message.content,
-                    color = if (isCurrentUser) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface,
-                    fontSize = 14.sp
-                )
+                Column {
+                    // Contenido del mensaje
+                    when (message.messageType) {
+                        MessageType.TEXT -> {
+                            Text(
+                                text = message.content,
+                                color = if (isCurrentUser || message.messageStatus == MessageStatus.FAILED)
+                                    MaterialTheme.colors.onPrimary
+                                else
+                                    MaterialTheme.colors.onSurface,
+                                fontSize = 14.sp
+                            )
+                        }
+
+                        MessageType.IMAGE -> {
+                            // TODO: Implementar vista de imagen
+                            Text(
+                                text = "📷 Image",
+                                color = if (isCurrentUser) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface,
+                                fontSize = 14.sp
+                            )
+                        }
+
+                        MessageType.FILE -> {
+                            // TODO: Implementar vista de archivo
+                            Text(
+                                text = "📎 File: ${message.content}",
+                                color = if (isCurrentUser) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface,
+                                fontSize = 14.sp
+                            )
+                        }
+
+                        MessageType.SYSTEM -> {
+                            Text(
+                                text = message.content,
+                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
+                                fontSize = 12.sp,
+                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                            )
+                        }
+
+                        else -> {
+                            Text(
+                                text = message.content,
+                                color = if (isCurrentUser) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface,
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+
+                    // Botón de reintentar para mensajes fallidos
+                    if (message.messageStatus == MessageStatus.FAILED && onRetryMessage != null) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.End,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            TextButton(
+                                onClick = { onRetryMessage(message.id) },
+                                colors = ButtonDefaults.textButtonColors(
+                                    contentColor = MaterialTheme.colors.onPrimary
+                                )
+                            ) {
+                                Icon(
+                                    Icons.Default.Refresh,
+                                    contentDescription = "Retry",
+                                    modifier = Modifier.size(12.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Retry", fontSize = 12.sp)
+                            }
+                        }
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(4.dp))
 
+            // Información del mensaje
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = if (isCurrentUser) Arrangement.End else Arrangement.Start
             ) {
                 Text(
-                    text = formatTime(message.sendAt),
+                    text = formatTime(message.sentAt),
                     fontSize = 11.sp,
                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                 )
 
-                if (isCurrentUser) {
+                if (isCurrentUser && showStatus) {
                     Spacer(modifier = Modifier.width(4.dp))
-                    MessageStatusIcon(message.messageStatus)
+                    MessageStatusIndicator(message.messageStatus)
                 }
+            }
+
+            // Mostrar estado de entrega/lectura si es relevante
+            if (isCurrentUser && showStatus && (message.deliveredAt != null || message.readAt != null)) {
+                Text(
+                    text = when {
+                        message.readAt != null -> "Read ${formatTime(message.readAt!!)}"
+                        message.deliveredAt != null -> "Delivered ${formatTime(message.deliveredAt!!)}"
+                        else -> ""
+                    },
+                    fontSize = 10.sp,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
+                )
             }
         }
 
@@ -84,16 +185,27 @@ fun MessageBubble(
 }
 
 @Composable
-private fun MessageStatusIcon(status: MessageStatus) {
-    val (text, color) = when (status) {
+private fun MessageStatusIndicator(status: MessageStatus) {
+    val (icon, color) = when (status) {
+        MessageStatus.SENDING -> "⏳" to Color.Gray
         MessageStatus.SENT -> "✓" to Color.Gray
         MessageStatus.DELIVERED -> "✓✓" to Color.Gray
         MessageStatus.READ -> "✓✓" to MaterialTheme.colors.primary
-        else -> "✓" to Color.Gray
+        MessageStatus.FAILED -> {
+            Icon(
+                Icons.Default.Warning,
+                contentDescription = "Failed",
+                modifier = Modifier.size(12.dp),
+                tint = Color.Red
+            )
+            return
+        }
+
+        MessageStatus.ALL -> return
     }
 
     Text(
-        text = text,
+        text = icon,
         fontSize = 10.sp,
         color = color,
         fontWeight = FontWeight.Bold

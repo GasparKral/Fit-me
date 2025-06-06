@@ -23,14 +23,15 @@ import kotlin.time.Duration.Companion.days
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun DietCreationDialog(
+fun DietDialog(
+    diet: Diet = Diet(),
     template: DietTemplate? = null,
-    onCreateDiet: (Diet) -> Unit
+    onAcceptAction: (Diet) -> Unit
 ) {
-    val state: Diet by remember {
+    var state: Diet by remember {
         mutableStateOf(
             if (template == null) {
-                Diet()
+                diet
             } else {
                 Diet(
                     name = template.name,
@@ -74,7 +75,7 @@ fun DietCreationDialog(
         // Diet Name
         OutlinedTextField(
             value = state.name,
-            onValueChange = { state.name = it },
+            onValueChange = { state = state.copy(name = it) },
             label = { Text("Diet Plan Name") },
             placeholder = { Text("e.g., 4-Week Muscle Gain Diet") },
             modifier = Modifier.fillMaxWidth(),
@@ -86,7 +87,7 @@ fun DietCreationDialog(
         // Description
         OutlinedTextField(
             value = state.description,
-            onValueChange = { state.description = it },
+            onValueChange = { state = state.copy(description = it) },
             label = { Text("Description") },
             placeholder = { Text("Describe the goals and focus of this diet plan") },
             modifier = Modifier
@@ -121,10 +122,10 @@ fun DietCreationDialog(
                     expanded = typeExpanded,
                     onDismissRequest = { typeExpanded = false }
                 ) {
-                    DietType.entries.forEach { type ->
+                    DietType.entries.filter { it != DietType.ALL }.forEach { type ->
                         DropdownMenuItem(
                             onClick = {
-                                state.dietType = type
+                                state = state.copy(dietType = type)
                                 typeExpanded = false
                             }
                         ) {
@@ -169,7 +170,7 @@ fun DietCreationDialog(
                     ).forEach { (label, duration) ->
                         DropdownMenuItem(
                             onClick = {
-                                state.duration = duration
+                                state = state.copy(duration = duration)
                                 durationExpanded = false
                             }
                         ) {
@@ -308,7 +309,7 @@ fun DietCreationDialog(
 
             Button(
                 onClick = {
-                    onCreateDiet(state)
+                    onAcceptAction(state)
                     DialogState.close()
                 }
             ) {

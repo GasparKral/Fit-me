@@ -10,15 +10,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import es.gaspardev.components.AssistChip
 import es.gaspardev.components.DifficultyBadge
+import es.gaspardev.core.domain.entities.workouts.Workout
 import es.gaspardev.core.domain.entities.workouts.WorkoutTemplate
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
-import es.gaspardev.layout.dialogs.WorkoutCreationDialog
+import es.gaspardev.layout.dialogs.WorkoutDialog
 
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun WorkoutTemplateCard(template: WorkoutTemplate) {
+fun WorkoutTemplateCard(template: WorkoutTemplate, onAcceptAction: (Workout) -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         backgroundColor = Color.White,
@@ -67,7 +68,7 @@ fun WorkoutTemplateCard(template: WorkoutTemplate) {
             Spacer(Modifier.height(16.dp))
 
             Text(
-                text = "${template.exercises} exercises",
+                text = "${template.exercises.values.size} exercises",
                 style = MaterialTheme.typography.body2,
                 color = MaterialTheme.colors.onSurface
             )
@@ -79,7 +80,9 @@ fun WorkoutTemplateCard(template: WorkoutTemplate) {
             Spacer(Modifier.height(12.dp))
 
             Button(
-                onClick = { DialogState.openWith { WorkoutCreationDialog(template, {}) } },
+                onClick = {
+                    DialogState.openWith { WorkoutDialog(template = template, onAcceptAction = onAcceptAction) }
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Use Template")

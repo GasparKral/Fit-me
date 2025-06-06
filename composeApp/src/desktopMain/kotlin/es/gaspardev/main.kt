@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
@@ -17,6 +18,9 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
+import com.dokar.sonner.Toaster
+import com.dokar.sonner.rememberToasterState
+import es.gaspardev.components.ToastManager
 import es.gaspardev.core.LocalRouter
 import es.gaspardev.core.Router
 import es.gaspardev.core.RouterState
@@ -27,13 +31,6 @@ import es.gaspardev.states.LoggedTrainer
 import fit_me.composeapp.generated.resources.Res
 import fit_me.composeapp.generated.resources.window_title
 import org.jetbrains.compose.resources.stringResource
-import java.awt.Dimension
-import java.awt.Toolkit
-
-val screenSize: Dimension = Toolkit.getDefaultToolkit().screenSize
-val SCREEN_HEIGHT = screenSize.height.dp
-val windowsState = WindowState(placement = WindowPlacement.Maximized)
-
 
 fun main() = application {
 
@@ -83,12 +80,14 @@ fun main() = application {
 
     Window(
         onCloseRequest = ::exitApplication,
-        state = windowsState,
+        state = WindowState(placement = WindowPlacement.Maximized),
         title = stringResource(Res.string.window_title),
         onKeyEvent = actions
     ) {
         AppTheme {
             val scope = rememberCoroutineScope()
+            val toast = rememberToasterState { }
+            ToastManager.initialize(toast)
             Router(Routes.Login, executionScope = scope) { content ->
                 val controller = LocalRouter.current
                 LaunchedEffect(controller) {
@@ -109,9 +108,9 @@ fun main() = application {
                             .padding(start = if (isVisible) 255.dp else 0.dp)
                             .background(MaterialTheme.colors.background)
                     ) {
-                        content()
+                        content(this@BoxWithConstraints.maxWidth, this@BoxWithConstraints.maxHeight)
                     }
-
+                    Toaster(toast, alignment = Alignment.TopEnd)
                     FloatingDialog(maxSize = Pair(maxWidth, maxHeight))
                 }
             }

@@ -13,6 +13,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import es.gaspardev.core.Route
 import es.gaspardev.core.RouterState
+import fit_me.composeapp.generated.resources.Res
+import fit_me.composeapp.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun SideBarMenuItem(
@@ -30,7 +33,7 @@ fun SideBarMenuItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
-            Icon(icon, "Icon for ${text}")
+            Icon(icon, stringResource(Res.string.icon_for, text))
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text,

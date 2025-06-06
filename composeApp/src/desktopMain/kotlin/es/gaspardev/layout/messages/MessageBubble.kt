@@ -56,7 +56,7 @@ fun MessageBubble(message: Message, user: User) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = message.sendAt.toLocalDateTime(TimeZone.currentSystemDefault()).toString(),
+                        text = message.sentAt.toLocalDateTime(TimeZone.currentSystemDefault()).toString(),
                         fontSize = 12.sp,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                     )

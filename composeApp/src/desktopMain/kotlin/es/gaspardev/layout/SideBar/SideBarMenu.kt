@@ -16,6 +16,9 @@ import es.gaspardev.core.RouterState
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.pages.Routes
 import es.gaspardev.states.LoggedTrainer
+import fit_me.composeapp.generated.resources.Res
+import fit_me.composeapp.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -75,39 +78,39 @@ fun SideBarMenu(controller: RouterState) {
             )
         }
 
-        SideBarMenuItem("Home", Routes.Dashboard, controller, Icons.Default.Home)
+        SideBarMenuItem(stringResource(Res.string.home), Routes.Dashboard, controller, Icons.Default.Home)
         SideBarMenuItem(
-            "Athletes",
+            stringResource(Res.string.athletes),
             Routes.Athletes,
             controller,
             FitMeIcons.Athlets
         )
         SideBarMenuItem(
-            "Workouts",
+            stringResource(Res.string.workouts),
             Routes.Workouts,
             controller,
             FitMeIcons.Weight
         )
         SideBarMenuItem(
-            "Nutrition",
+            stringResource(Res.string.nutrition),
             Routes.Nutrition,
             controller,
             FitMeIcons.Nutrition
         )
         SideBarMenuItem(
-            "Calendar",
+            stringResource(Res.string.calendar),
             Routes.Calendar,
             controller,
             FitMeIcons.Calendar
         )
         SideBarMenuItem(
-            "Statistics",
+            stringResource(Res.string.statistics),
             Routes.Statistics,
             controller,
             FitMeIcons.ChartBar
         )
         SideBarMenuItem(
-            "Messages",
+            stringResource(Res.string.messages),
             Routes.Messages,
             controller,
             FitMeIcons.Messages

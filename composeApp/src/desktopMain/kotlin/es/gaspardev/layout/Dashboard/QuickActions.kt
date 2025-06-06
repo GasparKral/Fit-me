@@ -7,20 +7,27 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.dokar.sonner.ToastType
+import com.dokar.sonner.ToasterState
 import es.gaspardev.core.Action
 import es.gaspardev.core.RouterState
+import es.gaspardev.core.domain.entities.workouts.WorkoutPlan
+import es.gaspardev.core.domain.usecases.create.CreateNewWorkout
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
-import es.gaspardev.layout.dialogs.DietCreationDialog
-import es.gaspardev.layout.dialogs.WorkoutCreationDialog
+import es.gaspardev.layout.dialogs.DietDialog
+import es.gaspardev.layout.dialogs.WorkoutDialog
 import es.gaspardev.pages.Routes
 import es.gaspardev.pages.agregateNewSportman
+import es.gaspardev.states.LoggedTrainer
 import fit_me.composeapp.generated.resources.*
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -31,44 +38,62 @@ data class QuickAction(
     val actionType: Action
 )
 
-// Y también necesitarás actualizar el componente QuickActions:
 @Composable
-fun QuickActions(controller: RouterState) {
-
+fun QuickActions(controller: RouterState, toaster: ToasterState) {
+    val scope = rememberCoroutineScope()
     val quickActions = listOf(
         QuickAction(
             icon = FitMeIcons.Athlets,
             labelRes = Res.string.add_athlete_action,
-            actionType = Action.SuspendAction {
+            actionType = Action.SuspendAction.create {
                 controller.navigateTo(Routes.Athletes)
-                agregateNewSportman()
+                agregateNewSportman(toaster)
             }
         ),
         QuickAction(
             icon = FitMeIcons.Weight,
             labelRes = Res.string.create_workout,
-            actionType = Action.SimpleAction {
+            actionType = Action.SimpleAction.create {
                 controller.navigateTo(Routes.Workouts)
-                DialogState.openWith { WorkoutCreationDialog { } }
+                DialogState.openWith {
+                    WorkoutDialog { workout ->
+                        scope.launch {
+                            CreateNewWorkout().run(Pair(workout, LoggedTrainer.state.trainer!!)).fold(
+                                {
+                                    toaster.show(
+                                        "La rutina se ha creado correctamente",
+                                        type = ToastType.Success
+                                    )
+                                },
+                                { err -> // Error
+                                    toaster.show(
+                                        if (err.message != null) "Error al crear la rutina" else "Error al crear la rutina: ${err.message!!}",
+                                        type = ToastType.Error
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
             }
         ),
         QuickAction(
             icon = FitMeIcons.Nutrition,
             labelRes = Res.string.create_diet,
-            actionType = Action.SuspendAction {
+            actionType = Action.SuspendAction.create {
                 controller.navigateTo(Routes.Nutrition)
-                DialogState.openWith { DietCreationDialog { } }
+                DialogState.openWith { DietDialog { } }
             }
         ),
         QuickAction(
             icon = FitMeIcons.Calendar,
             labelRes = Res.string.schedule_session,
-            actionType = Action.SuspendAction { agregateNewSportman() }
+            actionType = Action.SuspendAction.create { }
         ),
         QuickAction(
             icon = FitMeIcons.Messages,
             labelRes = Res.string.send_message,
-            actionType = Action.SuspendAction { agregateNewSportman() }
+            actionType = Action.SuspendAction.create { }
         )
     )
 

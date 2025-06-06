@@ -11,11 +11,12 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.dokar.sonner.Toaster
+import com.dokar.sonner.rememberToasterState
 import es.gaspardev.core.Action
 import es.gaspardev.core.LocalRouter
 import es.gaspardev.core.domain.dtos.TrainerDashBoardInfo
@@ -33,6 +34,7 @@ import org.jetbrains.compose.resources.stringResource
 fun DashboardScreen() {
 
     val router = LocalRouter.current
+    val toaster = rememberToasterState()
     var info = TrainerDashBoardInfo()
 
     LaunchedEffect(LoggedTrainer.state.trainer) {
@@ -67,9 +69,9 @@ fun DashboardScreen() {
         ) to Icons.Filled.Notifications
     )
 
-
     val scrollState = rememberScrollState()
     Box {
+        Toaster(toaster, Modifier.align(Alignment.TopEnd))
         VerticalScrollbar(
             adapter = rememberScrollbarAdapter(scrollState),
             modifier = Modifier
@@ -118,7 +120,7 @@ fun DashboardScreen() {
             }
 
             // Quick Actions
-            QuickActions(router)
+            QuickActions(router, toaster)
 
             // Stats Cards
             LazyVerticalGrid(
@@ -213,10 +215,10 @@ fun DashboardScreen() {
                             }
                             Button(
                                 onClick = {
-                                    router.executeAction(Action.SuspendAction {
+                                    router.executeAction(Action.SuspendAction.create({
                                         router.navigateTo(Routes.Athletes)
-                                        agregateNewSportman()
-                                    })
+                                        agregateNewSportman(toaster)
+                                    }))
                                 },
                                 colors = ButtonDefaults.buttonColors(
                                     backgroundColor = MaterialTheme.colors.primary,
@@ -233,7 +235,7 @@ fun DashboardScreen() {
 
                             }
                         }
-                        // Athletes list would go here
+
                         AthletesList()
                     }
                 }

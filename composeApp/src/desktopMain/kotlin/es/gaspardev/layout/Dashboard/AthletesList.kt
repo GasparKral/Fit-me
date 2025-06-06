@@ -4,8 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,16 +13,21 @@ import androidx.compose.ui.unit.dp
 import es.gaspardev.components.DropdownMenuButton
 import es.gaspardev.components.LastActiveText
 import es.gaspardev.components.UserAvatar
+import es.gaspardev.core.Action
 import es.gaspardev.core.LocalRouter
 import es.gaspardev.core.RouterState
 import es.gaspardev.core.domain.entities.users.Athlete
 import es.gaspardev.enums.StatusState
 import es.gaspardev.icons.FitMeIcons
+import es.gaspardev.layout.DialogState
+import es.gaspardev.layout.dialogs.DietDialog
+import es.gaspardev.layout.dialogs.WorkoutDialog
 import es.gaspardev.pages.Routes
 import es.gaspardev.states.LoggedTrainer
 import fit_me.composeapp.generated.resources.Res
 import fit_me.composeapp.generated.resources.active
 import fit_me.composeapp.generated.resources.inactive
+import fit_me.composeapp.generated.resources.*
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
 
@@ -50,7 +53,7 @@ fun AthletesList() {
                 contentColor = MaterialTheme.colors.primary
             )
         ) {
-            Text("View All Athletes")
+            Text(stringResource(Res.string.view_all_athletes))
         }
     }
 }
@@ -78,7 +81,7 @@ fun AthleteListItem(athlete: Athlete, router: RouterState) {
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Needs Plan",
+                            text = stringResource(Res.string.needs_plan),
                             color = MaterialTheme.colors.onPrimary,
                             style = MaterialTheme.typography.caption,
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
@@ -157,27 +160,62 @@ fun AthleteListItem(athlete: Athlete, router: RouterState) {
 
                     Box {
                         DropdownMenuButton(
-                            items = listOf("Ver Perfil", "Editar Rutina", "Editar Dieta"),
-                            onItemSelected = { index ->
+                            items = listOf(
+                                {
+                                    Text(
+                                        stringResource(Res.string.view_profile),
+                                        style = MaterialTheme.typography.subtitle2
+                                    )
+                                },
+                                {
+                                    Text(
+                                        stringResource(Res.string.edit_workout),
+                                        style = MaterialTheme.typography.subtitle2,
+                                        color = if (athlete.workout == null) MaterialTheme.colors.onSurface.copy(alpha = 0.6f) else MaterialTheme.colors.onSurface
+                                    )
+                                },
+                                {
+                                    Text(
+                                        stringResource(Res.string.edit_diet),
+                                        style = MaterialTheme.typography.subtitle2,
+                                        color = if (athlete.workout == null) MaterialTheme.colors.onSurface.copy(alpha = 0.6f) else MaterialTheme.colors.onSurface
+                                    )
+                                }
+                            ),
+                            onItemSelected = { index, funtion ->
                                 when (index) {
                                     0 -> {
                                         router.navigateTo(Routes.AthleteInfo.load(athlete))
                                         showDropdown = false
+                                        funtion(false)
                                     }
 
                                     1 -> {
-                                        /* Edit Workout Plan */
-                                        showDropdown = false
+                                        if (athlete.workout != null) {
+                                            router.executeAction(Action.SimpleAction.create {
+                                                router.navigateTo(Routes.AthleteInfo.load(athlete))
+                                                DialogState.openWith { WorkoutDialog(athlete.workout!!) { } }
+                                            })
+                                            showDropdown = false
+                                            funtion(false)
+                                        }
+                                        funtion(true)
                                     }
 
                                     2 -> {
-                                        /* Edit Nutrition Plan */
-                                        showDropdown = false
+                                        if (athlete.diet != null) {
+                                            router.executeAction(Action.SimpleAction.create {
+                                                router.navigateTo(Routes.AthleteInfo.load(athlete))
+                                                DialogState.openWith { DietDialog(athlete.diet!!) { } }
+                                            })
+                                            showDropdown = false
+                                            funtion(false)
+                                        }
+                                        funtion(true)
                                     }
                                 }
                             }
                         )
-
                     }
                 }
             }

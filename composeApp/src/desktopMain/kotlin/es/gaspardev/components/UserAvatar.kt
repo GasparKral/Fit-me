@@ -29,15 +29,14 @@ fun UserAvatar(
     layoutDirection: LayoutDirection = LayoutDirection.Horizontal,
     subtitleContent: (@Composable () -> Unit)? = null,
     extraSubtitleContent: (@Composable () -> Unit)? = null,
-    rightContent: (@Composable () -> Unit)? = null
+    rightContent: (@Composable () -> Unit)? = null,
+    modifier: Modifier = Modifier.fillMaxWidth()
 ) {
     // Contenedor principal que puede ser Row o Column
     when (layoutDirection) {
         LayoutDirection.Horizontal -> {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
+                modifier = modifier.padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {

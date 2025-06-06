@@ -75,7 +75,7 @@ fun OverviewTab(
             ) {
                 StatCard(
                     icon = Icons.Default.AccountBox,
-                    value = athlete.workout?.toString() ?: 0.toString(),
+                    value = workoutHistory.size.toString(),
                     label = stringResource(Res.string.workouts_completed),
                     modifier = Modifier.weight(1f)
                 )

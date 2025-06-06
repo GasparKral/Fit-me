@@ -2,7 +2,7 @@ package es.gaspardev
 
 import fit_me.composeapp.generated.resources.Outfit_Variable
 import fit_me.composeapp.generated.resources.Res
-import fit_me.composeapp.generated.resources.`RobotoSerif_VariableFont_GRAD,opsz,wdth,wght`
+import fit_me.composeapp.generated.resources.RobotoSerif_VariableFont
 import org.jetbrains.compose.resources.Font
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun AppTheme(content: @Composable () -> Unit) {
-    val robotoSerif = FontFamily(Font(Res.font.`RobotoSerif_VariableFont_GRAD,opsz,wdth,wght`))
+    val robotoSerif = FontFamily(Font(Res.font.RobotoSerif_VariableFont))
     val outFit = FontFamily(Font(Res.font.Outfit_Variable))
 
     // Definición de la paleta de colores

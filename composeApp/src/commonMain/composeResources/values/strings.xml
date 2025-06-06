@@ -7,6 +7,15 @@
     <string name="actions">Acciones</string>
     <string name="filters">Filtros</string>
     <string name="all">Todos</string>
+    <string name="workouts">Rutinas</string>
+    <string name="workout">Rutina</string>
+    <string name="nutrition">Dieta</string>
+    <string name="nutritions">Dietas</string>
+    <string name="home">Inicio</string>
+    <string name="athletes">Clientes</string>
+    <string name="calendar">Sesiones</string>
+    <string name="statistics">Estadísticas</string>
+    <string name="messages">Mensajes</string>
 
     <!-- ============ PLACEHOLDERS ============= -->
     <string name="athlete_search_query">¿Buscas a alguien?</string>
@@ -19,7 +28,7 @@
     <string name="login_error_generic">Ha ocurrido un error</string>
     <string name="inicio_de_sesion">Inicia Sesión en tu cuenta</string>
     <string name="inicio_de_sesion_portal">Portal de Entrenadores</string>
-    <string name="inicio_de_sesion-usuario">Usuario o e-mail</string>
+    <string name="inicio_de_sesion_usuario">Usuario o e-mail</string>
     <string name="inicio_de_sesion_contraseña">Contraseña</string>
     <string name="inicio_de_sesion_recuerdame">Recordarme</string>
 
@@ -464,6 +473,7 @@
     <string name="cut">Cortar</string>
     <string name="undo">Deshacer</string>
     <string name="redo">Rehacer</string>
+    <string name="assign">Asignar</string>
 
     <!-- Unidades de medida -->
     <string name="kg">kg</string>
@@ -507,4 +517,83 @@
     <string name="no_appointment">Sin cita</string>
     <string name="performance">Rendimiento</string>
     <string name="view_details">Ver detalles</string>
+
+    <!-- ============ ADDITIONAL STRINGS ============ -->
+    <string name="clients">Clientes</string>
+    <string name="view_profile">Ver Perfil</string>
+    <string name="edit_workout">Editar Rutina</string>
+    <string name="edit_diet">Editar Dieta</string>
+    <string name="needs_plan">Necesita Plan</string>
+    <string name="view_all_athletes">Ver Todos los Atletas</string>
+
+    <!-- QR Generation -->
+    <string name="qr_generated_successfully">QR generado correctamente en el escritorio</string>
+    <string name="qr_generation_error">Error en la generación del QR; envíe el siguiente link a su cliente: %s</string>
+    <string name="key_creation_error">Error en la creación de la clave: %s</string>
+
+    <!-- Calendar -->
+    <string name="calendar_title">Calendario</string>
+    <string name="calendar_description">Programa y gestiona tus sesiones de entrenamiento</string>
+    <string name="new_event">Nuevo Evento</string>
+    <string name="today">Hoy</string>
+    <string name="search_events">Buscar eventos...</string>
+    <string name="all_events">Todos los Eventos</string>
+    <string name="assessments">Evaluaciones</string>
+    <string name="group_sessions">Sesiones Grupales</string>
+    <string name="filter_by_type">Filtrar por tipo</string>
+    <string name="month">Mes</string>
+    <string name="week">Semana</string>
+    <string name="day">Día</string>
+
+    <!-- Profile -->
+    <string name="profile_options">Mi Perfil y Opciones</string>
+    <string name="profile">Perfil</string>
+    <string name="subscription">Suscripción</string>
+    <string name="help_center">Centro de Ayuda</string>
+    <string name="log_out">Cerrar Sesión</string>
+
+    <!-- Workouts Screen -->
+    <string name="workout_plans">Planes de Entrenamiento</string>
+    <string name="workout_plans_description">Crea y gestiona planes de entrenamiento para tus atletas</string>
+    <string name="create_workout_plan">Crear Plan de Entrenamiento</string>
+    <string name="search_workout_plans">Buscar planes de entrenamiento...</string>
+    <string name="strength">Fuerza</string>
+    <string name="cardio">Cardio</string>
+    <string name="core">Core</string>
+    <string name="flexibility">Flexibilidad</string>
+    <string name="full_body">Cuerpo Completo</string>
+    <string name="lower_body">Tren Inferior</string>
+    <string name="upper_body">Tren Superior</string>
+    <string name="no_workout_plans_found">No se encontraron planes de entrenamiento</string>
+    <string name="try_different_search">Intenta con un término de búsqueda diferente</string>
+    <string name="create_first_workout">Crea tu primer plan de entrenamiento para comenzar</string>
+    <string name="workout_templates">Plantillas de Entrenamiento</string>
+    <string name="workout_history">Historial de Entrenamientos</string>
+    <string name="assign_workout">Asignar Entrenamiento</string>
+    <string name="error_creating_workout">Error al crear la rutina</string>
+
+    <!-- Nutrition Screen -->
+    <string name="diets_plans">Planes de Dietas</string>
+    <string name="nutrition_plans_description">Crea y gestiona planes de nutrición para tus atletas</string>
+    <string name="create_nutrition_plan">Crear Plan de Nutrición</string>
+    <string name="search_plans">Buscar planes...</string>
+    <string name="balanced">Balanceado</string>
+    <string name="low_carb">Bajos Carbohidratos</string>
+    <string name="muscle_gain">Ganancia Muscular</string>
+    <string name="performance_plan">Rendimiento</string>
+    <string name="vegan">Vegano</string>
+    <string name="vegetarian">Vegetariano</string>
+    <string name="weight_loss">Pérdida de Peso</string>
+    <string name="no_nutrition_plans_found">No se encontraron planes de nutrición</string>
+    <string name="nutrition_templates">Plantillas de Nutrición</string>
+    <string name="diet_created_successfully">La dieta ha sido creada correctamente</string>
+    <string name="diet_creation_error">Ha ocurrido un error al crear la dieta: %s</string>
+
+    <!-- Components -->
+    <string name="icon_for">Ícono para %s</string>
+
+    <!-- Message Status -->
+    <string name="message_sent_symbol">✓</string>
+    <string name="message_delivered_symbol">✓✓</string>
+    <string name="message_read_symbol">✓✓</string>
 </resources>

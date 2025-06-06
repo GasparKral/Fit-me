@@ -1,34 +1,34 @@
 package es.gaspardev.layout.nutrition
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import es.gaspardev.components.DifficultyBadge
+import es.gaspardev.core.domain.entities.diets.Diet
 import es.gaspardev.core.domain.entities.diets.DietTemplate
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
-import es.gaspardev.layout.dialogs.DietCreationDialog
+import es.gaspardev.layout.dialogs.DietDialog
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun NutritionTemplateCard(
-    template: DietTemplate,
-    modifier: Modifier = Modifier
-) {
+fun NutritionTemplateCard(template: DietTemplate, onAcceptAction: (Diet) -> Unit) {
     Card(
-        modifier = modifier
+        modifier = Modifier.fillMaxWidth(),
+        backgroundColor = Color.White,
+        elevation = 4.dp
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Column(modifier = Modifier.weight(1f)) {
+            Column {
                 Text(
                     text = template.name,
                     style = MaterialTheme.typography.h4,
                     fontWeight = FontWeight.Bold
                 )
+                Spacer(Modifier.height(4.dp))
                 Text(
                     text = template.description,
                     style = MaterialTheme.typography.body1,
@@ -38,6 +38,7 @@ fun NutritionTemplateCard(
                 )
             }
 
+            Spacer(Modifier.height(16.dp))
             FlowRow(
                 modifier = Modifier.padding(top = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -53,14 +54,10 @@ fun NutritionTemplateCard(
             )
 
             Button(
-                onClick = { DialogState.openWith { DietCreationDialog(template) { } } },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = MaterialTheme.colors.primary,
-                    contentColor = MaterialTheme.colors.onPrimary
-                )
+                onClick = {
+                    DialogState.openWith { DietDialog(template = template, onAcceptAction = onAcceptAction) }
+                },
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Use Template")
             }

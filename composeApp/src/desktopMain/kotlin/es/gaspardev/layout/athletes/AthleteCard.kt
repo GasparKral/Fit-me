@@ -108,7 +108,7 @@ fun AthleteCard(
                     modifier = Modifier.padding(top = 6.dp)
                 ) {
                     Text(
-                        text = stringResource(Res.string.age_years, athlete.age),
+                        text = stringResource(Res.string.age_years).format(athlete.age),
                         fontSize = 12.sp,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                     )
@@ -127,7 +127,9 @@ fun AthleteCard(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    ProgressBar(75.toDouble(), label = { Text(stringResource(Res.string.progress), fontWeight = FontWeight.Bold) })
+                    ProgressBar(
+                        athlete.getOverallProgression(),
+                        label = { Text(stringResource(Res.string.progress), fontWeight = FontWeight.Bold) })
                 }
             }
         }

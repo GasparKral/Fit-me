@@ -13,6 +13,9 @@ import androidx.compose.ui.unit.sp
 import es.gaspardev.core.RouterState
 import es.gaspardev.pages.Routes
 import es.gaspardev.states.LoggedTrainer
+import fit_me.composeapp.generated.resources.Res
+import fit_me.composeapp.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -71,7 +74,7 @@ fun UserProfileDropdown(
                     onClick = { controller.navigateTo(Routes.Settings) },
                     enabled = false
                 ) {
-                    Text("Mi Perfil y Opciones")
+                    Text(stringResource(Res.string.profile_options))
                 }
 
                 Divider()
@@ -82,16 +85,16 @@ fun UserProfileDropdown(
                         expanded = false
                     }
                 ) {
-                    Text("Profile")
+                    Text(stringResource(Res.string.profile))
                 }
 
                 DropdownMenuItem(
                     onClick = { expanded = false }
-                ) { Text("Subscription") }
+                ) { Text(stringResource(Res.string.subscription)) }
 
                 DropdownMenuItem(
                     onClick = { expanded = false }
-                ) { Text("Help Center") }
+                ) { Text(stringResource(Res.string.help_center)) }
 
                 Divider()
 
@@ -107,7 +110,7 @@ fun UserProfileDropdown(
                             contentDescription = null,
                             modifier = Modifier.size(16.dp).padding(end = 8.dp)
                         )
-                        Text("Log out")
+                        Text(stringResource(Res.string.log_out))
                     }
                 }
             }

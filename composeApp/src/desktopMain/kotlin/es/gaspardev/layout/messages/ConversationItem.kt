@@ -36,7 +36,7 @@ fun ConversationItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box {
-            UserAvatar(conversation.trainer)
+            UserAvatar(conversation.athlete)
             if (true) {
                 Box(
                     modifier = Modifier
@@ -70,14 +70,17 @@ fun ConversationItem(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = conversation.lastMessage.toLocalDateTime(TimeZone.currentSystemDefault()).toString(),
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
+                if (conversation.lastMessage != null) {
+                    Text(
+                        text = conversation.lastMessage!!.deliveredAt!!.toLocalDateTime(TimeZone.currentSystemDefault())
+                            .toString(),
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
         }
     }

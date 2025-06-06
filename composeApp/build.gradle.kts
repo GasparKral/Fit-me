@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.ksp)
 }
 
 kotlin {
@@ -24,13 +25,16 @@ kotlin {
 
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
+            implementation(libs.constraintlayout)
+            implementation(libs.androidx.ui)
+            implementation(libs.compose.destinations.core)
+            implementation(libs.androidx.material3)
         }
         commonMain.dependencies {
             implementation(projects.shared)
             implementation(compose.preview)
             implementation(compose.runtime)
             implementation(compose.foundation)
-            implementation(compose.material)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
@@ -40,6 +44,7 @@ kotlin {
             implementation(libs.chart)
         }
         desktopMain.dependencies {
+            implementation(compose.material)
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.kotlinx.datetime)
@@ -78,11 +83,8 @@ android {
 }
 
 dependencies {
-    implementation(libs.constraintlayout)
-    implementation(libs.androidx.material3.android)
-    implementation(libs.androidx.navigation.runtime.android)
-    debugImplementation(compose.uiTooling)
-    implementation(kotlin("reflect"))
+    add("kspAndroid", libs.compose.destinations.ksp)
+    implementation(platform(libs.androidx.compose.bom))
 }
 
 compose.desktop {

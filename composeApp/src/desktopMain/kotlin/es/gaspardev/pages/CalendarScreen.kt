@@ -23,6 +23,8 @@ import es.gaspardev.layout.calendar.MonthView
 import es.gaspardev.layout.calendar.WeekView
 import es.gaspardev.states.SessionState
 import kotlinx.datetime.*
+import fit_me.composeapp.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 
 fun isLeapYear(year: Int): Boolean = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)
 
@@ -174,12 +176,12 @@ fun CalendarScreen() {
                         ) {
                             Column {
                                 Text(
-                                    text = "Calendar",
+                                    text = stringResource(Res.string.calendar_title),
                                     style = MaterialTheme.typography.subtitle1,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
-                                    text = "Schedule and manage your training sessions",
+                                    text = stringResource(Res.string.calendar_description),
                                     style = MaterialTheme.typography.body1
                                 )
                             }
@@ -193,7 +195,7 @@ fun CalendarScreen() {
                             ) {
                                 Icon(Icons.Default.Add, contentDescription = "Add")
                                 Spacer(Modifier.width(8.dp))
-                                Text("New Event")
+                                Text(stringResource(Res.string.new_event))
                             }
                         }
 
@@ -227,7 +229,7 @@ fun CalendarScreen() {
                                                 contentColor = MaterialTheme.colors.onSecondary
                                             )
                                         ) {
-                                            Text("Today")
+                                            Text(stringResource(Res.string.today))
                                         }
                                         IconButton(onClick = { handleNext() }) {
                                             Icon(
@@ -279,7 +281,7 @@ fun CalendarScreen() {
                                     value = searchQuery,
                                     onValueChange = { searchQuery = it },
                                     modifier = Modifier.height(32.dp),
-                                    placeholder = { Text("Search events...") },
+                                    placeholder = { Text(stringResource(Res.string.search_events)) },
                                     leadingIcon = {
                                         Icon(Icons.Default.Search, contentDescription = "Search")
                                     },
@@ -294,12 +296,12 @@ fun CalendarScreen() {
                                 ) {
                                     OutlinedTextField(
                                         value = when (filterType) {
-                                            "all" -> "All Events"
-                                            "workout" -> "Workouts"
-                                            "nutrition" -> "Nutrition"
-                                            "assessment" -> "Assessments"
-                                            "group" -> "Group Sessions"
-                                            else -> "Filter by type"
+                                            "all" -> stringResource(Res.string.all_events)
+                                            "workout" -> stringResource(Res.string.workouts)
+                                            "nutrition" -> stringResource(Res.string.nutrition)
+                                            "assessment" -> stringResource(Res.string.assessments)
+                                            "group" -> stringResource(Res.string.group_sessions)
+                                            else -> stringResource(Res.string.filter_by_type)
                                         },
                                         onValueChange = {},
                                         readOnly = true,
@@ -317,31 +319,31 @@ fun CalendarScreen() {
                                                 filterType = "all"
                                                 expanded = false
                                             }
-                                        ) { Text("All Events") }
+                                        ) { Text(stringResource(Res.string.all_events)) }
                                         DropdownMenuItem(
                                             onClick = {
                                                 filterType = "workout"
                                                 expanded = false
                                             }
-                                        ) { Text("Workouts") }
+                                        ) { Text(stringResource(Res.string.workouts)) }
                                         DropdownMenuItem(
                                             onClick = {
                                                 filterType = "nutrition"
                                                 expanded = false
                                             }
-                                        ) { Text("Nutrition") }
+                                        ) { Text(stringResource(Res.string.nutrition)) }
                                         DropdownMenuItem(
                                             onClick = {
                                                 filterType = "assessment"
                                                 expanded = false
                                             }
-                                        ) { Text("Assessments") }
+                                        ) { Text(stringResource(Res.string.assessments)) }
                                         DropdownMenuItem(
                                             onClick = {
                                                 filterType = "group"
                                                 expanded = false
                                             }
-                                        ) { Text("Group Sessions") }
+                                        ) { Text(stringResource(Res.string.group_sessions)) }
                                     }
                                 }
 
@@ -355,7 +357,11 @@ fun CalendarScreen() {
                                     backgroundColor = Color.Transparent,
                                     contentColor = MaterialTheme.colors.primary
                                 ) {
-                                    listOf("Month", "Week", "Day").forEachIndexed { index, title ->
+                                    listOf(
+                                    stringResource(Res.string.month),
+                                    stringResource(Res.string.week), 
+                                    stringResource(Res.string.day)
+                                ).forEachIndexed { index, title ->
                                         Tab(
                                             selected = when (index) {
                                                 0 -> viewType == "month"
