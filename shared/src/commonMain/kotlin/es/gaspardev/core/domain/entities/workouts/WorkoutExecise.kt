@@ -13,6 +13,8 @@ data class WorkoutExecise(
     val exercise: Exercise,
     val notes: List<Note>
 ) {
+
+    fun isOptional(): Boolean = isOption
     var optionalExercise: MutableList<Exercise> = mutableListOf()
         private set
 
@@ -24,5 +26,6 @@ data class WorkoutExecise(
             return Either.Failure(IllegalArgumentException("Los ejercicios opcionales no pueden tener opciones"))
         }
     }
+
 
 }

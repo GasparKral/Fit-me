@@ -9,8 +9,8 @@ import es.gaspardev.interfaces.repositories.DietRepository
 
 class CreateNewDiet(
     private val repo: DietRepository = DietRepositoryImp()
-) : UseCase<Boolean, Pair<Diet, Trainer>>() {
-    override suspend fun run(params: Pair<Diet, Trainer>): Either<Exception, Boolean> {
+) : UseCase<Int, Pair<Diet, Trainer>>() {
+    override suspend fun run(params: Pair<Diet, Trainer>): Either<Exception, Int> {
         return repo.createDiet(params.first, params.second)
     }
 }

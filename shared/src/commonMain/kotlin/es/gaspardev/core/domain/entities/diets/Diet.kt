@@ -12,6 +12,7 @@ import kotlin.time.toDuration
 
 @Serializable
 data class Diet(
+    private val id: Int? = null,
     var name: String = "",
     var description: String = "",
     var dietType: DietType = DietType.ALL,
@@ -24,6 +25,8 @@ data class Diet(
     companion object {
         const val URLPATH = "/diets"
     }
+
+    fun getId(): Int = id ?: throw IllegalStateException("ID no puede ser null")
 
     fun getDietProgression(): Double {
         val now = Clock.System.now()

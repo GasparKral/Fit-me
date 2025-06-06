@@ -1,0 +1,197 @@
+openapi: 3.0.3
+info:
+  title: API de Dietas
+  description: API para gestionar planes de dieta, plantillas y comidas.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Servidor local
+
+paths:
+  /diets/plans:
+    get:
+      summary: Obtener planes de dieta
+      description: Obtiene los planes de dieta de un entrenador.
+      parameters:
+        - name: trainer_id
+          in: query
+          required: true
+          description: ID del entrenador.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Lista de planes de dieta.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DietPlan"
+        "400":
+          description: Parámetros requeridos faltantes.
+
+  /diets/templates:
+    get:
+      summary: Obtener plantillas de dieta
+      description: Obtiene las plantillas de dieta de un entrenador.
+      parameters:
+        - name: trainer_id
+          in: query
+          required: true
+          description: ID del entrenador.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Lista de plantillas de dieta.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DietTemplate"
+        "400":
+          description: Parámetros requeridos faltantes.
+
+  /diets/create:
+    post:
+      summary: Crear nueva dieta
+      description: Crea un nuevo plan de dieta.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                diet:
+                  $ref: "#/components/schemas/DietRequest"
+                trainer:
+                  $ref: "#/components/schemas/Trainer"
+      responses:
+        "200":
+          description: Dieta creada exitosamente.
+        "400":
+          description: Error en la solicitud.
+
+components:
+  schemas:
+    DietPlan:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [WEIGHT_LOSS, MUSCLE_GAIN, BALANCED, VEGETARIAN, VEGAN, LOW_CARB, PERFORMANCE, ALL]
+        duration:
+          type: string
+        frequency:
+          type: string
+        asignedCount:
+          type: integer
+        dishes:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: "#/components/schemas/DietDish"
+
+    DietTemplate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        dietType:
+          type: string
+          enum: [WEIGHT_LOSS, MUSCLE_GAIN, BALANCED, VEGETARIAN, VEGAN, LOW_CARB, PERFORMANCE, ALL]
+        dishes:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: "#/components/schemas/DietDish"
+
+    DietRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        dietType:
+          type: string
+          enum: [WEIGHT_LOSS, MUSCLE_GAIN, BALANCED, VEGETARIAN, VEGAN, LOW_CARB, PERFORMANCE, ALL]
+        duration:
+          type: string
+          description: Duración en formato ISO
+
+    DietDish:
+      type: object
+      properties:
+        amout:
+          type: number
+          format: double
+        mealType:
+          type: string
+          enum: [BREAKFAST, LUNCH, DINNER, SNACK, PRE_WORKOUT, POST_WORKOUT]
+        notes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Note"
+        dish:
+          $ref: "#/components/schemas/Dish"
+
+    Dish:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+    Note:
+      type: object
+      properties:
+        id:
+          type: integer
+        user:
+          $ref: "#/components/schemas/User"
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    Trainer:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        specialization:
+          type: string
+        yearsOfExperience:
+          type: integer
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        fullname:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        creationDate:
+          type: string
+          format: date-time
+        userImageURL:
+          type: string

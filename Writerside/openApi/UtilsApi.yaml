@@ -1,0 +1,182 @@
+openapi: 3.0.3
+info:
+  title: API de Usuarios y Utilidades
+  description: API para gestión de usuarios, autenticación y funciones generales.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Servidor local
+
+paths:
+  /ping:
+    get:
+      summary: Prueba de conectividad
+      description: Endpoint simple para verificar que el servidor está funcionando.
+      responses:
+        "200":
+          description: Servidor funcionando correctamente.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "pong"
+
+  /users/key_gen:
+    get:
+      summary: Generar clave de registro
+      description: Genera una clave única para registro de atletas asociada a un entrenador.
+      parameters:
+        - name: trainer_id
+          in: query
+          required: true
+          description: ID del entrenador.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Clave de registro generada exitosamente.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Clave de registro única
+        "400":
+          description: Parámetros requeridos faltantes.
+
+  /upload:
+    post:
+      summary: Subir archivo
+      description: Permite subir archivos al servidor (imágenes de perfil, videos de ejercicios, etc.).
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Archivo a subir
+      responses:
+        "200":
+          description: Archivo guardado correctamente.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "File correctly save: 1234567890.jpg"
+        "400":
+          description: Petición incorrecta.
+        "500":
+          description: Error al encontrar la carpeta bucket.
+
+  /resources:
+    get:
+      summary: Obtener recursos
+      description: Endpoint para obtener recursos generales del sistema.
+      responses:
+        "200":
+          description: Recursos obtenidos exitosamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Recursos del sistema
+
+components:
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Indica si la operación fue exitosa
+        message:
+          type: string
+          description: Mensaje descriptivo de la respuesta
+        data:
+          type: object
+          description: Datos de respuesta (opcional)
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp de la respuesta
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Descripción del error
+        code:
+          type: integer
+          description: Código de error HTTP
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp del error
+        path:
+          type: string
+          description: Ruta donde ocurrió el error
+
+    UploadResponse:
+      type: object
+      properties:
+        fileName:
+          type: string
+          description: Nombre del archivo guardado
+        originalName:
+          type: string
+          description: Nombre original del archivo
+        size:
+          type: integer
+          description: Tamaño del archivo en bytes
+        url:
+          type: string
+          description: URL para acceder al archivo
+        uploadedAt:
+          type: string
+          format: date-time
+          description: Timestamp de subida
+
+# Respuestas globales que pueden aplicar a múltiples endpoints
+responses:
+  BadRequest:
+    description: Petición incorrecta - parámetros faltantes o inválidos
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/ErrorResponse"
+  
+  NotFound:
+    description: Recurso no encontrado
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/ErrorResponse"
+  
+  InternalServerError:
+    description: Error interno del servidor
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/ErrorResponse"
+  
+  Unauthorized:
+    description: No autorizado - credenciales inválidas
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/ErrorResponse"
+
+# Headers de seguridad comunes
+security:
+  - BearerAuth: []
+
+securitySchemes:
+  BearerAuth:
+    type: http
+    scheme: bearer
+    bearerFormat: JWT
+    description: Token JWT para autenticación de usuarios

@@ -4,21 +4,21 @@ import es.gaspardev.auxliars.Either
 import es.gaspardev.core.domain.dtos.DashboardChartInfo
 import es.gaspardev.core.domain.dtos.LoginCredentials
 import es.gaspardev.core.domain.dtos.RegisterTrainerData
+import es.gaspardev.core.domain.entities.comunication.Conversation
 import es.gaspardev.core.domain.entities.users.Athlete
 import es.gaspardev.core.domain.entities.users.Trainer
+import es.gaspardev.core.domain.entities.users.User
 import es.gaspardev.interfaces.repositories.TrainerRepository
 
 class TrainerRepositoryImp : TrainerRepository {
     private suspend fun getIntValueForTrainer(fragment: List<String>, trainer: Trainer): Int {
-        var result = 0
-        TrainerRepository.API.getSingleValue<Int>(
+        return TrainerRepository.API.getSingleValue<Int>(
             fragment,
             params = arrayOf(Pair("trainer_id", trainer.user.id.toString()))
-        ).fold(
-            { value -> result = value },
-            { _ -> }
+        ).foldValue(
+            { value -> value },
+            { _ -> 0 }
         )
-        return result
     }
 
     override suspend fun getPendingWorkouts(trainer: Trainer): Int {
@@ -50,18 +50,15 @@ class TrainerRepositoryImp : TrainerRepository {
     }
 
     override suspend fun getDashboardChartData(trainer: Trainer): DashboardChartInfo {
-        var returnValue = DashboardChartInfo()
-
-        TrainerRepository.API.getSingleValue<DashboardChartInfo>(
+        return TrainerRepository.API.getSingleValue<DashboardChartInfo>(
             listOf("data", "dashboardChartInfo"),
             params = arrayOf(
                 Pair("trainer_id", trainer.user.id.toString())
             )
-        ).fold(
-            { value -> returnValue = value },
-            { _ -> }
+        ).foldValue(
+            { value -> value },
+            { _ -> DashboardChartInfo() }
         )
-        return returnValue
     }
 
     override suspend fun generateRegistrationKey(trainer: Trainer): Either<Exception, String> {
@@ -80,18 +77,22 @@ class TrainerRepositoryImp : TrainerRepository {
     }
 
     override suspend fun logIn(expectedUser: LoginCredentials): Either<Exception, Pair<Trainer, List<Athlete>>> {
-        var result: Pair<Trainer, List<Athlete>>? = null
-
-        TrainerRepository.API.getSingleValue<Pair<Trainer, List<Athlete>>>(
+        return TrainerRepository.API.getSingleValue<Pair<Trainer, List<Athlete>>>(
             listOf(),
             params = arrayOf(
                 Pair("userIdentification", expectedUser.userIdetification),
                 Pair("userPassword", expectedUser.userPassword)
             )
-        ).fold(
-            { value -> result = value },
-            { err -> return Either.Failure(err) }
+        ).foldValue(
+            { value -> Either.Success(value) },
+            { err -> Either.Failure(err) }
         )
-        return Either.Success(result!!)
+    }
+
+    override suspend fun getComunications(user: User): Either<Exception, List<Conversation>> {
+        return TrainerRepository.API.getGenericList<Conversation>(
+            listOf("comunication"),
+            params = arrayOf(Pair("user_id", user.id.toString()))
+        )
     }
 }

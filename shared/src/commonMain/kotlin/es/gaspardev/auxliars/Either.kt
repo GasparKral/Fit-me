@@ -43,13 +43,6 @@ sealed class Either<out E, out T> where E : Any, T : Any {
         }
     }
 
-    fun getError(): E? {
-        return when (this) {
-            is Failure -> error
-            is Success -> null
-        }
-    }
-
     // Obtener el valor o un valor por defecto
     fun getOrElse(defaultValue: @UnsafeVariance T): T {
         return when (this) {

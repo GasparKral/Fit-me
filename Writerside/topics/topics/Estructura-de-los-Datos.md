@@ -2,628 +2,288 @@
 
 ## Clases principales
 
-La aplicación se compondrá de las siguientes principales clases:
-- **User**: Almacenará la información común entre usuarios, esto incluye los entrenadores y los deportistas.
-- **Trainer**: Datos específicos de los entrenadores, incluyendo certificaciones, experiencia, disponibilidad.
-- **Sportsman**: Datos específicos de los deportistas, medidas, pesos, sexo, alergias, dietas, rutinas y suplementación.
-- **Exercise**: Clase que representa los ejercicios a realizar.
-- **Dish**: Clase que representa los platos(pollo, pescado blanco, verduras, frutas, ...) y sus cantidades en las dietas.
-- **Supplementation**: Clase que representa los distintos tipos de suplementación y cantidades a usar por los deportistas.
-- **Note**: Clase que representa las notas que se puede usar en los distintos sitios de la aplicación.
+La aplicación se organiza bajo **Clean Architecture** y se compone de las siguientes clases principales en el módulo compartido:
 
-## Validación de JSONS
+### Entidades de Dominio
 
-Hay dos JSON específicos que requieren de un formato rígido; estos son las rutinas/entrenamientos (Workout::class) y 
-las dietas (Diet::class) que son explícitamente un Map dentro de la aplicación
+#### Usuarios
+- **User**: Información común entre usuarios (entrenadores y deportistas)
+- **Trainer**: Datos específicos de entrenadores, certificaciones, experiencia, disponibilidad
+- **Athlete**: Datos específicos de deportistas, medidas, alergias, dietas y rutinas asignadas
+- **UserStatus**: Estado de conexión y última actividad del usuario
 
-### Esquema para los platos (Dish::class)
+#### Entrenamientos
+- **Workout**: Rutina de entrenamiento con ejercicios organizados por días
+- **WorkoutPlan**: Plan de entrenamiento con información de asignación
+- **WorkoutTemplate**: Plantilla reutilizable para crear entrenamientos
+- **Exercise**: Ejercicio individual con descripción y parte del cuerpo
+- **WorkoutExercise**: Ejercicio específico dentro de una rutina (sets, reps, etc.)
+- **CompletionWorkoutStatistic**: Estadística de entrenamiento completado
 
-<code-block lang="JSON">
-{
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://example.com/fitme-exercises.schema.json",
-    "title": "Fit-me Exercises Schema",
-    "description": "Schema for daily dishes",
-    "type": "object",
-    "patternProperties": {
-        "^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)$": {
-            "type": "array",
-            "description": "Dishes for a specific day",
-            "items": {
-                "$ref": "#/$defs/dish"
-            }
-        }
-    },
-    "$defs": {
-        "dish": {
-            "type": "object",
-            "description": "Dish",
-            "properties": {
-                "dishName": {
-                    "type": "string",
-                    "description": "Name of the dish"
-                },
-                "dishDescription": {
-                    "type": "string",
-                    "description": "Description of the dish"
-                },
-                "dishAmount": {
-                    "type": "number",
-                    "minimum": 0,
-                    "description": "Amount of the dish in grams"
-                },
-                "notes": {
-                    "type": "object",
-                    "properties": {
-                        "id": {
-                            "type": "number"
-                        },
-                        "title": {
-                            "description": "note title",
-                            "type": "string"
-                        },
-                        "content": {
-                            "description": "note content",
-                            "type": "string"
-                        },
-                        "user": {
-                            "type": "string"
-                        },
-                        "date": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "optionalDishes": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/dish"
-                    },
-                    "description": "Optional dishes related to this dish"
-                }
-            },
-            "required": [
-                "dishName",
-                "dishDescription",
-                "dishAmount"
-            ]
+#### Nutrición
+- **Diet**: Plan nutricional con platos organizados por días
+- **DietPlan**: Plan de dieta con información de asignación  
+- **DietTemplate**: Plantilla reutilizable para crear dietas
+- **Dish**: Plato individual con nombre
+- **DietDish**: Plato específico dentro de una dieta (cantidad, tipo de comida)
+- **CompletionDietStatistics**: Estadística de dieta completada
+
+#### Comunicación
+- **Conversation**: Conversación entre entrenador y deportista
+- **Message**: Mensaje individual en una conversación
+- **Session**: Sesión de entrenamiento programada
+
+#### Información Adicional
+- **Note**: Notas que pueden asociarse a diferentes entidades
+- **Measurements**: Medidas corporales del deportista
+- **Allergy**: Alergia específica
+- **Certification**: Certificación del entrenador
+- **TimeSlot**: Franja horaria de disponibilidad
+
+### DTOs (Data Transfer Objects)
+
+- **LoginCredentials**: Credenciales de acceso al sistema
+- **RegisterTrainerData**: Datos para registro de nuevo entrenador
+- **RegisterAthleteData**: Datos para registro de nuevo deportista
+- **TrainerDashBoardInfo**: Información del dashboard del entrenador
+- **DashboardChartInfo**: Datos para gráficos del dashboard
+- **QrData**: Datos para generación de códigos QR
+
+### Enumeraciones
+
+```kotlin
+enum class BodyPart { LEG, ARM, SHOULDER, CORE, BACK, CHEST, FULL_BODY }
+enum class WeekDay { MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY }
+enum class Difficulty { EASY, ADVANCE, HARD }
+enum class WorkoutType { STRENGTH, CARDIO, FULL_BODY, UPPER_BODY, LOWER_BODY, CORE, FLEXIBILITY, ALL }
+enum class DietType { WEIGHT_LOSS, MUSCLE_GAIN, BALANCED, VEGETARIAN, VEGAN, LOW_CARB, PERFORMANCE, ALL }
+enum class MealType { BREAKFAST, LUNCH, DINNER, SNACK, PRE_WORKOUT, POST_WORKOUT }
+enum class Sex { MALE, FEMALE }
+enum class StatusState { ACTIVE, INACTIVE }
+enum class MessageStatus { SENT, DELIVERED, READ, ALL }
+enum class SessionType { WORKOUT, NUTRITION, ASSESSMENT, GROUP, OTHER }
+```
+
+## Casos de Uso (Use Cases)
+
+### Casos de Uso de Lectura
+- **LogInUser**: Autenticación de usuarios
+- **LoadDashboardInfo**: Cargar información del dashboard
+- **LoadDashboardChartInfo**: Cargar datos de gráficos
+- **GetTrainerWorkoutsPlans**: Obtener planes de entrenamiento del entrenador
+- **GetTrainerWorkoutsTemplates**: Obtener plantillas de entrenamiento
+- **GetTrainerDietsPlans**: Obtener planes de dieta del entrenador
+- **GetTrainerDietsTemplates**: Obtener plantillas de dieta
+- **GetAthleteWorkoutHistory**: Obtener historial de entrenamientos del deportista
+- **GetAthleteDietHistory**: Obtener historial de dietas del deportista
+- **GetAthleteCommingSessions**: Obtener sesiones próximas del deportista
+
+### Casos de Uso de Creación
+- **CreateNewWorkout**: Crear nuevo entrenamiento
+- **CreateNewDiet**: Crear nueva dieta
+- **RegisterNewTrainer**: Registrar nuevo entrenador
+- **RegisterNewSportsman**: Registrar nuevo deportista
+
+### Casos de Uso de Eliminación
+- **DeleteTrainerAccount**: Eliminar cuenta de entrenador
+
+## Arquitectura de Repositorios
+
+### Interfaces de Repositorio
+```kotlin
+interface UserRepository<T : Any, T2 : Any> {
+    suspend fun logIn(expectedUser: LoginCredentials): Either<Exception, Pair<T, List<T2>>>
+}
+
+interface TrainerRepository : UserRepository<Trainer, Athlete> {
+    suspend fun registerTrainer(newTrainerData: RegisterTrainerData): Either<Exception, Trainer>
+    suspend fun getPendingWorkouts(trainer: Trainer): Int
+    suspend fun getActivePlans(trainer: Trainer): Int
+    suspend fun getDashboardChartData(trainer: Trainer): DashboardChartInfo
+    suspend fun generateRegistrationKey(trainer: Trainer): Either<Exception, String>
+    // ... más métodos
+}
+
+interface AthleteRepository : UserRepository<Athlete, Trainer> {
+    suspend fun registerAthlete(newAthleteData: RegisterAthleteData): Either<Exception, Athlete>
+    suspend fun getWorkoutsHistory(athlete: Athlete): Either<Exception, List<CompletionWorkoutStatistic>>
+    suspend fun getCommingSessions(athlete: Athlete): Either<Exception, List<Session>>
+}
+
+interface WorkoutRepository {
+    suspend fun getWorkouts(trainer: Trainer): Either<Exception, List<Workout>>
+    suspend fun getWorkoutsPlans(trainer: Trainer): Either<Exception, List<WorkoutPlan>>
+    suspend fun getWorkoutsPlanTemplates(trainer: Trainer): Either<Exception, List<WorkoutTemplate>>
+    suspend fun createWorkout(workout: Workout, trainer: Trainer): Either<Exception, Boolean>
+}
+
+interface DietRepository {
+    suspend fun getDiets(trainer: Trainer): Either<Exception, List<Diet>>
+    suspend fun getDietsPlans(trainer: Trainer): Either<Exception, List<DietPlan>>
+    suspend fun getDietsTemplates(trainer: Trainer): Either<Exception, List<DietTemplate>>
+    suspend fun createDiet(diet: Diet, trainer: Trainer): Either<Exception, Boolean>
+}
+```
+
+### APIs de Comunicación
+```kotlin
+abstract class API<ApiType> {
+    protected abstract val apiPath: String
+    
+    abstract suspend fun post(segments: List<String>, body: Any): Either<Exception, ApiType>
+    abstract suspend fun get(segments: List<String>, vararg params: Pair<String, String>): Either<Exception, ApiType>
+    abstract suspend fun getList(segments: List<String>, vararg params: Pair<String, String>): Either<Exception, List<ApiType>>
+    abstract suspend fun delete(segments: List<String>, vararg params: Pair<String, String>): Either.Failure<Exception>?
+    abstract suspend fun patch(segments: List<String>, body: Any): Either.Failure<Exception>?
+}
+```
+
+## Estructura de Datos en Kotlin
+
+### Ejemplo de Entidad Principal - User
+```kotlin
+@Serializable
+class User(
+    val id: Int,
+    var fullname: String,
+    private var password: String,
+    var email: String,
+    var phone: String?,
+    val creationDate: Instant,
+    val userImageURL: String?,
+    var status: UserStatus
+) {
+    companion object {
+        val URLPATH = "/users"
+    }
+
+    fun getInitials(): String {
+        return fullname
+            .split(" ")
+            .filter { it.isNotEmpty() }
+            .take(2)
+            .joinToString(separator = "") { it.first().uppercase() }
+    }
+}
+```
+
+### Ejemplo de Entidad de Entrenamiento - Workout
+```kotlin
+@Serializable
+data class Workout(
+    var name: String = "",
+    var description: String = "",
+    var difficulty: Difficulty = Difficulty.EASY,
+    var duration: Duration = 0.toDuration(DurationUnit.HOURS),
+    val startAt: Instant = Clock.System.now(),
+    var workoutType: WorkoutType = WorkoutType.ALL,
+    var exercises: Map<WeekDay, List<WorkoutExercise>> = mapOf(),
+    val notes: List<Note> = listOf()
+) {
+    companion object {
+        const val URLPATH = "/workouts"
+    }
+
+    fun getWorkoutProgression(): Double {
+        val now = Clock.System.now()
+        val endTime = startAt + duration
+        
+        if (now < startAt) return 0.0
+        if (now >= endTime) return 1.0
+        
+        val totalDuration = endTime - startAt
+        val elapsed = now - startAt
+        return (elapsed.inWholeMilliseconds.toDouble() / totalDuration.inWholeMilliseconds.toDouble()) * 100
+    }
+}
+```
+
+## Comunicación en Tiempo Real
+
+### WebSocket para Chat
+```kotlin
+class ChatWebShocket(
+    private val userId: String,
+    private val conversationId: Int,
+    private val onMessageReceived: (Message) -> Unit,
+    private val onStatusUpdate: (MessageStatus) -> Unit,
+    private val onConnectionEvent: (Boolean) -> Unit,
+    private val onError: (String) -> Unit = { }
+) {
+    suspend fun sendMessage(content: String): Boolean
+    fun connect()
+    fun closeConnection()
+    fun isConnected(): Boolean
+}
+```
+
+## Manejo de Errores con Either
+
+```kotlin
+sealed class Either<out E, out T> where E : Any, T : Any {
+    data class Failure<out E : Any>(val error: E) : Either<E, Nothing>()
+    data class Success<out T : Any>(val value: T) : Either<Nothing, T>()
+    
+    inline fun fold(onSuccess: (T) -> Unit, onFailure: (E) -> Unit = { _ -> }) {
+        when (this) {
+            is Failure -> onFailure(error)
+            is Success -> onSuccess(value)
         }
     }
 }
-</code-block>
+```
 
-### Esquema para los entrenamientos (Workout::class)
+## Estructura de Carpetas Actualizada
 
-<code-block lang="JSON">
-{
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://example.com/fitme-exercises.schema.json",
-    "title": "Fit-me Exercises Schema",
-    "description": "Schema for daily exercises in the Fit-me app",
-    "type": "object",
-    "patternProperties": {
-        "^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)$": {
-            "type": "array",
-            "description": "Exercises for a specific day",
-            "items": {
-                "$ref": "#/$defs/exercise"
-            }
-        }
-    },
-    "$defs": {
-        "exercise": {
-            "type": "object",
-            "properties": {
-                "exerciseName": {
-                    "type": "string",
-                    "description": "Name of the exercise"
-                },
-                "exerciseDescription": {
-                    "type": "string",
-                    "description": "Description of the exercise"
-                },
-                "repetitions": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "description": "Number of repetitions per set"
-                },
-                "sets": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "description": "Number of sets for the exercise"
-                },
-                "video": {
-                    "type": "object",
-                    "description": "metadata for a resources request to the server",
-                    "properties": {
-                        "id": {
-                            "type": "number"
-                        },
-                        "title": {
-                            "description": "video title",
-                            "type": "string"
-                        },
-                        "url": {
-                            "description": "url for the api to obtain the video",
-                            "type": "string"
-                        },
-                        "thumbnail": {
-                            "description": "url for the thumbnail api"
-                        }
-                    }
-                },
-                "optionalExercises": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/exercise"
-                    },
-                    "description": "Optional exercises related to this exercise"
-                },
-                "notes": {
-                    "type": "object",
-                    "properties": {
-                        "id": {
-                            "type": "number"
-                        },
-                        "title": {
-                            "description": "note title",
-                            "type": "string"
-                        },
-                        "content": {
-                            "description": "note content",
-                            "type": "string"
-                        },
-                        "user": {
-                            "type": "string"
-                        },
-                        "date": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "required": [
-                "exerciseName",
-                "repetitions",
-                "sets"
-            ]
-        }
-    }
-}
-</code-block>
+La aplicación sigue **Clean Architecture** organizada de la siguiente manera:
 
-## Modelo base de datos
+```
+📁 shared/src/commonMain/kotlin/es/gaspardev/
+├── 📁 auxliars/                    # Utilidades auxiliares (Either, etc.)
+├── 📁 core/
+│   ├── 📁 domain/
+│   │   ├── 📁 entities/            # Entidades de dominio
+│   │   │   ├── 📁 users/           # User, Trainer, Athlete
+│   │   │   ├── 📁 workouts/        # Workout, Exercise, etc.
+│   │   │   ├── 📁 diets/           # Diet, Dish, etc.
+│   │   │   ├── 📁 comunication/    # Message, Conversation, Session
+│   │   │   └── Note.kt
+│   │   ├── 📁 dtos/                # Data Transfer Objects
+│   │   └── 📁 usecases/            # Casos de uso
+│   │       ├── 📁 create/          # Casos de uso de creación
+│   │       ├── 📁 read/            # Casos de uso de lectura
+│   │       ├── 📁 update/          # Casos de uso de actualización
+│   │       └── 📁 delete/          # Casos de uso de eliminación
+│   └── 📁 infrastructure/
+│       ├── 📁 apis/                # APIs de comunicación con servidor
+│       ├── 📁 repositories/        # Implementaciones de repositorios
+│       ├── 📁 shockets/            # WebSocket implementations
+│       └── 📁 memo/                # Cache y memoria
+├── 📁 enums/                       # Enumeraciones del dominio
+├── 📁 interfaces/
+│   ├── 📁 repositories/            # Interfaces de repositorios
+│   ├── 📁 apis/                    # Interfaces de APIs
+│   └── 📁 debug/                   # Interfaces de debug
+└── 📁 utils/                       # Utilidades (constantes, validaciones, etc.)
+```
 
-<code-block lang="plantuml">
-@startuml
-skinparam classAttributeIconSize 0
+### Ventajas de esta Estructura
 
-' Enumeraciones
-enum MediaType
-enum BodyPart
-enum WeekDay
+1. **Separación de Responsabilidades**: Cada capa tiene una responsabilidad específica
+2. **Inversión de Dependencias**: Las capas internas no dependen de las externas
+3. **Testabilidad**: Fácil creación de tests unitarios por capa
+4. **Flexibilidad**: Fácil intercambio de implementaciones
+5. **Reutilización**: El módulo compartido se usa en todos los clientes
+6. **Mantenibilidad**: Código organizado y fácil de mantener
 
-' Tablas base
-class UserTable {
-+id: Int
-+name: String
-+password: String
-+email: String
-+creationTime: Timestamp
-+userImage: String
-}
+### Flujo de Datos
 
-class TrainerTable {
-+id: Int
-+userId: Int?
-+specialization: String
-+years_of_experience: Int
-+bio: Text
-+rating: Double
-+certification: Int[] ' referencia a CertificationTable
-}
-
-class SportsmanTable {
-+id: Int
-+userId: Int?
-+trainerId: Int?
-+age: Int
-+weight: Double
-+height: Double
-+sex: Boolean
-}
-
-class SocialLinksTable {
-+id: Int
-+trainerId: Int?
-+socialMedia: String
-+link: String
-}
-
-class CertificationTable {
-+id: Int
-+name: String
-+issuinOrganization: String
-+optainedDate: Timestamp
-}
-
-class ResourceTable {
-+id: Int
-+type: MediaType
-+path: String
-}
-
-class NoteTable {
-+id: Int
-+user: Int?
-+message: Text
-+answer: Int?
-}
-
-' Ejercicios
-class ExerciseBase {
-+id: Int
-+name: String
-+bodyPart: BodyPart
-+description: Text
-+author: Int?
-+video: Int?
-}
-
-class WorkoutTable {
-+id: Int
-+duration: String
-}
-
-class WorkoutExercises {
-+id: Int
-+workoutId: Int
-+exerciseId: Int
-+reps: Int
-+sets: Int
-+note: Text?
-+day: WeekDay
-}
-
-class ExerciseOptionalLinks {
-+workoutExerciseId: Int
-+optionalExerciseId: Int
-}
-
-' Relaciones
-UserTable --o{ TrainerTable : userId
-UserTable --o{ SportsmanTable : userId
-TrainerTable --o{ SportsmanTable : trainerId
-TrainerTable --o{ SocialLinksTable : trainerId
-TrainerTable --o{ ExerciseBase : author
-ResourceTable --o{ ExerciseBase : video
-UserTable --o{ NoteTable : user
-
-WorkoutTable --o{ WorkoutExercises : id
-ExerciseBase --o{ WorkoutExercises : exerciseId
-WorkoutExercises --o{ ExerciseOptionalLinks : workoutExerciseId
-ExerciseBase --o{ ExerciseOptionalLinks : optionalExerciseId
-
-@enduml
-
-</code-block>
-
-## Estructura de carpetas
-
-La aplicación sigue una estructura basada en **Clean Architecture**, una arquitectura propuesta por **Robert C. Martin (Uncle Bob)** que busca lograr un sistema altamente **mantenible, flexible y escalable** a través de un **desacoplamiento estricto** entre las distintas capas del software. Esta estructura tiene dos objetivos principales:
-
----
-
-### 1. Desacoplamiento entre las capas del sistema
-Las capas están organizadas de manera que dependen **únicamente de abstracciones** y no de implementaciones concretas.  
-Esto significa que los cambios realizados en el **núcleo de la aplicación** (lógica de negocio) no generan una cascada de modificaciones en otras capas, como la interfaz de usuario, el acceso a datos o frameworks externos. Cada componente del sistema se manipula de forma **independiente y atómica**, facilitando la prueba unitaria y la evolución del software sin riesgo de afectar otras partes.
-
----
-
-### 2. Organización por capas
-Clean Architecture organiza el código en **cuatro capas principales** que forman un círculo concéntrico, donde las **dependencias fluyen siempre hacia adentro**, es decir, las capas externas dependen de las internas, pero nunca al revés. Estas capas son:
-
-- **Entities (Entidades):**  
-  Representan las **lógicas de negocio de nivel más alto**, independientes de cualquier capa externa. Son clases puras que encapsulan las reglas de negocio centrales y no dependen de detalles de implementación.
-
-- **Use Cases (Casos de uso):**  
-  Contienen la lógica específica de las operaciones que la aplicación puede realizar. Representan las **acciones** que el sistema permite ejecutar y dependen únicamente de las entidades.
-
-- **Interface Adapters (Adaptadores de interfaz):**  
-  Esta capa actúa como un **puente** entre los casos de uso y las capas externas, como la interfaz de usuario (UI) y la infraestructura de datos. Aquí se implementan transformaciones de datos, controladores, presentadores y vistas.
-
-- **Frameworks and Drivers (Frameworks y controladores):**  
-  Es la capa más externa, donde residen los **detalles de implementación**, como bases de datos, frameworks web, herramientas externas y bibliotecas específicas. Estas dependencias externas son reemplazables sin afectar las capas internas.
-
----
-
-### 3. Ventajas y desventajas
-
-- **Ventajas:**
-    - Facilita la **mantenibilidad** del código y la **evolución** del sistema.
-    - Permite realizar **pruebas unitarias** de forma más sencilla y aislada, al desacoplar los componentes.
-    - Favorece la **escalabilidad**, facilitando la incorporación de nuevas funcionalidades sin alterar las existentes.
-    - Promueve el uso de **abstracciones**, haciendo que el sistema sea independiente de tecnologías específicas o frameworks.
-
-- **Desventajas:**
-    - Su implementación inicial puede ser **más costosa en tiempo**, ya que requiere una planificación cuidadosa y la creación de un mayor número de clases.
-    - Puede parecer **compleja** para proyectos pequeños o equipos no familiarizados con este tipo de arquitectura.
-    - Genera **overhead de código** debido a la separación estricta entre capas y la necesidad de definir múltiples interfaces y clases.
-
----
-
-### 4. Resumen práctico
-
-La **Clean Architecture** proporciona una estructura modular, donde cada capa cumple una **responsabilidad específica** y depende solo de **abstracciones**, no de implementaciones concretas. Aunque requiere un esfuerzo inicial significativo, su adopción resulta beneficiosa a largo plazo, especialmente en proyectos grandes y con necesidades de **escalabilidad** y **mantenimiento continuo**.
+1. **UI/Presentación** → Llama a casos de uso
+2. **Casos de Uso** → Coordinan lógica de negocio usando entidades
+3. **Entidades** → Encapsulan reglas de negocio
+4. **Repositorios** → Abstraen acceso a datos
+5. **APIs** → Implementan comunicación con servicios externos
 
 <note title="Actualización">
-    Este esquema será actualizado periódicamente.
+    Esta estructura está actualizada según el código actual del repositorio y seguirá evolucionando.
 </note>
-
-```
-📁 
-│   ├── 📁 .fleet
-│   ├── 📁 .git
-│   ├── 📄 .gitignore
-│   ├── 📁 .gradle
-│   ├── 📁 .idea
-│   ├── 📁 .kotlin
-│   ├── 📄 build.gradle.kts
-│   ├── 📁 composeApp
-│   │   ├── 📁 build
-│   │   ├── 📄 build.gradle.kts
-│   │   ├── 📁 frontend
-│   │   │   ├── 📁 .idea
-│   │   │   ├── 📄 bun.lockb
-│   │   │   ├── 📄 eslint.config.js
-│   │   │   ├── 📄 index.html
-│   │   │   ├── 📁 node_modules
-│   │   │   ├── 📄 package-lock.json
-│   │   │   ├── 📄 package.json
-│   │   │   ├── 📄 postcss.config.js
-│   │   │   ├── 📁 public
-│   │   │   ├── 📁 src
-│   │   │   │   ├── 📄 App.tsx
-│   │   │   │   ├── 📁 assets
-│   │   │   │   ├── 📄 index.css
-│   │   │   │   ├── 📄 main.tsx
-│   │   │   │   ├── 📄 vite-env.d.ts
-│   │   │   ├── 📄 tailwind.config.js
-│   │   │   ├── 📄 tsconfig.app.json
-│   │   │   ├── 📄 tsconfig.json
-│   │   │   ├── 📄 tsconfig.node.json
-│   │   │   ├── 📄 vite.config.ts
-│   │   ├── 📁 src
-│   │   │   ├── 📁 androidMain
-│   │   │   │   ├── 📄 AndroidManifest.xml
-│   │   │   │   ├── 📁 kotlin
-│   │   │   │   │   ├── 📁 es
-│   │   │   │   │   │   ├── 📁 gaspardev
-│   │   │   │   │   │   │   ├── 📄 MainActivity.kt
-│   │   │   │   ├── 📁 res
-│   │   │   ├── 📁 commonMain
-│   │   │   │   ├── 📁 composeResources
-│   │   │   │   │   ├── 📁 drawable
-│   │   │   │   │   │   ├── 📄 Athlets.xml
-│   │   │   │   │   │   ├── 📄 Calendar.xml
-│   │   │   │   │   │   ├── 📄 compose-multiplatform.xml
-│   │   │   │   │   │   ├── 📄 Home.xml
-│   │   │   │   │   │   ├── 📄 Messages.xml
-│   │   │   │   │   │   ├── 📄 Nutrition.xml
-│   │   │   │   │   │   ├── 📄 Settings.xml
-│   │   │   │   │   │   ├── 📄 Stadistics.xml
-│   │   │   │   │   │   ├── 📄 Weights.xml
-│   │   │   │   │   ├── 📁 values
-│   │   │   │   │   │   ├── 📄 strings.xml
-│   │   │   │   ├── 📁 kotlin
-│   │   │   │   │   ├── 📁 es
-│   │   │   │   │   │   ├── 📁 gaspardev
-│   │   │   │   │   │   │   ├── 📄 App.kt
-│   │   │   │   │   │   │   ├── 📁 components
-│   │   │   │   │   │   │   │   ├── 📄 Badge.kt
-│   │   │   ├── 📁 desktopMain
-│   │   │   │   ├── 📁 kotlin
-│   │   │   │   │   ├── 📁 es
-│   │   │   │   │   │   ├── 📁 gaspardev
-│   │   │   │   │   │   │   ├── 📁 components
-│   │   │   │   │   │   │   ├── 📁 core
-│   │   │   │   │   │   │   │   ├── 📁 actions
-│   │   │   │   │   │   │   │   │   ├── 📄 PageAction.kt
-│   │   │   │   │   │   │   │   ├── 📁 routing
-│   │   │   │   │   │   │   │   │   ├── 📄 Anchor.kt
-│   │   │   │   │   │   │   │   │   ├── 📄 Route.kt
-│   │   │   │   │   │   │   │   │   ├── 📄 Router.kt
-│   │   │   │   │   │   │   │   │   ├── 📄 TextAnchor.kt
-│   │   │   │   │   │   │   ├── 📁 layout
-│   │   │   │   │   │   │   │   ├── 📄 FloatingDialong.kt
-│   │   │   │   │   │   │   │   ├── 📄 SideBarMenu.kt
-│   │   │   │   │   │   │   │   ├── 📄 SideBarMenuItem.kt
-│   │   │   │   │   │   │   ├── 📄 main.kt
-│   │   │   │   │   │   │   ├── 📁 pages
-│   │   │   │   │   │   │   │   ├── 📄 AthletesScreen.kt
-│   │   │   │   │   │   │   │   ├── 📄 CalendarScreen.kt
-│   │   │   │   │   │   │   │   ├── 📄 DashboardScreen.kt
-│   │   │   │   │   │   │   │   ├── 📄 LoginScreen.kt
-│   │   │   │   │   │   │   │   ├── 📄 MessagesScreen.kt
-│   │   │   │   │   │   │   │   ├── 📄 NutritionScreen.kt
-│   │   │   │   │   │   │   │   ├── 📄 SettingsScreen.kt
-│   │   │   │   │   │   │   │   ├── 📄 StatisticsScreen.kt
-│   │   │   │   │   │   │   │   ├── 📄 WorkoutsScreen.kt
-│   ├── 📁 gradle
-│   ├── 📄 gradle.properties
-│   ├── 📄 gradlew
-│   ├── 📄 gradlew.bat
-│   ├── 📄 LICENSE.md
-│   ├── 📄 local.properties
-│   ├── 📄 README.md
-│   ├── 📁 server
-│   │   ├── 📁 bin
-│   │   │   ├── 📁 main
-│   │   │   │   ├── 📄 application.conf
-│   │   │   │   ├── 📄 docker-compose.yml
-│   │   │   │   ├── 📁 es
-│   │   │   │   │   ├── 📁 gaspardev
-│   │   │   │   │   │   ├── 📄 Application.kt
-│   │   │   │   │   │   ├── 📁 db
-│   │   │   │   │   │   ├── 📁 modules
-│   │   │   │   │   │   │   ├── 📄 Sportsmankt.kt
-│   │   │   │   │   │   │   ├── 📄 Trainer.kt
-│   │   │   │   ├── 📄 logback.xml
-│   │   ├── 📁 build
-│   │   ├── 📄 build.gradle.kts
-│   │   ├── 📁 src
-│   │   │   ├── 📁 main
-│   │   │   │   ├── 📁 kotlin
-│   │   │   │   │   ├── 📁 es
-│   │   │   │   │   │   ├── 📁 gaspardev
-│   │   │   │   │   │   │   ├── 📄 Application.kt
-│   │   │   │   │   │   │   ├── 📁 bucket
-│   │   │   │   │   │   │   ├── 📁 db
-│   │   │   │   │   │   │   │   ├── 📄 allergiesMapping.kt
-│   │   │   │   │   │   │   │   ├── 📄 sportsmanMapping.kt
-│   │   │   │   │   │   │   │   ├── 📄 Tables.kt
-│   │   │   │   │   │   │   │   ├── 📄 trainerMappings.kt
-│   │   │   │   │   │   │   │   ├── 📄 userMapping.kt
-│   │   │   │   │   │   │   ├── 📁 modules
-│   │   │   │   │   │   │   │   ├── 📁 endpoints
-│   │   │   │   │   │   │   │   │   ├── 📄 DataBase.kt
-│   │   │   │   │   │   │   │   │   ├── 📄 Resources.kt
-│   │   │   │   │   │   │   │   │   ├── 📄 Sportsmankt.kt
-│   │   │   │   │   │   │   │   │   ├── 📄 Trainer.kt
-│   │   │   │   │   │   │   │   │   ├── 📄 Upload.kt
-│   │   │   │   │   │   │   │   │   ├── 📄 User.kt
-│   │   │   │   │   │   │   │   ├── 📁 shockets
-│   │   │   │   │   │   │   │   │   ├── 📄 Chat.kt
-│   │   │   │   ├── 📁 resources
-│   ├── 📄 settings.gradle.kts
-│   ├── 📁 shared
-│   │   ├── 📁 build
-│   │   ├── 📄 build.gradle.kts
-│   │   ├── 📁 src
-│   │   │   ├── 📁 androidMain
-│   │   │   │   ├── 📁 kotlin
-│   │   │   │   │   ├── 📁 es
-│   │   │   │   │   │   ├── 📁 gaspardev
-│   │   │   │   │   │   │   ├── 📁 core
-│   │   │   │   │   │   │   │   ├── 📁 debug
-│   │   │   │   │   │   │   │   │   ├── 📄 FilePrintter.android.kt
-│   │   │   │   │   │   │   ├── 📁 utils
-│   │   │   │   │   │   │   │   ├── 📄 Constants.android.kt
-│   │   │   │   │   │   │   │   ├── 📄 Logger.android.kt
-│   │   │   ├── 📁 commonMain
-│   │   │   │   ├── 📁 kotlin
-│   │   │   │   │   ├── 📁 es
-│   │   │   │   │   │   ├── 📁 gaspardev
-│   │   │   │   │   │   │   ├── 📁 auxliars
-│   │   │   │   │   │   │   │   ├── 📄 Dupla.kt
-│   │   │   │   │   │   │   │   ├── 📄 Either.kt
-│   │   │   │   │   │   │   ├── 📁 controllers
-│   │   │   │   │   │   │   │   ├── 📄 LoggedUser.kt
-│   │   │   │   │   │   │   ├── 📁 core
-│   │   │   │   │   │   │   │   ├── 📁 debug
-│   │   │   │   │   │   │   │   │   ├── 📄 BasicPrintter.kt
-│   │   │   │   │   │   │   │   │   ├── 📄 DebugPrintter.kt
-│   │   │   │   │   │   │   │   │   ├── 📄 FilePrintter.kt
-│   │   │   │   │   │   │   │   ├── 📁 domain
-│   │   │   │   │   │   │   │   │   ├── 📁 entities
-│   │   │   │   │   │   │   │   │   │   ├── 📄 Availability.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📄 Certification.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📄 Chat.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📄 Diet.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📄 Dish.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📄 Exercise.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📄 Message.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📄 Note.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📄 Resource.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📄 Social.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📄 Sportsman.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📄 Suplemment.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📄 Trainer.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📄 User.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📄 Workout.kt
-│   │   │   │   │   │   │   │   │   ├── 📁 usecases
-│   │   │   │   │   │   │   │   │   │   ├── 📁 create
-│   │   │   │   │   │   │   │   │   │   │   ├── 📄 RegisterNewSportsman.kt
-│   │   │   │   │   │   │   │   │   │   │   ├── 📄 RegisterNewTrainer.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📁 delete
-│   │   │   │   │   │   │   │   │   │   ├── 📁 read
-│   │   │   │   │   │   │   │   │   │   │   ├── 📄 LogInUser.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📁 update
-│   │   │   │   │   │   │   │   │   │   ├── 📄 UseCase.kt
-│   │   │   │   │   │   │   │   ├── 📁 infrastructure
-│   │   │   │   │   │   │   │   │   ├── 📁 apis
-│   │   │   │   │   │   │   │   │   │   ├── 📄 SportsmanAPI.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📄 TrainerAPI.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📄 UserAPI.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📄 WorkoutAPI.kt
-│   │   │   │   │   │   │   │   │   ├── 📁 memo
-│   │   │   │   │   │   │   │   │   │   ├── 📄 CacheManager.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📄 ContentManager.kt
-│   │   │   │   │   │   │   │   │   ├── 📁 repositories
-│   │   │   │   │   │   │   │   │   │   ├── 📄 NotesRepositoryImp.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📄 SportsmantRepositoryImp.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📄 TrainerRepositoryImp.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📄 UserRespositoryImp.kt
-│   │   │   │   │   │   │   │   │   │   ├── 📄 WorkoutRespositoryImp.kt
-│   │   │   │   │   │   │   ├── 📁 enums
-│   │   │   │   │   │   │   │   ├── 📄 BodyPart.kt
-│   │   │   │   │   │   │   │   ├── 📄 MediaType.kt
-│   │   │   │   │   │   │   │   ├── 📄 MessageType.kt
-│   │   │   │   │   │   │   │   ├── 📄 WeekDay.kt
-│   │   │   │   │   │   │   ├── 📁 interfaces
-│   │   │   │   │   │   │   │   ├── 📁 apis
-│   │   │   │   │   │   │   │   │   ├── 📄 API.kt
-│   │   │   │   │   │   │   │   ├── 📁 debug
-│   │   │   │   │   │   │   │   │   ├── 📄 Printter.kt
-│   │   │   │   │   │   │   │   ├── 📁 repositories
-│   │   │   │   │   │   │   │   │   ├── 📄 EntitieRepository.kt
-│   │   │   │   │   │   │   │   │   ├── 📄 NotesRepository.kt
-│   │   │   │   │   │   │   │   │   ├── 📄 SportsmanRepository.kt
-│   │   │   │   │   │   │   │   │   ├── 📄 TrainerRepository.kt
-│   │   │   │   │   │   │   │   │   ├── 📄 UserRepository.kt
-│   │   │   │   │   │   │   │   │   ├── 📄 WorkoutRespository.kt
-│   │   │   │   │   │   │   ├── 📁 utils
-│   │   │   │   │   │   │   │   ├── 📄 Constants.kt
-│   │   │   │   │   │   │   │   ├── 📄 Encrypter.kt
-│   │   │   │   │   │   │   │   ├── 📄 Logger.kt
-│   │   │   ├── 📁 commonTest
-│   │   │   │   ├── 📁 kotlin
-│   │   │   ├── 📁 jvmMain
-│   │   │   │   ├── 📁 kotlin
-│   │   │   │   │   ├── 📁 es
-│   │   │   │   │   │   ├── 📁 gaspardev
-│   │   │   │   │   │   │   ├── 📁 core
-│   │   │   │   │   │   │   │   ├── 📁 debug
-│   │   │   │   │   │   │   │   │   ├── 📄 FilePrintter.jvm.kt
-│   │   │   │   │   │   │   ├── 📁 utils
-│   │   │   │   │   │   │   │   ├── 📄 Constants.jvm.kt
-│   │   │   │   │   │   │   │   ├── 📄 Logger.jvm.kt
-│   ├── 📁 Writerside
-│   │   ├── 📁 .idea
-│   │   ├── 📄 c.list
-│   │   ├── 📁 cfg
-│   │   │   ├── 📄 buildprofiles.xml
-│   │   ├── 📄 d.tree
-│   │   ├── 📁 images
-│   │   │   ├── 📄 completion_procedure.png
-│   │   │   ├── 📄 completion_procedure_dark.png
-│   │   │   ├── 📄 convert_table_to_xml.png
-│   │   │   ├── 📄 convert_table_to_xml_dark.png
-│   │   │   ├── 📄 Data-base.png
-│   │   │   ├── 📄 new_topic_options.png
-│   │   │   ├── 📄 new_topic_options_dark.png
-│   │   ├── 📁 openApi
-│   │   │   ├── 📄 ResourceApi.yaml
-│   │   │   ├── 📄 ResourceApi.yaml~
-│   │   │   ├── 📄 UserApi.yaml
-│   │   ├── 📁 topics
-│   │   │   ├── 📁 topics
-│   │   │   │   ├── 📄 Diagramas-UML.md
-│   │   │   │   ├── 📄 Estructura-de-los-Datos.md
-│   │   │   │   ├── 📄 Mapa-de-rutas.md
-│   │   │   │   ├── 📄 Propuesta_de_Aplicación.md
-│   │   ├── 📄 v.list
-│   │   ├── 📄 writerside.cfg
-
-
-```

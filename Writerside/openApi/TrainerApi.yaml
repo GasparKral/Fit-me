@@ -1,0 +1,430 @@
+openapi: 3.0.3
+info:
+  title: API de Entrenadores
+  description: API para gestionar funcionalidades específicas de entrenadores.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Servidor local
+
+paths:
+  /user/trainer:
+    get:
+      summary: Autenticación de entrenador
+      description: Autentica un entrenador y devuelve sus datos junto con sus atletas asociados.
+      parameters:
+        - name: userIdentification
+          in: query
+          required: true
+          description: Nombre de usuario o correo electrónico del entrenador.
+          schema:
+            type: string
+        - name: userPassword
+          in: query
+          required: true
+          description: Hash de la contraseña del entrenador.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Entrenador autenticado exitosamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  trainer:
+                    $ref: "#/components/schemas/Trainer"
+                  athletes:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Athlete"
+        "400":
+          description: Parámetros requeridos faltantes.
+        "404":
+          description: Entrenador no encontrado.
+
+  /user/trainer/data/pending:
+    get:
+      summary: Obtener atletas que necesitan asistencia
+      description: Retorna el número de atletas que requieren atención del entrenador.
+      parameters:
+        - name: trainer_id
+          in: query
+          required: true
+          description: ID del entrenador.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Número de atletas que necesitan asistencia.
+          content:
+            application/json:
+              schema:
+                type: integer
+        "400":
+          description: Parámetro trainer_id requerido.
+
+  /user/trainer/data/dashboardChartInfo:
+    get:
+      summary: Datos para gráficos del dashboard
+      description: Obtiene información estadística para mostrar en los gráficos del dashboard del entrenador.
+      parameters:
+        - name: trainer_id
+          in: query
+          required: true
+          description: ID del entrenador.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Información de gráficos del dashboard.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardChartInfo"
+        "400":
+          description: Parámetro trainer_id requerido.
+        "417":
+          description: Error de expectativa fallida.
+
+  /user/trainer/data/plans:
+    get:
+      summary: Obtener número de planes activos
+      description: Retorna el total de planes de entrenamiento y dieta activos.
+      parameters:
+        - name: trainer_id
+          in: query
+          required: true
+          description: ID del entrenador.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Número total de planes activos.
+          content:
+            application/json:
+              schema:
+                type: integer
+        "400":
+          description: Parámetro trainer_id requerido.
+
+  /user/trainer/data/session:
+    get:
+      summary: Obtener sesiones próximas
+      description: Retorna el número de sesiones programadas en los próximos 2 días.
+      parameters:
+        - name: trainer_id
+          in: query
+          required: true
+          description: ID del entrenador.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Número de sesiones próximas.
+          content:
+            application/json:
+              schema:
+                type: integer
+        "400":
+          description: Parámetro trainer_id requerido.
+
+  /user/trainer/data/messages:
+    get:
+      summary: Obtener mensajes no leídos
+      description: Retorna el número de mensajes no leídos del entrenador.
+      parameters:
+        - name: trainer_id
+          in: query
+          required: true
+          description: ID del entrenador.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Número de mensajes no leídos.
+          content:
+            application/json:
+              schema:
+                type: integer
+        "400":
+          description: Parámetro trainer_id requerido.
+
+  /user/trainer/data/new_athletes:
+    get:
+      summary: Obtener atletas nuevos
+      description: Retorna el número de atletas que se han unido en el último día.
+      parameters:
+        - name: trainer_id
+          in: query
+          required: true
+          description: ID del entrenador.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Número de atletas nuevos.
+          content:
+            application/json:
+              schema:
+                type: integer
+        "400":
+          description: Parámetro trainer_id requerido.
+
+  /user/trainer/data/new_active_plans:
+    get:
+      summary: Obtener nuevos planes activos
+      description: Retorna el número de planes activados en los últimos 30 días.
+      parameters:
+        - name: trainer_id
+          in: query
+          required: true
+          description: ID del entrenador.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Número de nuevos planes activos.
+          content:
+            application/json:
+              schema:
+                type: integer
+        "400":
+          description: Parámetro trainer_id requerido.
+
+  /user/trainer/data/new_messages:
+    get:
+      summary: Obtener mensajes nuevos
+      description: Retorna el número de mensajes recibidos en el último día.
+      parameters:
+        - name: trainer_id
+          in: query
+          required: true
+          description: ID del entrenador.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Número de mensajes nuevos.
+          content:
+            application/json:
+              schema:
+                type: integer
+        "400":
+          description: Parámetro trainer_id requerido.
+
+components:
+  schemas:
+    Trainer:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        specialization:
+          type: string
+          description: Especialización del entrenador
+        yearsOfExperience:
+          type: integer
+          description: Años de experiencia
+        socials:
+          type: object
+          additionalProperties:
+            type: string
+          description: Redes sociales del entrenador
+        certifications:
+          type: array
+          items:
+            $ref: "#/components/schemas/Certification"
+        availability:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: "#/components/schemas/TimeSlot"
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        fullname:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        creationDate:
+          type: string
+          format: date-time
+        userImageURL:
+          type: string
+        status:
+          $ref: "#/components/schemas/UserStatus"
+
+    UserStatus:
+      type: object
+      properties:
+        state:
+          type: string
+          enum: [ACTIVE, INACTIVE]
+        lastTimeActive:
+          type: string
+          format: date-time
+
+    Athlete:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        age:
+          type: integer
+        sex:
+          type: string
+          enum: [MALE, FEMALE]
+        trainingSince:
+          type: string
+          format: date-time
+        allergies:
+          type: array
+          items:
+            $ref: "#/components/schemas/Allergy"
+        measurements:
+          $ref: "#/components/schemas/Measurements"
+        workout:
+          $ref: "#/components/schemas/Workout"
+        diet:
+          $ref: "#/components/schemas/Diet"
+        needAssistant:
+          type: boolean
+
+    Allergy:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+    Measurements:
+      type: object
+      properties:
+        weight:
+          type: number
+          format: double
+        height:
+          type: number
+          format: double
+        bodyFat:
+          type: number
+          format: double
+        armSize:
+          type: number
+          format: double
+        chest_backSize:
+          type: number
+          format: double
+        hipSize:
+          type: number
+          format: double
+        legSize:
+          type: number
+          format: double
+        calvesSize:
+          type: number
+          format: double
+
+    Certification:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        issuingOrganization:
+          type: string
+        completeAt:
+          type: string
+          format: date-time
+
+    TimeSlot:
+      type: object
+      properties:
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+
+    Workout:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        difficulty:
+          type: string
+          enum: [EASY, ADVANCE, HARD]
+        duration:
+          type: string
+          description: Duración en formato ISO
+        startAt:
+          type: string
+          format: date-time
+        workoutType:
+          type: string
+          enum: [STRENGTH, CARDIO, FULL_BODY, UPPER_BODY, LOWER_BODY, CORE, FLEXIBILITY, ALL]
+
+    Diet:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        dietType:
+          type: string
+          enum: [WEIGHT_LOSS, MUSCLE_GAIN, BALANCED, VEGETARIAN, VEGAN, LOW_CARB, PERFORMANCE, ALL]
+        duration:
+          type: string
+          description: Duración en formato ISO
+        startAt:
+          type: string
+          format: date-time
+
+    DashboardChartInfo:
+      type: object
+      properties:
+        workouts:
+          type: array
+          items:
+            $ref: "#/components/schemas/CompletionWorkoutStatistic"
+        diets:
+          type: array
+          items:
+            $ref: "#/components/schemas/CompletionDietStatistics"
+
+    CompletionWorkoutStatistic:
+      type: object
+      properties:
+        workout:
+          $ref: "#/components/schemas/Workout"
+        completeAt:
+          type: string
+          format: date-time
+        assignedAthlete:
+          $ref: "#/components/schemas/Athlete"
+
+    CompletionDietStatistics:
+      type: object
+      properties:
+        diet:
+          $ref: "#/components/schemas/Diet"
+        completeAt:
+          type: string
+          format: date-time
+        asignedAthlete:
+          type: integer

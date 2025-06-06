@@ -1,0 +1,184 @@
+openapi: 3.0.3
+info:
+  title: API de WebSockets
+  description: Documentación de los endpoints WebSocket para comunicación en tiempo real.
+  version: 1.0.0
+servers:
+  - url: ws://localhost:8080
+    description: Servidor WebSocket local
+
+paths:
+  /chat/{userId}/{conversationId}:
+    get:
+      summary: Conexión WebSocket para chat
+      description: |
+        Establece una conexión WebSocket para comunicación en tiempo real entre entrenador y atleta.
+        
+        **Flujo de funcionamiento:**
+        1. El cliente se conecta al WebSocket
+        2. El servidor añade la sesión a las sesiones activas
+        3. Los mensajes se envían/reciben en formato JSON
+        4. El servidor gestiona el estado de entrega de mensajes
+        
+        **Formato de mensajes:**
+        ```json
+        {
+          "userName": "string",
+          "sendAt": "2024-01-01T12:00:00Z",
+          "content": "string",
+          "messageStatus": "SENT"
+        }
+        ```
+        
+        **Estados de mensajes:**
+        - `SENT`: Mensaje enviado
+        - `DELIVERED`: Mensaje entregado al destinatario
+        - `READ`: Mensaje leído por el destinatario
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID del usuario que se conecta (entrenador o atleta).
+          schema:
+            type: integer
+        - name: conversationId
+          in: path
+          required: true
+          description: ID de la conversación.
+          schema:
+            type: integer
+      responses:
+        "101":
+          description: Switching Protocols - Conexión WebSocket establecida
+        "400":
+          description: Parámetros de conexión inválidos
+        "404":
+          description: Conversación no encontrada
+
+  /status:
+    get:
+      summary: WebSocket de estado (testing)
+      description: |
+        Endpoint WebSocket de prueba para verificar la conectividad.
+        Envía un mensaje de testing y cierra la conexión inmediatamente.
+      responses:
+        "101":
+          description: Switching Protocols - Conexión WebSocket establecida
+        "200":
+          description: Conexión cerrada normalmente
+
+components:
+  schemas:
+    WebSocketMessage:
+      type: object
+      description: Formato de mensaje enviado/recibido a través de WebSocket
+      properties:
+        userName:
+          type: string
+          description: Nombre del usuario que envía el mensaje
+        sendAt:
+          type: string
+          format: date-time
+          description: Timestamp de cuando se envió el mensaje
+        content:
+          type: string
+          description: Contenido del mensaje
+        messageStatus:
+          type: string
+          enum: [SENT, DELIVERED, READ]
+          description: Estado del mensaje
+      required:
+        - userName
+        - sendAt
+        - content
+        - messageStatus
+
+    WebSocketError:
+      type: object
+      description: Formato de error enviado a través de WebSocket
+      properties:
+        error:
+          type: string
+          description: Descripción del error
+        code:
+          type: integer
+          description: Código de error
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp del error
+
+    ConnectionStatus:
+      type: object
+      description: Estado de la conexión WebSocket
+      properties:
+        userId:
+          type: integer
+          description: ID del usuario conectado
+        conversationId:
+          type: integer
+          description: ID de la conversación
+        connected:
+          type: boolean
+          description: Estado de conexión
+        lastActivity:
+          type: string
+          format: date-time
+          description: Última actividad registrada
+
+# Eventos WebSocket
+x-websocket-events:
+  message:
+    description: Evento disparado cuando se recibe un mensaje
+    payload:
+      $ref: "#/components/schemas/WebSocketMessage"
+  
+  user_connected:
+    description: Evento disparado cuando un usuario se conecta
+    payload:
+      type: object
+      properties:
+        userId:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+  
+  user_disconnected:
+    description: Evento disparado cuando un usuario se desconecta
+    payload:
+      type: object
+      properties:
+        userId:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+  
+  message_delivered:
+    description: Evento disparado cuando un mensaje es entregado
+    payload:
+      type: object
+      properties:
+        messageId:
+          type: integer
+        status:
+          type: string
+          enum: [DELIVERED]
+        timestamp:
+          type: string
+          format: date-time
+  
+  message_read:
+    description: Evento disparado cuando un mensaje es leído
+    payload:
+      type: object
+      properties:
+        messageId:
+          type: integer
+        status:
+          type: string
+          enum: [READ]
+        timestamp:
+          type: string
+          format: date-time

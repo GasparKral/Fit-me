@@ -1,16 +1,16 @@
-package es.gaspardev.core.domain.usecases.read
+package es.gaspardev.core.domain.usecases.update
 
 import es.gaspardev.auxliars.Either
 import es.gaspardev.core.domain.entities.workouts.WorkoutPlan
-import es.gaspardev.core.domain.entities.users.Trainer
 import es.gaspardev.core.domain.usecases.UseCase
 import es.gaspardev.core.infrastructure.repositories.WorkoutRepositoryImp
 import es.gaspardev.interfaces.repositories.WorkoutRepository
 
-class GetTrainerWorkoutsPlans(
+class UpdateWorkout(
     private val repo: WorkoutRepository = WorkoutRepositoryImp()
-) : UseCase<List<WorkoutPlan>, Trainer>() {
-    override suspend fun run(params: Trainer): Either<Exception, List<WorkoutPlan>> {
-        return repo.getWorkoutsPlans(params)
+) : UseCase<WorkoutPlan, WorkoutPlan>() {
+    override suspend fun run(params: WorkoutPlan): Either<Exception, WorkoutPlan> {
+        val result = repo.updateWorkout(params)
+        return if (result?.isFailure == true) Either.Failure(result.error) else Either.Success(params)
     }
 }

@@ -6,8 +6,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class DietTemplate(
+    private val templateId: Int,
     var name: String,
     var description: String,
     var dietType: DietType,
     val dishes: Map<WeekDay, List<DietDish>>
-)
+) {
+
+    fun getId(): Int = templateId
+
+}

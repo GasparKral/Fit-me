@@ -13,6 +13,7 @@ import kotlin.time.toDuration
 
 @Serializable
 data class Workout(
+    private val id: Int? = null,
     var name: String = "",
     var description: String = "",
     var difficulty: Difficulty = Difficulty.EASY,
@@ -26,6 +27,8 @@ data class Workout(
     companion object {
         const val URLPATH = "/workouts"
     }
+
+    fun getId(): Int = id ?: throw IllegalStateException("ID no puede ser null")
 
     fun getWorkoutProgression(): Double {
         val now = Clock.System.now()

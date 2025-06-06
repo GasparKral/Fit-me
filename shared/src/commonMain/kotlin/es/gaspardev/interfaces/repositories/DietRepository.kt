@@ -20,5 +20,7 @@ interface DietRepository {
     suspend fun getDietsTemplates(trainer: Trainer): Either<Exception, List<DietTemplate>>
 
     suspend fun getDietsHistory(athlete: Athlete): Either<Exception, List<CompletionDietStatistics>>
-    suspend fun createDiet(diet: Diet, trainer: Trainer): Either<Exception, Boolean>
+    suspend fun createDiet(diet: Diet, trainer: Trainer): Either<Exception, Int>
+    suspend fun deleteDiet(dietId: Int): Either.Failure<Exception>?
+    suspend fun updateDiet(dietPlan: DietPlan): Either.Failure<Exception>?
 }

@@ -7,12 +7,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class WorkoutPlan(
+    val workoutId: Int,
     var name: String,
     var description: String,
     var type: WorkoutType,
     var duration: String,
     val frequency: String,
     var difficulty: Difficulty,
-    val assignedCount: Int,
+    val asignedCount: Int,
     var exercises: Map<WeekDay, List<WorkoutExecise>>
 )

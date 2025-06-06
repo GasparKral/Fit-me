@@ -35,13 +35,22 @@ class DietRepositoryImp : DietRepository {
         )
     }
 
-    override suspend fun createDiet(diet: Diet, trainer: Trainer): Either<Exception, Boolean> {
-        val result = DietRepository.API.post(
+    override suspend fun createDiet(diet: Diet, trainer: Trainer): Either<Exception, Int> {
+        return DietRepository.API.post(
             listOf("create"),
             Pair(diet, trainer)
+        ).foldValue<Either<Exception, Int>>(
+            { value -> return Either.Success(value.getId()) },
+            { err -> return Either.Failure(err) }
         )
+    }
 
-        return if (result.isFailure) Either.Failure(result.getError()!!) else Either.Success(true)
+    override suspend fun deleteDiet(dietId: Int): Either.Failure<Exception>? {
+        return DietRepository.API.delete(emptyList(), params = arrayOf(Pair("diet_id", dietId.toString())))
+    }
+
+    override suspend fun updateDiet(dietPlan: DietPlan): Either.Failure<Exception>? {
+        return DietRepository.API.patch(emptyList(), dietPlan)
     }
 
 }

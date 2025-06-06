@@ -8,7 +8,7 @@ import java.io.FileWriter
 import java.io.IOException
 
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
-actual object FilePrintter : Printter {
+actual object FilePrinter : Printter {
 
     private var outputFile: File = File(System.getProperty("user.home") + "/Desktop/Log.txt")
 

@@ -28,8 +28,6 @@ kotlin {
             implementation(libs.io.ktor.ktor.serialization.kotlinx.json)
             implementation(libs.ktor.ktor.client.logging)
             implementation(libs.io.ktor.ktor.client.content.negotiation2)
-            implementation(libs.postgresql)
-
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

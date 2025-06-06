@@ -7,6 +7,8 @@ import es.gaspardev.core.domain.entities.workouts.Workout
 import es.gaspardev.enums.Sex
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 @Serializable
 class Athlete(
@@ -29,22 +31,17 @@ class Athlete(
         val wProgression = workout?.getWorkoutProgression() ?: 0.0
         val dProgression = diet?.getDietProgression() ?: 0.0
 
-        // If both exist, calculate average
-        return if (workout != null && diet != null) {
+        val progression = if (workout != null && diet != null) {
             (wProgression + dProgression) / 2.0
-        }
-        // If only workout exists, use its progression
-        else if (workout != null) {
+        } else if (workout != null) {
             wProgression
-        }
-        // If only diet exists, use its progression
-        else if (diet != null) {
+        } else if (diet != null) {
             dProgression
-        }
-        // If neither exists
-        else {
+        } else {
             0.0
         }
+
+        return BigDecimal(progression).setScale(2, RoundingMode.HALF_UP).toDouble()
     }
 
 }

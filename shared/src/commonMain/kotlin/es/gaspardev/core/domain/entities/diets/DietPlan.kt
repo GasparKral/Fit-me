@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class DietPlan(
+    val dietId: Int,
     var name: String,
     var description: String,
     var type: DietType,
