@@ -182,6 +182,31 @@ fun Application.trainer() {
             }
         }
 
+        get("${Trainer.URLPATH}/comunication") {
+            val userID = call.request.queryParameters["user_id"]
+                ?: return@get call.respondText("Parámetro user_id requerido", status = HttpStatusCode.BadRequest)
+
+            try {
+                // Validate user ID format
+                val userIdInt = userID.toIntOrNull()
+                    ?: return@get call.respondText(
+                        "user_id debe ser un número válido",
+                        status = HttpStatusCode.BadRequest
+                    )
+
+                val result = transaction {
+                    CommunicationDao().getConversations(userIdInt).map { it.toModel() }
+                }
+                call.respond(result)
+            } catch (e: NumberFormatException) {
+                call.respondText("user_id debe ser un número válido", status = HttpStatusCode.BadRequest)
+            } catch (e: Exception) {
+                println("Error in communication endpoint: ${e.message}")
+                e.printStackTrace()
+                call.respondText("Error interno del servidor", status = HttpStatusCode.InternalServerError)
+            }
+        }
+
     }
 
 }

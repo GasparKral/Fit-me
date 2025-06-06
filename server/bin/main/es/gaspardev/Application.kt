@@ -1,7 +1,7 @@
 package es.gaspardev
 
 import es.gaspardev.modules.endpoints.*
-import es.gaspardev.modules.shockets.socket
+import es.gaspardev.modules.shockets.chat
 import es.gaspardev.utils.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
@@ -56,7 +56,7 @@ fun Application.module() {
 
     /* CARGA DE MÓDULOS */
     configureDatabases()
-    socket()
+    chat()
 
     /* Modulos Referentes a recursos */
     upload()
@@ -78,7 +78,7 @@ fun startDB() {
         val runningOutput = checkRunningProcess.inputStream.bufferedReader().readText().trim()
 
         if (runningOutput.isNotEmpty()) {
-            println("✅ El contenedor PostgreSQL ya está corriendo.")
+            println("El contenedor PostgreSQL ya está corriendo.")
             return
         }
 
@@ -89,16 +89,16 @@ fun startDB() {
 
         if (existsOutput.isNotEmpty()) {
             // El contenedor existe pero está detenido, iniciarlo
-            println("🔄 Iniciando contenedor PostgreSQL existente...")
+            println("Iniciando contenedor PostgreSQL existente...")
             val startProcessBuilder = ProcessBuilder("docker", "start", DATA_BASE_NAME)
             val startProcess = startProcessBuilder.start()
             val startOutput = startProcess.inputStream.bufferedReader().readText()
 
             if (startProcess.waitFor() == 0) {
-                println("✅ Contenedor PostgreSQL existente iniciado: $startOutput")
+                println("Contenedor PostgreSQL existente iniciado: $startOutput")
                 return
             } else {
-                println("❌ Error al iniciar el contenedor existente")
+                println("Error al iniciar el contenedor existente")
             }
         }
 
@@ -112,7 +112,7 @@ fun startDB() {
             "-e", "POSTGRES_USER=${DATA_BASE_USERNAME}",
             "-e", "POSTGRES_PASSWORD=${DATA_BASE_PASSWORD}",
             "-e", "POSTGRES_DB=${DATA_BASE_NAME}",
-            //  "-v", "$initScriptsPath:/docker-entrypoint-initdb.d",
+            "-v", "$initScriptsPath:/docker-entrypoint-initdb.d",
             "-p", "${DATA_BASE_PORT}:5432",
             "-d",
             "postgres:15"
@@ -124,13 +124,13 @@ fun startDB() {
         val output = process.inputStream.bufferedReader().readText()
 
         if (process.waitFor() == 0) {
-            println("✅ Nuevo contenedor PostgreSQL creado e iniciado: $output")
+            println("Nuevo contenedor PostgreSQL creado e iniciado: $output")
         } else {
-            println("❌ Error al crear el contenedor: $output")
+            println("Error al crear el contenedor: $output")
             exitProcess(1)
         }
     } catch (e: Exception) {
-        println("❌ Error al gestionar PostgreSQL: ${e.message}")
+        println("Error al gestionar PostgreSQL: ${e.message}")
         exitProcess(1)
     }
 }
