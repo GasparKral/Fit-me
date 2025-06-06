@@ -4,27 +4,34 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
-import es.gaspardev.core.debug.FilePrintter
+import com.ramcosta.composedestinations.DestinationsNavHost
+import es.gaspardev.ui.screens.NavGraphs
+import es.gaspardev.ui.screens.destinations.DashboardScreenDestination
+import es.gaspardev.ui.screens.destinations.LoginScreenDestination
 
 class MainActivity : ComponentActivity() {
-
-    fun INIT_PROCCESS() {
-        FilePrintter.init(this)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        INIT_PROCCESS()
-
         setContent {
-            App()
+            AppTheme {
+                AppNavigation(
+                    isUserLoggedIn = checkIfUserIsLoggedIn()
+                )
+            }
         }
+    }
+
+    private fun checkIfUserIsLoggedIn(): Boolean {
+        return true //TODO CAMBIAR
     }
 }
 
-@Preview
 @Composable
-fun AppAndroidPreview() {
-    App()
+fun AppNavigation(
+    isUserLoggedIn: Boolean = false
+) {
+    DestinationsNavHost(
+        navGraph = NavGraphs.root,
+        startRoute = if (isUserLoggedIn) DashboardScreenDestination else LoginScreenDestination
+    )
 }
