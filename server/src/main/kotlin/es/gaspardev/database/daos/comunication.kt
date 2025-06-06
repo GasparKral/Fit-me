@@ -74,7 +74,6 @@ class CommunicationDao {
         conversation
     }
 
-    // Mensajes
     fun createMessage(
         messageId: String = UUID.randomUUID().toString(),
         conversationId: Int,
@@ -83,35 +82,48 @@ class CommunicationDao {
         content: String,
         messageType: MessageType = MessageType.TEXT,
         metadata: String? = null
-    ): MessageEntity = transaction {
-        val now = Clock.System.now()
+    ): MessageEntity {
+        return try {
+            val now = Clock.System.now()
 
-        val message = MessageEntity.new {
-            this.messageId = messageId
-            this.conversation = ConversationEntity[conversationId]
-            this.sender = UserEntity[senderId]
-            this.receiver = UserEntity[receiverId]
-            this.senderName = UserEntity[senderId].fullname
-            this.content = content
-            this.messageType = messageType
-            this.sentAt = now
-            this.status = MessageStatus.SENT
-            this.metadata = metadata
+            println("Creating message: messageId=$messageId, conversationId=$conversationId, senderId=$senderId")
+
+            val message = MessageEntity.new {
+                this.messageId = messageId
+                this.conversation = ConversationEntity[conversationId]
+                this.sender = UserEntity[senderId]
+                this.receiver = UserEntity[receiverId]
+                this.senderName = UserEntity[senderId].fullname
+                this.content = content
+                this.messageType = messageType
+                this.sentAt = now
+                this.status = MessageStatus.SENT
+                this.metadata = metadata
+            }
+
+            // **FIX: Forzar flush para que se genere el ID**
+            message.flush()
+
+            // Actualizar última actividad de la conversación
+            val conversation = ConversationEntity[conversationId]
+            conversation.updateLastActivity()
+
+            // Incrementar contador de no leídos para el receptor
+            val receiverConversationUser = ConversationUserEntity.find {
+                (ConversationUsers.conversationId eq conversationId) and
+                        (ConversationUsers.userId eq receiverId)
+            }.firstOrNull()
+
+            receiverConversationUser?.incrementUnreadCount()
+
+            println("Message created successfully: id=${message.id}, messageId=${message.messageId}")
+            message
+
+        } catch (e: Exception) {
+            println("Error creating message: ${e.message}")
+            e.printStackTrace()
+            throw e
         }
-
-        // Actualizar última actividad de la conversación
-        val conversation = ConversationEntity[conversationId]
-        conversation.updateLastActivity()
-
-        // Incrementar contador de no leídos para el receptor
-        val receiverConversationUser = ConversationUserEntity.find {
-            (ConversationUsers.conversationId eq conversationId) and
-                    (ConversationUsers.userId eq receiverId)
-        }.firstOrNull()
-
-        receiverConversationUser?.incrementUnreadCount()
-
-        message
     }
 
     fun getMessage(messageId: String): MessageEntity = transaction {
@@ -131,16 +143,22 @@ class CommunicationDao {
         messageId: String,
         status: MessageStatus,
         timestamp: Instant = Clock.System.now()
-    ): Boolean = transaction {
-        try {
+    ): Boolean {
+        return try {
+            println("Updating message status: messageId=$messageId, status=$status")
+
             val message = MessageEntity.find { Messages.messageId eq messageId }.firstOrNull()
-                ?: return@transaction false
+            if (message == null) {
+                println("Message not found: messageId=$messageId")
+                return false
+            }
 
             when (status) {
                 MessageStatus.DELIVERED -> {
                     if (message.status == MessageStatus.SENT) {
                         message.status = status
                         message.deliveredAt = timestamp
+                        println("Message marked as delivered: messageId=$messageId")
                     }
                 }
 
@@ -154,14 +172,22 @@ class CommunicationDao {
                     }.firstOrNull()
 
                     receiverConversationUser?.markAllAsRead(messageId)
+                    println("Message marked as read: messageId=$messageId")
                 }
 
                 else -> {
                     message.status = status
+                    println("Message status updated: messageId=$messageId, status=$status")
                 }
             }
+
+            // **FIX: Forzar flush para persistir cambios**
+            message.flush()
             true
+
         } catch (e: Exception) {
+            println("Error updating message status: ${e.message}")
+            e.printStackTrace()
             false
         }
     }
@@ -171,30 +197,40 @@ class CommunicationDao {
             val message = MessageEntity.find { Messages.messageId eq messageId }.firstOrNull()
                 ?: return@transaction false
             message.status = MessageStatus.FAILED
+            message.flush() // **FIX: Forzar persistencia**
             true
         } catch (e: Exception) {
+            println("Error marking message as failed: ${e.message}")
             false
         }
     }
 
-    // Estados de usuario
-    fun updateUserOnlineStatus(userId: Int, isOnline: Boolean): UserStatusEntity = transaction {
-        val userStatus = UserStatusEntity.find { UserStatus.userId eq userId }.firstOrNull()
-            ?: UserStatusEntity.new {
-                user = UserEntity[userId]
-                state = StatusState.ACTIVE // Asumiendo que existe este enum
-                lastTimeActive = Clock.System.now()
-                this.isOnline = false
-                lastSeenAt = Clock.System.now()
+    // Estados de usuario - **MÉTODO CORREGIDO**
+    fun updateUserOnlineStatus(userId: Int, isOnline: Boolean): UserStatusEntity {
+        return try {
+            val userStatus = UserStatusEntity.find { UserStatus.userId eq userId }.firstOrNull()
+                ?: UserStatusEntity.new {
+                    user = UserEntity[userId]
+                    state = StatusState.ACTIVE
+                    lastTimeActive = Clock.System.now()
+                    this.isOnline = false
+                    lastSeenAt = Clock.System.now()
+                }
+
+            if (isOnline) {
+                userStatus.setOnline()
+            } else {
+                userStatus.setOffline()
             }
 
-        if (isOnline) {
-            userStatus.setOnline()
-        } else {
-            userStatus.setOffline()
-        }
+            // **FIX: Forzar persistencia**
+            userStatus.flush()
+            userStatus
 
-        userStatus
+        } catch (e: Exception) {
+            println("Error updating user online status: ${e.message}")
+            throw e
+        }
     }
 
     fun getUserOnlineStatus(userId: Int): Boolean = transaction {
@@ -211,7 +247,7 @@ class CommunicationDao {
         }.map { it.user }.toList()
     }
 
-    // Sesiones activas
+    // Sesiones activas - **MÉTODOS CORREGIDOS**
     fun createActiveSession(
         userId: Int,
         conversationId: Int,
@@ -219,14 +255,21 @@ class CommunicationDao {
         userAgent: String? = null,
         ipAddress: String? = null
     ): ActiveSessionEntity = transaction {
-        ActiveSessionEntity.new {
-            user = UserEntity[userId]
-            conversation = ConversationEntity[conversationId]
-            this.sessionId = sessionId
-            connectedAt = Clock.System.now()
-            lastPingAt = Clock.System.now()
-            this.userAgent = userAgent
-            this.ipAddress = ipAddress
+        try {
+            val session = ActiveSessionEntity.new {
+                user = UserEntity[userId]
+                conversation = ConversationEntity[conversationId]
+                this.sessionId = sessionId
+                connectedAt = Clock.System.now()
+                lastPingAt = Clock.System.now()
+                this.userAgent = userAgent
+                this.ipAddress = ipAddress
+            }
+            session.flush() // **FIX: Forzar persistencia**
+            session
+        } catch (e: Exception) {
+            println("Error creating active session: ${e.message}")
+            throw e
         }
     }
 
@@ -239,6 +282,7 @@ class CommunicationDao {
             }.forEach { it.delete() }
             true
         } catch (e: Exception) {
+            println("Error removing active session: ${e.message}")
             false
         }
     }
@@ -252,8 +296,10 @@ class CommunicationDao {
             }.firstOrNull()
 
             session?.updatePing()
+            session?.flush() // **FIX: Forzar persistencia**
             session != null
         } catch (e: Exception) {
+            println("Error updating session ping: ${e.message}")
             false
         }
     }
