@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "name": "composeApp (1)",
+            "type": "android-app",
+            "workingDir": "C:\\programar\\Fit-me",
+            "allowParallelRun": true,
+            "module": "Fit-me.composeApp"
+        }
+    ]
+}

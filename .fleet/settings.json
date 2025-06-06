@@ -10,5 +10,10 @@
         }
     ],
     "prettier.mode": "Enabled",
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "gradle.autoImportOnSave": true,
+    "files.exclude": [
+        ".DS_Store",
+        ".git"
+    ]
 }
