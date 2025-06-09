@@ -18,12 +18,23 @@ data class Diet(
     var dietType: DietType = DietType.ALL,
     var duration: Duration = 0.toDuration(DurationUnit.HOURS),
     val startAt: Instant = Clock.System.now(),
-    val dishes: Map<WeekDay, List<DietDish>> = mapOf(),
-    val notes: List<Note> = listOf()
+    val dishes: MutableMap<WeekDay, MutableList<DietDish>> = mutableMapOf()
 ) {
 
     companion object {
         const val URLPATH = "/diets"
+
+        fun fromPlan(plan: DietPlan): Diet {
+            return Diet(
+                id = plan.dietId,
+                name = plan.name,
+                description = plan.description,
+                dietType = plan.type,
+                duration = plan.duration,
+                startAt = Instant.DISTANT_FUTURE,
+                dishes = plan.dishes
+            )
+        }
     }
 
     fun getId(): Int = id ?: throw IllegalStateException("ID no puede ser null")
@@ -44,4 +55,25 @@ data class Diet(
         return (elapsed.inWholeMilliseconds.toDouble() / totalDuration.inWholeMilliseconds.toDouble()) * 100
     }
 
+    override fun toString(): String {
+        val totalDishes = dishes.values.flatten().size
+        val dishesByDay = dishes.mapValues { it.value.size }
+        val progression = "%.1f".format(getDietProgression())
+        val durationInDays = duration.inWholeDays
+
+        return buildString {
+            appendLine("Diet Plan: $name")
+            appendLine("Description: $description")
+            appendLine("Type: $dietType")
+            appendLine("Duration: $durationInDays days")
+            appendLine("Progress: $progression%")
+            appendLine("Total dishes: $totalDishes")
+            if (dishesByDay.isNotEmpty()) {
+                appendLine("Dishes by day:")
+                dishesByDay.forEach { (day, count) ->
+                    appendLine("  $day: $count dish(es)")
+                }
+            }
+        }.trimEnd()
+    }
 }

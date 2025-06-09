@@ -17,7 +17,7 @@ interface WorkoutRepository {
     suspend fun getWorkoutsPlans(trainer: Trainer): Either<Exception, List<WorkoutPlan>>
     suspend fun getWorkoutsPlanTemplates(trainer: Trainer): Either<Exception, List<WorkoutTemplate>>
     suspend fun createWorkout(workout: Workout, trainer: Trainer): Either<Exception, Int>
-    suspend fun deleteWorkout(workoutId: Int): Either.Failure<Exception>?
-    suspend fun updateWorkout(workout: WorkoutPlan): Either.Failure<Exception>?
+    suspend fun deleteWorkout(workoutId: Int): Either<Exception, Unit>
+    suspend fun updateWorkout(workout: WorkoutPlan): Either<Exception, WorkoutPlan>
 
 }

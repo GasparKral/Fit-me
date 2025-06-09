@@ -11,5 +11,5 @@ data class WorkoutTemplate(
     var description: String,
     var difficulty: Difficulty = Difficulty.EASY,
     var workoutType: WorkoutType,
-    val exercises: Map<WeekDay, List<WorkoutExecise>>
+    val exercises: MutableMap<WeekDay, MutableList<WorkoutExecise>>
 )

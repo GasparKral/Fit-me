@@ -10,7 +10,7 @@ data class DietTemplate(
     var name: String,
     var description: String,
     var dietType: DietType,
-    val dishes: Map<WeekDay, List<DietDish>>
+    val dishes: MutableMap<WeekDay, MutableList<DietDish>>
 ) {
 
     fun getId(): Int = templateId

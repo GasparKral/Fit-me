@@ -11,10 +11,9 @@ import es.gaspardev.core.domain.entities.users.User
 import es.gaspardev.interfaces.repositories.TrainerRepository
 
 class TrainerRepositoryImp : TrainerRepository {
-    private suspend fun getIntValueForTrainer(fragment: List<String>, trainer: Trainer): Int {
+    private suspend fun getIntValueForTrainer(end: String, trainer: Trainer): Int {
         return TrainerRepository.API.getSingleValue<Int>(
-            fragment,
-            params = arrayOf(Pair("trainer_id", trainer.user.id.toString()))
+            listOf("data", trainer.user.id.toString(), end)
         ).foldValue(
             { value -> value },
             { _ -> 0 }
@@ -22,39 +21,36 @@ class TrainerRepositoryImp : TrainerRepository {
     }
 
     override suspend fun getPendingWorkouts(trainer: Trainer): Int {
-        return getIntValueForTrainer(listOf("data", "pending"), trainer)
+        return getIntValueForTrainer("pending", trainer)
     }
 
     override suspend fun getActivePlans(trainer: Trainer): Int {
-        return getIntValueForTrainer(listOf("data", "plans"), trainer)
+        return getIntValueForTrainer("plans", trainer)
     }
 
     override suspend fun getUpCommingSessions(trainer: Trainer): Int {
-        return getIntValueForTrainer(listOf("data", "session"), trainer)
+        return getIntValueForTrainer("session", trainer)
     }
 
     override suspend fun getUnreadMessages(trainer: Trainer): Int {
-        return getIntValueForTrainer(listOf("data", "messages"), trainer)
+        return getIntValueForTrainer("messages", trainer)
     }
 
     override suspend fun getNewAthlete(trainer: Trainer): Int {
-        return getIntValueForTrainer(listOf("data", "new_athletes"), trainer)
+        return getIntValueForTrainer("new_athletes", trainer)
     }
 
     override suspend fun getNewActivePlans(trainer: Trainer): Int {
-        return getIntValueForTrainer(listOf("data", "new_active_plans"), trainer)
+        return getIntValueForTrainer("new_active_plans", trainer)
     }
 
     override suspend fun getNewMessages(trainer: Trainer): Int {
-        return getIntValueForTrainer(listOf("data", "new_messages"), trainer)
+        return getIntValueForTrainer("new_messages", trainer)
     }
 
     override suspend fun getDashboardChartData(trainer: Trainer): DashboardChartInfo {
         return TrainerRepository.API.getSingleValue<DashboardChartInfo>(
-            listOf("data", "dashboardChartInfo"),
-            params = arrayOf(
-                Pair("trainer_id", trainer.user.id.toString())
-            )
+            listOf("data", trainer.user.id.toString(), "dashboardChartInfo")
         ).foldValue(
             { value -> value },
             { _ -> DashboardChartInfo() }
@@ -76,23 +72,18 @@ class TrainerRepositoryImp : TrainerRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun logIn(expectedUser: LoginCredentials): Either<Exception, Pair<Trainer, List<Athlete>>> {
-        return TrainerRepository.API.getSingleValue<Pair<Trainer, List<Athlete>>>(
-            listOf(),
-            params = arrayOf(
-                Pair("userIdentification", expectedUser.userIdetification),
-                Pair("userPassword", expectedUser.userPassword)
-            )
+    override suspend fun logIn(expectedUser: LoginCredentials): Either<Exception, Triple<Trainer, List<Athlete>, List<Conversation>>> {
+        return TrainerRepository.API.getSingleValue<Triple<Trainer, List<Athlete>, List<Conversation>>>(
+            segments = listOf(expectedUser.userIdetification, expectedUser.userPassword)
         ).foldValue(
             { value -> Either.Success(value) },
             { err -> Either.Failure(err) }
         )
     }
 
-    override suspend fun getComunications(user: User): Either<Exception, List<Conversation>> {
+    override suspend fun getConversations(user: User): Either<Exception, List<Conversation>> {
         return TrainerRepository.API.getGenericList<Conversation>(
-            listOf("comunication"),
-            params = arrayOf(Pair("user_id", user.id.toString()))
+            listOf(user.id.toString(), "comunication")
         )
     }
 }

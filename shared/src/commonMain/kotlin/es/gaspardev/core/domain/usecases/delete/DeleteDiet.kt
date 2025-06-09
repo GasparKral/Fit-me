@@ -9,7 +9,9 @@ class DeleteDiet(
     private val repo: DietRepository = DietRepositoryImp()
 ) : UseCase<UseCase.None, Int>() {
     override suspend fun run(params: Int): Either<Exception, None> {
-        val result = repo.deleteDiet(params)
-        return if (result?.isFailure == true) Either.Failure(result.error) else Either.Success(None)
+        return repo.deleteDiet(params).foldValue(
+            { _ -> Either.Success(None) },
+            { err -> Either.Failure(err) }
+        )
     }
 }

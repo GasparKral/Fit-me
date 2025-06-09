@@ -4,18 +4,17 @@ import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 
-fun saveQrToDesktop(bufferedImage: BufferedImage, fileName: String) {
-    // Obtener el directorio del escritorio del usuario
-    val desktopDir = File(System.getProperty("user.home"), "Desktop")
+val DESKTOP_DIR = File(System.getProperty("user.home"), "Desktop")
 
-    // Crear el directorio si no existe
-    if (!desktopDir.exists()) {
-        desktopDir.mkdirs()
-    }
+fun saveQrToDesktop(bufferedImage: BufferedImage, fileName: String) {
 
     // Crear el archivo destino
-    val outputFile = File(desktopDir, fileName)
+    val outputFile = File(DESKTOP_DIR, fileName)
 
     // Guardar la imagen
     ImageIO.write(bufferedImage, "png", outputFile)
+}
+
+fun saveTextFile(content: String, fileName: String) {
+    File(DESKTOP_DIR, fileName).writeText(content)
 }

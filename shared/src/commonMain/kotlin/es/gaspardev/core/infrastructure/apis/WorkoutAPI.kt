@@ -29,11 +29,11 @@ class WorkoutAPI(
     override suspend fun delete(
         segments: List<String>,
         vararg params: Pair<String, String>
-    ): Either.Failure<Exception>? {
+    ): Either<Exception, Unit> {
         return performDelete(segments, *params)
     }
 
-    override suspend fun patch(segments: List<String>, body: Any): Either.Failure<Exception>? {
+    override suspend fun patch(segments: List<String>, body: Any): Either<Exception, Unit> {
         return performPatch(segments, body)
     }
 }

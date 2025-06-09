@@ -10,7 +10,9 @@ class UpdateWorkout(
     private val repo: WorkoutRepository = WorkoutRepositoryImp()
 ) : UseCase<WorkoutPlan, WorkoutPlan>() {
     override suspend fun run(params: WorkoutPlan): Either<Exception, WorkoutPlan> {
-        val result = repo.updateWorkout(params)
-        return if (result?.isFailure == true) Either.Failure(result.error) else Either.Success(params)
+        return repo.updateWorkout(params).foldValue(
+            { value -> Either.Success(value) },
+            { err -> Either.Failure(err) }
+        )
     }
 }

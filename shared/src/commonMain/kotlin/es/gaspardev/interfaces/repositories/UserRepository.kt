@@ -12,7 +12,7 @@ interface UserRepository<T : Any, T2 : Any> {
         val API = UserAPI()
     }
 
-    suspend fun logIn(expectedUser: LoginCredentials): Either<Exception, Pair<T, List<T2>>>
-    suspend fun getComunications(user: User): Either<Exception, List<Conversation>>
+    suspend fun logIn(expectedUser: LoginCredentials): Either<Exception, Triple<T, List<T2>, List<Conversation>>>
+    suspend fun getConversations(user: User): Either<Exception, List<Conversation>>
 
 }

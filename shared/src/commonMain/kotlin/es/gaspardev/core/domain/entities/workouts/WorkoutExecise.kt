@@ -1,7 +1,6 @@
 package es.gaspardev.core.domain.entities.workouts
 
 import es.gaspardev.auxliars.Either
-import es.gaspardev.core.domain.entities.Note
 import kotlinx.serialization.Serializable
 import java.lang.IllegalArgumentException
 
@@ -10,8 +9,7 @@ data class WorkoutExecise(
     var reps: Int,
     var sets: Int,
     private val isOption: Boolean = false,
-    val exercise: Exercise,
-    val notes: List<Note>
+    val exercise: Exercise
 ) {
 
     fun isOptional(): Boolean = isOption

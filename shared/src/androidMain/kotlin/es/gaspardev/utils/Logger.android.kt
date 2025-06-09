@@ -5,6 +5,7 @@ import es.gaspardev.core.debug.BasicPrintter
 import es.gaspardev.core.debug.FilePrinter
 import es.gaspardev.interfaces.Printter
 
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 actual object Logger {
 
     actual var printter: Printter = BasicPrintter;

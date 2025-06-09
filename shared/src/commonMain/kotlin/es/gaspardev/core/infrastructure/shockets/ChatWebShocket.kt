@@ -2,7 +2,6 @@ package es.gaspardev.core.infrastructure.shockets
 
 import es.gaspardev.enums.MessageStatus
 import es.gaspardev.enums.MessageType
-import es.gaspardev.utils.SERVER_ADRESS
 import es.gaspardev.utils.SERVER_HOST
 import es.gaspardev.utils.SERVER_PORT
 import io.ktor.client.*
@@ -14,6 +13,8 @@ import kotlinx.coroutines.*
 import kotlinx.datetime.Clock
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -23,6 +24,19 @@ val json = Json {
     isLenient = true
     classDiscriminator = "type"
     encodeDefaults = true
+    // ✅ Configurar serialización polimórfica
+    serializersModule = kotlinx.serialization.modules.SerializersModule {
+        polymorphic(WebSocketMessage::class) {
+            subclass(WebSocketMessage.SendMessage::class)
+            subclass(WebSocketMessage.MessageReceived::class)
+            subclass(WebSocketMessage.MessageStatusUpdate::class)
+            subclass(WebSocketMessage.TypingIndicator::class)
+            subclass(WebSocketMessage.UserOnlineStatus::class)
+            subclass(WebSocketMessage.Error::class)
+            subclass(WebSocketMessage.Ping::class)
+            subclass(WebSocketMessage.Pong::class)
+        }
+    }
 }
 
 class ChatWebSocket(
@@ -31,18 +45,17 @@ class ChatWebSocket(
     private val onWebSocketMessage: (WebSocketMessage) -> Unit,
     private val onConnectionEvent: (Boolean) -> Unit,
     private val onError: (String) -> Unit = { },
-    coroutineContext: CoroutineContext = Dispatchers.IO
+    parentCoroutineContext: CoroutineContext = Dispatchers.IO // ✅ Renamed to avoid confusion
 ) : CoroutineScope {
 
+    // ✅ FIX: Usar SupervisorJob independiente para evitar cancelaciones
     private val job = SupervisorJob()
-    override val coroutineContext: CoroutineContext = coroutineContext + job
+    override val coroutineContext: CoroutineContext =
+        parentCoroutineContext + job + CoroutineName("ChatWebSocket-$userId-$conversationId")
 
     private val client = HttpClient {
         install(WebSockets) {
-            contentConverter = KotlinxWebsocketSerializationConverter(Json {
-                ignoreUnknownKeys = true
-                isLenient = true
-            })
+            contentConverter = KotlinxWebsocketSerializationConverter(json)
             pingInterval = 15.toDuration(DurationUnit.SECONDS)
             maxFrameSize = Long.MAX_VALUE
         }
@@ -56,90 +69,161 @@ class ChatWebSocket(
     private var heartbeatJob: Job? = null
 
     fun connect() {
+        if (isConnected) {
+            println("⚠️ WebSocket ya está conectado")
+            return
+        }
+
+        println("🔌 Iniciando conexión WebSocket...")
         launch {
             connectWithRetry()
         }
     }
 
     private suspend fun connectWithRetry() {
-        while (shouldReconnect && reconnectAttempts < maxReconnectAttempts) {
+        while (shouldReconnect && reconnectAttempts < maxReconnectAttempts && !job.isCancelled) {
             try {
                 println("🔌 Conectando al WebSocket... (Intento ${reconnectAttempts + 1})")
 
-                client.webSocket(
-                    method = HttpMethod.Get,
-                    host = SERVER_HOST,
-                    port = SERVER_PORT,
-                    path = "/chat/$userId/$conversationId"
-                ) {
-                    session = this
-                    isConnected = true
-                    reconnectAttempts = 0
-                    onConnectionEvent(true)
+                // ✅ FIX: Usar timeout y manejo de errores mejorado
+                withTimeoutOrNull(30000) { // 30 segundos timeout
+                    client.webSocket(
+                        method = HttpMethod.Get,
+                        host = SERVER_HOST,
+                        port = SERVER_PORT,
+                        path = "/chat/$userId/$conversationId"
+                    ) {
+                        if (!job.isActive) {
+                            println("⚠️ Job cancelado durante conexión")
+                            return@webSocket
+                        }
 
-                    println("✅ WebSocket conectado exitosamente")
+                        session = this
+                        isConnected = true
+                        reconnectAttempts = 0
+                        onConnectionEvent(true)
 
-                    // Iniciar heartbeat
-                    startHeartbeat()
+                        println("✅ WebSocket conectado exitosamente")
 
-                    // Enviar ping inicial
-                    send(Frame.Text(json.encodeToString<WebSocketMessage.Ping>(WebSocketMessage.Ping)))
+                        // Iniciar heartbeat
+                        startHeartbeat()
 
-                    try {
-                        for (frame in incoming) {
-                            when (frame) {
-                                is Frame.Text -> {
-                                    try {
-                                        val messageText = frame.readText()
-                                        val wsMessage = json.decodeFromString<WebSocketMessage.Pong>(messageText)
+                        // Enviar ping inicial
+                        send(Frame.Text(json.encodeToString(WebSocketMessage.Ping as WebSocketMessage)))
 
-                                        @Suppress("UNUSED_EXPRESSION")
-                                        when (wsMessage) {
+                        try {
+                            for (frame in incoming) {
+                                if (!job.isActive || !isConnected) {
+                                    println("⚠️ Saliendo del loop de mensajes: job.isActive=${job.isActive}, isConnected=$isConnected")
+                                    break
+                                }
 
-                                            else -> {
-                                                // Keep alive response
+                                when (frame) {
+                                    is Frame.Text -> {
+                                        try {
+                                            val messageText = frame.readText()
+                                            println("📨 Mensaje recibido del servidor: $messageText")
+
+                                            // **FIX: Deserializar como WebSocketMessage genérico**
+                                            val wsMessage = json.decodeFromString<WebSocketMessage>(messageText)
+
+                                            // **FIX: Procesar el mensaje según su tipo**
+                                            when (wsMessage) {
+                                                is WebSocketMessage.Pong -> {
+                                                    println("🏓 Pong recibido del servidor")
+                                                    // Keep alive response - no action needed
+                                                }
+
+                                                is WebSocketMessage.MessageReceived -> {
+                                                    println("✅ Mensaje confirmado del servidor: ${wsMessage.message.id}")
+                                                    onWebSocketMessage(wsMessage)
+                                                }
+
+                                                is WebSocketMessage.MessageStatusUpdate -> {
+                                                    println("📋 Actualización de estado: ${wsMessage.messageId} -> ${wsMessage.status}")
+                                                    onWebSocketMessage(wsMessage)
+                                                }
+
+                                                is WebSocketMessage.TypingIndicator -> {
+                                                    println("⌨️ Indicador de escritura: Usuario ${wsMessage.userId} ${if (wsMessage.isTyping) "escribiendo" else "dejó de escribir"}")
+                                                    onWebSocketMessage(wsMessage)
+                                                }
+
+                                                is WebSocketMessage.UserOnlineStatus -> {
+                                                    println("🟢 Estado de usuario: Usuario ${wsMessage.userId} ${if (wsMessage.isOnline) "online" else "offline"}")
+                                                    onWebSocketMessage(wsMessage)
+                                                }
+
+                                                is WebSocketMessage.Error -> {
+                                                    println("❌ Error del servidor: ${wsMessage.code} - ${wsMessage.message}")
+                                                    onError("Server error: ${wsMessage.message}")
+                                                    onWebSocketMessage(wsMessage)
+                                                }
+
+                                                else -> {
+                                                    println("📦 Mensaje no reconocido: ${wsMessage::class.simpleName}")
+                                                    onWebSocketMessage(wsMessage)
+                                                }
                                             }
+
+                                        } catch (e: Exception) {
+                                            println("❌ Error al procesar mensaje: ${e.message}")
+                                            println("📝 Mensaje original: ${frame.readText()}")
+                                            onError("Error parsing message: ${e.message}")
                                         }
-                                    } catch (e: Exception) {
-                                        println("❌ Error al procesar mensaje: ${e.message}")
-                                        onError("Error parsing message: ${e.message}")
+                                    }
+
+                                    is Frame.Ping -> {
+                                        println("🏓 Ping recibido del servidor, enviando Pong")
+                                        send(Frame.Pong(frame.data))
+                                    }
+
+                                    is Frame.Close -> {
+                                        println("🔌 Conexión WebSocket cerrada por el servidor")
+                                        handleDisconnection()
+                                        return@webSocket
+                                    }
+
+                                    else -> {
+                                        println("📦 Frame desconocido recibido: ${frame.frameType}")
                                     }
                                 }
-
-                                is Frame.Ping -> {
-                                    send(Frame.Pong(frame.data))
-                                }
-
-                                is Frame.Close -> {
-                                    println("🔌 Conexión WebSocket cerrada")
-                                    handleDisconnection()
-                                    return@webSocket
-                                }
-
-                                else -> {
-                                    println("📦 Frame desconocido recibido: ${frame.frameType}")
-                                }
                             }
+                        } catch (e: Exception) {
+                            if (e is CancellationException) {
+                                println("⚠️ Conexión WebSocket cancelada")
+                                return@webSocket
+                            }
+                            println("❌ Error en el manejo de mensajes: ${e.message}")
+                            e.printStackTrace()
+                            onError("Connection error: ${e.message}")
+                            handleDisconnection()
                         }
-                    } catch (e: Exception) {
-                        println("❌ Error en el manejo de mensajes: ${e.message}")
-                        onError("Connection error: ${e.message}")
-                        handleDisconnection()
                     }
+                } ?: run {
+                    println("⏰ Timeout al conectar WebSocket")
+                    throw Exception("Connection timeout")
                 }
 
                 handleDisconnection()
 
             } catch (e: Exception) {
+                if (e is CancellationException) {
+                    println("⚠️ Conexión cancelada por el usuario")
+                    break
+                }
+
                 println("❌ Fallo en la conexión: ${e.message}")
+                e.printStackTrace()
                 onError("Connection failed: ${e.message}")
                 reconnectAttempts++
 
-                if (reconnectAttempts < maxReconnectAttempts && shouldReconnect) {
+                if (reconnectAttempts < maxReconnectAttempts && shouldReconnect && job.isActive) {
                     val delay = minOf(2000L * reconnectAttempts, 10000L) // Max 10 segundos
                     println("🔄 Reintentando en ${delay}ms...")
                     delay(delay)
                 } else {
+                    println("❌ Máximo de intentos de reconexión alcanzado o job cancelado")
                     onError("Max reconnection attempts reached")
                     disconnect()
                     break
@@ -150,15 +234,18 @@ class ChatWebSocket(
 
     private fun startHeartbeat() {
         heartbeatJob?.cancel()
-        heartbeatJob = CoroutineScope(Dispatchers.IO + SupervisorJob()).launch { // ← Scope independiente
-            while (isConnected && session != null) {
+
+        // ✅ FIX: Usar scope del WebSocket para evitar conflictos
+        heartbeatJob = launch {
+            while (isConnected && session != null && isActive) {
                 try {
                     delay(30000)
-                    if (isConnected && session != null) {
-                        session?.send(Frame.Text(json.encodeToString<WebSocketMessage.Ping>(WebSocketMessage.Ping)))
+                    if (isConnected && session != null && isActive) {
+                        println("💓 Enviando heartbeat")
+                        session?.send(Frame.Text(json.encodeToString(WebSocketMessage.Ping as WebSocketMessage)))
                     }
                 } catch (e: CancellationException) {
-                    // Normal cancellation, exit quietly
+                    println("💓 Heartbeat cancelado")
                     break
                 } catch (e: Exception) {
                     println("❌ Error en heartbeat: ${e.message}")
@@ -174,14 +261,12 @@ class ChatWebSocket(
         isConnected = false
         onConnectionEvent(false)
 
-        // ← Evitar reconexión automática si fue desconexión intencional
         if (shouldReconnect && reconnectAttempts < maxReconnectAttempts && !job.isCancelled) {
             delay(2000)
             reconnectAttempts++
             connectWithRetry()
         }
     }
-
 
     suspend fun sendMessage(
         content: String,
@@ -200,7 +285,9 @@ class ChatWebSocket(
         )
 
         return try {
-            val messageJson = json.encodeToString<WebSocketMessage.SendMessage>(message)
+            // **FIX: Enviar con el tipo correcto**
+            val messageJson = json.encodeToString(message as WebSocketMessage)
+            println("📤 Enviando mensaje: $content (tempId: $tempId)")
             session?.send(Frame.Text(messageJson))
             true
         } catch (e: Exception) {
@@ -221,7 +308,8 @@ class ChatWebSocket(
         )
 
         return try {
-            val messageJson = json.encodeToString<WebSocketMessage.MessageStatusUpdate>(statusUpdate)
+            val messageJson = json.encodeToString(statusUpdate as WebSocketMessage)
+            println("📋 Enviando actualización de estado: $messageId -> $status")
             session?.send(Frame.Text(messageJson))
             true
         } catch (e: Exception) {
@@ -240,7 +328,8 @@ class ChatWebSocket(
         )
 
         return try {
-            val messageJson = json.encodeToString<WebSocketMessage.TypingIndicator>(typingIndicator)
+            val messageJson = json.encodeToString(typingIndicator as WebSocketMessage)
+            println("⌨️ Enviando indicador de escritura: $isTyping")
             session?.send(Frame.Text(messageJson))
             true
         } catch (e: Exception) {
@@ -259,23 +348,27 @@ class ChatWebSocket(
     }
 
     fun disconnect() {
+        println("🔌 Desconectando WebSocket...")
         shouldReconnect = false
         heartbeatJob?.cancel()
 
         launch {
             try {
+                isConnected = false
                 session?.close(CloseReason(CloseReason.Codes.NORMAL, "Client disconnecting"))
             } catch (e: Exception) {
                 println("❌ Error cerrando WebSocket: ${e.message}")
             } finally {
                 session = null
-                isConnected = false
                 onConnectionEvent(false)
-                client.close()
+                try {
+                    client.close()
+                } catch (e: Exception) {
+                    println("❌ Error cerrando cliente HTTP: ${e.message}")
+                }
                 job.cancel()
+                println("✅ WebSocket desconectado completamente")
             }
         }
     }
-
-
 }

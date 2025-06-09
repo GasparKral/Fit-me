@@ -16,15 +16,13 @@ class DietRepositoryImp : DietRepository {
 
     override suspend fun getDietsPlans(trainer: Trainer): Either<Exception, List<DietPlan>> {
         return DietRepository.API.getGenericList<DietPlan>(
-            listOf("plans"),
-            params = arrayOf(Pair("trainer_id", trainer.user.id.toString()))
+            listOf("plans", trainer.user.id.toString())
         )
     }
 
     override suspend fun getDietsTemplates(trainer: Trainer): Either<Exception, List<DietTemplate>> {
         return DietRepository.API.getGenericList<DietTemplate>(
-            listOf("templates"),
-            params = arrayOf(Pair("trainer_id", trainer.user.id.toString()))
+            listOf("templates", trainer.user.id.toString())
         )
     }
 
@@ -45,12 +43,15 @@ class DietRepositoryImp : DietRepository {
         )
     }
 
-    override suspend fun deleteDiet(dietId: Int): Either.Failure<Exception>? {
+    override suspend fun deleteDiet(dietId: Int): Either<Exception, Unit> {
         return DietRepository.API.delete(emptyList(), params = arrayOf(Pair("diet_id", dietId.toString())))
     }
 
-    override suspend fun updateDiet(dietPlan: DietPlan): Either.Failure<Exception>? {
-        return DietRepository.API.patch(emptyList(), dietPlan)
+    override suspend fun updateDiet(dietPlan: DietPlan): Either<Exception, DietPlan> {
+        return DietRepository.API.patch(emptyList(), dietPlan).foldValue(
+            { _ -> Either.Success(dietPlan) },
+            { err -> Either.Failure(err) }
+        )
     }
 
 }

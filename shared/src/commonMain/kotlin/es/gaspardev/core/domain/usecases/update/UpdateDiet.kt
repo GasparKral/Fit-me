@@ -10,7 +10,9 @@ class UpdateDiet(
     private val repo: DietRepository = DietRepositoryImp()
 ) : UseCase<DietPlan, DietPlan>() {
     override suspend fun run(params: DietPlan): Either<Exception, DietPlan> {
-        val result = repo.updateDiet(params)
-        return if (result?.isFailure == true) Either.Failure(result.error) else Either.Success(params)
+        return repo.updateDiet(params).foldValue(
+            { value -> Either.Success(value) },
+            { err -> Either.Failure(err) }
+        )
     }
 }

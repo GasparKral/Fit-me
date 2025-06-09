@@ -77,22 +77,25 @@ abstract class API<ApiType> where ApiType : Any {
     protected suspend fun performDelete(
         segments: List<String> = listOf(),
         vararg params: Pair<String, String>
-    ): Either.Failure<Exception>? {
+    ): Either<Exception, Unit> {
         return try {
             val response = httpClient.delete(apiPath) {
                 configureUrl(segments, *params)
             }
 
             when (response.status) {
-                HttpStatusCode.OK -> null // Éxito
+                HttpStatusCode.OK -> Either.Success(Unit) // Éxito
                 HttpStatusCode.NotFound -> Either.Failure(NoSuchElementException("No se encontró el entrenamiento"))
                 HttpStatusCode.RequestTimeout -> Either.Failure(TimeoutException("Fallo en la conexión"))
+                HttpStatusCode.ExpectationFailed -> Either.Failure(Exception("Existen usuarios que estan usando este entrenamiento"))
                 else -> Either.Failure(Exception("Unexpected status code: ${response.status}"))
             }
         } catch (e: Exception) {
             Either.Failure(e)
         }
+
     }
+
 
     /**
      * Realiza una petición PATCH y retorna el resultado del manejo de errores
@@ -100,13 +103,13 @@ abstract class API<ApiType> where ApiType : Any {
     protected suspend fun performPatch(
         segments: List<String> = listOf(),
         body: Any
-    ): Either.Failure<Exception>? {
+    ): Either<Exception, Unit> {
         return try {
             httpClient.patch(apiPath) {
                 configureUrl(segments)
                 configureJsonBody(body)
             }
-            null // PATCH exitoso
+            Either.Success(Unit)
         } catch (e: Exception) {
             Either.Failure(e)
         }
@@ -225,7 +228,7 @@ abstract class API<ApiType> where ApiType : Any {
     abstract suspend fun delete(
         segments: List<String> = listOf(),
         vararg params: Pair<String, String>
-    ): Either.Failure<Exception>?
+    ): Either<Exception, Unit>
 
     /**
      * Actualiza parcialmente un elemento
@@ -233,7 +236,7 @@ abstract class API<ApiType> where ApiType : Any {
     abstract suspend fun patch(
         segments: List<String> = listOf(),
         body: Any
-    ): Either.Failure<Exception>?
+    ): Either<Exception, Unit>
 
     @PublishedApi
     internal val `access$httpClient`: HttpClient

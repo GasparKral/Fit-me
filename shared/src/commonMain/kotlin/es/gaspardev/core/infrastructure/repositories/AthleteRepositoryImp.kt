@@ -18,37 +18,26 @@ class AthletetRepositoryImp : AthleteRepository {
 
     override suspend fun getWorkoutsHistory(athlete: Athlete): Either<Exception, List<CompletionWorkoutStatistic>> {
         return AthleteRepository.API.getGenericList<CompletionWorkoutStatistic>(
-            listOf("data", "workouthistory"),
-            params = arrayOf(Pair("athlete_id", athlete.user.id.toString()))
+            listOf("data", "workouthistory", athlete.user.id.toString())
         )
     }
 
     override suspend fun getCommingSessions(athlete: Athlete): Either<Exception, List<Session>> {
         return AthleteRepository.API.getGenericList<Session>(
-            listOf("data", "sessions"),
-            params = arrayOf(Pair("athlete_id", athlete.user.id.toString()))
+            listOf("data", "sessions", athlete.user.id.toString())
         )
     }
 
-    override suspend fun logIn(expectedUser: LoginCredentials): Either<Exception, Pair<Athlete, List<Trainer>>> {
-        var athelte: Athlete? = null
-        AthleteRepository.API.get(
-            params = arrayOf(
-                Pair("userIdentification", "expectedUser.userIdetification"),
-                Pair("userPassword", expectedUser.userPassword)
-            )
-        ).fold(
-            { value -> athelte = value },
-            { err -> return Either.Failure(err) }
+    override suspend fun logIn(expectedUser: LoginCredentials): Either<Exception, Triple<Athlete, List<Trainer>, List<Conversation>>> {
+        return AthleteRepository.API.getSingleValue<Triple<Athlete, List<Trainer>, List<Conversation>>>(
+            segments = listOf(expectedUser.userIdetification, expectedUser.userPassword)
+        ).foldValue(
+            { value -> Either.Success(value) },
+            { err -> Either.Failure(err) }
         )
-
-        val trainer = Athlete
-
-        val res: Pair<Athlete, List<Trainer>> = Pair(athelte!!, listOf())
-        return Either.Success(res)
     }
 
-    override suspend fun getComunications(user: User): Either<Exception, List<Conversation>> {
+    override suspend fun getConversations(user: User): Either<Exception, List<Conversation>> {
         TODO("Not yet implemented")
     }
 
