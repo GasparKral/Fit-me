@@ -26,6 +26,12 @@ class DietRepositoryImp : DietRepository {
         )
     }
 
+    override suspend fun getDietById(dietId: Int): Either<Exception, DietPlan> {
+        return DietRepository.API.getSingleValue<DietPlan>(
+            listOf("plan", dietId.toString())
+        )
+    }
+
     override suspend fun getDietsHistory(athlete: Athlete): Either<Exception, List<CompletionDietStatistics>> {
         return DietRepository.API.getGenericList<CompletionDietStatistics>(
             listOf("data", "history"),
@@ -34,12 +40,12 @@ class DietRepositoryImp : DietRepository {
     }
 
     override suspend fun createDiet(diet: Diet, trainer: Trainer): Either<Exception, Int> {
-        return DietRepository.API.post(
-            listOf("create"),
-            Pair(diet, trainer)
-        ).foldValue<Either<Exception, Int>>(
-            { value -> return Either.Success(value.getId()) },
-            { err -> return Either.Failure(err) }
+        return DietRepository.API.postGeneric<Diet, Diet>(
+            listOf("create", trainer.user.id.toString()),
+            diet
+        ).foldValue(
+            { value -> Either.Success(value.getId()) },
+            { err -> Either.Failure(err) }
         )
     }
 
@@ -50,6 +56,19 @@ class DietRepositoryImp : DietRepository {
     override suspend fun updateDiet(dietPlan: DietPlan): Either<Exception, DietPlan> {
         return DietRepository.API.patch(emptyList(), dietPlan).foldValue(
             { _ -> Either.Success(dietPlan) },
+            { err -> Either.Failure(err) }
+        )
+    }
+
+    override suspend fun assignDietToAthlete(dietId: Int, athleteId: Int): Either<Exception, Unit> {
+        return DietRepository.API.patch(
+            listOf("assign"), 
+            mapOf(
+                "dietId" to dietId,
+                "athleteId" to athleteId
+            )
+        ).foldValue(
+            { _ -> Either.Success(Unit) },
             { err -> Either.Failure(err) }
         )
     }

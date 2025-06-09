@@ -470,50 +470,6 @@ object Sessions : IntIdTable("sessions") {
 }
 
 // ============================================================================
-// TABLA DE NOTAS
-// ============================================================================
-
-object Notes : IntIdTable("notes") {
-    val userId = reference("user_id", Users)
-    val content = text("content")
-    val createdAt = timestamp("created_at").transform(
-        wrap = { Instant.fromEpochMilliseconds(it.toEpochMilli()) },
-        unwrap = { java.time.Instant.ofEpochMilli(it.toEpochMilliseconds()) })
-}
-
-// Tablas intermedias para asociar notas con diferentes entidades
-
-object WorkoutNotes : Table("workout_notes") {
-    val workoutId = reference("workout_id", Workouts)
-    val noteId = reference("note_id", Notes)
-    override val primaryKey = PrimaryKey(workoutId, noteId)
-}
-
-object WorkoutExerciseNotes : Table("workout_exercise_notes") {
-    val workoutExerciseId = reference("workout_exercise_id", WorkoutExercises)
-    val noteId = reference("note_id", Notes)
-    override val primaryKey = PrimaryKey(workoutExerciseId, noteId)
-}
-
-object DietNotes : Table("diet_notes") {
-    val dietId = reference("diet_id", Diets)
-    val noteId = reference("note_id", Notes)
-    override val primaryKey = PrimaryKey(dietId, noteId)
-}
-
-object DietDishNotes : Table("diet_dish_notes") {
-    val dietDishId = reference("diet_dish_id", DietDishes)
-    val noteId = reference("note_id", Notes)
-    override val primaryKey = PrimaryKey(dietDishId, noteId)
-}
-
-object SessionNotes : Table("session_notes") {
-    val sessionId = reference("session_id", Sessions)
-    val noteId = reference("note_id", Notes)
-    override val primaryKey = PrimaryKey(sessionId, noteId)
-}
-
-// ============================================================================
 // TABLA CLAVES DE ACCESO
 // ============================================================================
 

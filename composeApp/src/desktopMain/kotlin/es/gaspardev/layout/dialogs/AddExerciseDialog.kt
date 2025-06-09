@@ -325,8 +325,7 @@ fun AddExerciseDialog(
                                 reps = reps.toInt(),
                                 sets = sets.toInt(),
                                 isOption = isOptional,
-                                exercise = selectedExercise!!,
-                                notes = emptyList() // Se pueden agregar notas después
+                                exercise = selectedExercise!!
                             )
                             onCreateExercise(workoutExercise, selectedWeekDay!!)
                         }

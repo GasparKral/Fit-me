@@ -18,9 +18,11 @@ interface DietRepository {
     suspend fun getDiets(trainer: Trainer): Either<Exception, List<Diet>>
     suspend fun getDietsPlans(trainer: Trainer): Either<Exception, List<DietPlan>>
     suspend fun getDietsTemplates(trainer: Trainer): Either<Exception, List<DietTemplate>>
+    suspend fun getDietById(dietId: Int): Either<Exception, DietPlan>
 
     suspend fun getDietsHistory(athlete: Athlete): Either<Exception, List<CompletionDietStatistics>>
     suspend fun createDiet(diet: Diet, trainer: Trainer): Either<Exception, Int>
     suspend fun deleteDiet(dietId: Int): Either<Exception, Unit>
     suspend fun updateDiet(dietPlan: DietPlan): Either<Exception, DietPlan>
+    suspend fun assignDietToAthlete(dietId: Int, athleteId: Int): Either<Exception, Unit>
 }

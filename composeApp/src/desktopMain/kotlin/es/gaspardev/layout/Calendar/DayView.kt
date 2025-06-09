@@ -147,13 +147,6 @@ fun DayView(
                                     Spacer(modifier = Modifier.width(8.dp))
                                 }
 
-                                if (event.notes.isNotEmpty() == true) {
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text(
-                                        text = "Notes: ${event.notes}",
-                                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
-                                    )
-                                }
                             }
                         }
                     }

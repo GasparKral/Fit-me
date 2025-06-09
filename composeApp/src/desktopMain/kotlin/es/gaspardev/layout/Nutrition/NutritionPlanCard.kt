@@ -18,11 +18,13 @@ import es.gaspardev.core.domain.entities.diets.Diet
 import es.gaspardev.core.domain.entities.diets.DietPlan
 import es.gaspardev.core.domain.usecases.create.CreateNewDiet
 import es.gaspardev.core.domain.usecases.delete.DeleteDiet
+import es.gaspardev.core.domain.usecases.update.AssignDietToAthlete
 import es.gaspardev.core.domain.usecases.update.UpdateDiet
 import es.gaspardev.helpers.resDietType
 import es.gaspardev.helpers.visualizeDiet
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
+import es.gaspardev.layout.dialogs.AsignDialog
 import es.gaspardev.layout.dialogs.DietDialog
 import es.gaspardev.states.LoggedTrainer
 import es.gaspardev.utils.toWeeks
@@ -130,7 +132,26 @@ fun NutritionPlanCard(
                             }
 
                             2 -> {
-                                onAsign(plan.copy(asignedCount = plan.asignedCount + 1))
+                                DialogState.openWith {
+                                    AsignDialog(
+                                        {
+                                            Column {
+                                                Text(plan.name)
+                                                Text(plan.description)
+                                            }
+                                        },
+                                        onAcceptAction = {
+                                            scope.launch {
+                                                AssignDietToAthlete().run(Pair(plan, it)).fold(
+                                                    { _ -> onAsign(plan.copy(asignedCount = plan.asignedCount + 1)) },
+                                                    { err -> ToastManager.showError("Ocurrió un erro al actualizar${if (err.message != null) ": ${err.message!!}" else ""}") }
+                                                )
+                                            }
+
+                                        },
+                                        onCancel = {}
+                                    )
+                                }
                                 continueOpen(false)
                             }
 
@@ -160,7 +181,7 @@ fun NutritionPlanCard(
                     label = { Text(plan.duration.toWeeks().format(stringResource(Res.string.weeks))) },
                     leadingIcon = { Icon(FitMeIcons.Calendar, "Icons of ${plan.duration}") })
                 AssistChip(
-                    label = { Text("${plan.dishes.values.sumOf { it.size } / plan.dishes.keys.size} raziones/día") },
+                    label = { Text("${plan.dishes.values.sumOf { it.size } / plan.dishes.keys.size} platos/día") },
                     leadingIcon = { Icon(Icons.Default.Refresh, "Icons of meals per day") })
             }
 

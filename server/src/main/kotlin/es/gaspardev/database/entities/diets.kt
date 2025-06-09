@@ -42,7 +42,6 @@ class DietEntity(id: EntityID<Int>) : IntEntity(id) {
     val dishes by DietDishEntity referrersOn DietDishes.dietId
     val athletes by AthleteEntity optionalReferrersOn Athletes.dietId
     val completions by CompletionDietStatisticEntity referrersOn CompletionDietStatistics.dietId
-    val notes by NoteEntity via DietNotes
 
     fun toModel(): Diet {
         return Diet(

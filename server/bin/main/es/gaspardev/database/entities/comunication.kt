@@ -155,7 +155,6 @@ class SessionEntity(id: EntityID<Int>) : IntEntity(id) {
     var expectedDuration by Sessions.expectedDuration
     var actualDuration by Sessions.actualDuration
     var completed by Sessions.completed
-    var notes by NoteEntity via SessionNotes
 
     fun toModel(): Session {
         return Session(
@@ -163,8 +162,7 @@ class SessionEntity(id: EntityID<Int>) : IntEntity(id) {
             dateTime = this.dateTime,
             sessionType = this.sessionType,
             with = this.athlete.userEntity.toModel().fullname,
-            expectedDuration = this.expectedDuration,
-            notes = this.notes.map { it.toModel() }
+            expectedDuration = this.expectedDuration
         )
     }
 }

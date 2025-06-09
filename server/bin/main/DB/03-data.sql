@@ -294,56 +294,6 @@ INSERT INTO sessions (title, date_time, session_type, trainer_id, athlete_id, ex
 ('Follow Up', NOW() + INTERVAL '3 days', 'FOLLOW_UP', 1, 2, 45, NULL, FALSE),
 ('Swim Assessment', NOW() + INTERVAL '2 days', 'ASSESSMENT', 3, 3, 60, NULL, FALSE);
 
--- Insert notes
-INSERT INTO notes (user_id, content) VALUES
-(1, 'Sarah shows good form on squats but needs to work on depth'),
-(1, 'Mike struggles with endurance - suggest more interval training'),
-(3, 'Emma has excellent swimming technique but needs work on turns'),
-(1, 'David is progressing well with deadlifts - consider increasing weight next session'),
-(2, 'I felt some knee discomfort during yesterday''s workout'),
-(4, 'I prefer morning sessions if possible'),
-(3, 'Need to focus on breathing technique during freestyle'),
-(1, 'Client prefers vegetarian options in meal plan');
-
--- Insert workout notes
-INSERT INTO workout_notes (workout_id, note_id) VALUES
-(1, 1),
-(2, 2),
-(3, 3),
-(4, 4);
-
--- Insert workout exercise notes
-INSERT INTO workout_exercise_notes (workout_exercise_id, note_id) VALUES
-(1, 1),
-(9, 2),
-(13, 3),
-(16, 4);
-
--- Insert diet notes
-INSERT INTO diet_notes (diet_id, note_id) VALUES
-(1, 8),
-(2, 6),
-(3, 7),
-(4, 5);
-
--- Insert diet dish notes
-INSERT INTO diet_dish_notes (diet_dish_id, note_id) VALUES
-(1, 8),
-(7, 6),
-(10, 7),
-(13, 5);
-
--- Insert session notes
-INSERT INTO session_notes (session_id, note_id) VALUES
-(1, 1),
-(2, 2),
-(3, 3),
-(4, 4),
-(5, 5),
-(6, 6),
-(7, 7),
-(8, 8);
-
 -- Insert registration keys
 INSERT INTO key_gen (key, trainer_id) VALUES
 ('ABCD1234', 1),

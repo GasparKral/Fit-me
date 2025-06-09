@@ -12,6 +12,5 @@ data class Session(
     var dateTime: Instant,
     var sessionType: SessionType,
     val with: String, // Athelete name
-    var expectedDuration: Duration,
-    val notes: List<Note>
+    var expectedDuration: Duration
 )

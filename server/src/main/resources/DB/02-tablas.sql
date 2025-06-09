@@ -427,53 +427,6 @@ CREATE TABLE sessions (
     completed BOOLEAN DEFAULT FALSE
 );
 
--- ============================================================================
--- NOTES TABLES
--- ============================================================================
-
--- Notes table
-CREATE TABLE notes (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    content TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
--- Workout Notes junction table
-CREATE TABLE workout_notes (
-    workout_id INTEGER NOT NULL REFERENCES workouts(id) ON DELETE CASCADE,
-    note_id INTEGER NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
-    PRIMARY KEY (workout_id, note_id)
-);
-
--- Workout Exercise Notes junction table
-CREATE TABLE workout_exercise_notes (
-    workout_exercise_id INTEGER NOT NULL REFERENCES workout_exercises(id) ON DELETE CASCADE,
-    note_id INTEGER NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
-    PRIMARY KEY (workout_exercise_id, note_id)
-);
-
--- Diet Notes junction table
-CREATE TABLE diet_notes (
-    diet_id INTEGER NOT NULL REFERENCES diets(id) ON DELETE CASCADE,
-    note_id INTEGER NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
-    PRIMARY KEY (diet_id, note_id)
-);
-
--- Diet Dish Notes junction table
-CREATE TABLE diet_dish_notes (
-    diet_dish_id INTEGER NOT NULL REFERENCES diet_dishes(id) ON DELETE CASCADE,
-    note_id INTEGER NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
-    PRIMARY KEY (diet_dish_id, note_id)
-);
-
--- Session Notes junction table
-CREATE TABLE session_notes (
-    session_id INTEGER NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
-    note_id INTEGER NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
-    PRIMARY KEY (session_id, note_id)
-);
-
 CREATE TABLE strength_statistics (
     id SERIAL PRIMARY KEY,
     athlete_id INTEGER NOT NULL,
@@ -573,10 +526,6 @@ CREATE INDEX idx_messages_sender_id ON messages(sender_id);
 CREATE INDEX idx_messages_sent_at ON messages(sent_at);
 CREATE INDEX idx_conversations_trainer_id ON conversations(trainer_id);
 CREATE INDEX idx_conversations_athlete_id ON conversations(athlete_id);
-
--- Notes related indexes
-CREATE INDEX idx_notes_user_id ON notes(user_id);
-CREATE INDEX idx_notes_created_at ON notes(created_at);
 
 -- Session related indexes
 CREATE INDEX idx_sessions_trainer_id ON sessions(trainer_id);

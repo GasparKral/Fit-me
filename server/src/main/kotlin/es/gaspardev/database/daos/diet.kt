@@ -4,11 +4,14 @@ import es.gaspardev.core.domain.entities.diets.CompletionDietStatistics
 import es.gaspardev.core.domain.entities.diets.DietPlan
 import es.gaspardev.core.domain.entities.diets.DietTemplate
 import es.gaspardev.database.Diets
+import es.gaspardev.database.DietDishes
 import es.gaspardev.database.entities.*
 import es.gaspardev.enums.DietType
 import es.gaspardev.enums.MealType
 import es.gaspardev.enums.WeekDay
 import kotlinx.datetime.Instant
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.time.Duration
 
@@ -80,5 +83,83 @@ object DietDao {
                 it.athlete.trainer?.user?.id?._value = trainerId
                 it.completeAt in upRange..baseRange
             }.map { it.toModel() }
+    }
+
+    fun updateDiet(dietPlan: DietPlan) = transaction {
+        val dietEntity = DietPlanEntity.findById(dietPlan.dietId)
+
+        dietEntity?.let { entity ->
+            // Actualizar campos básicos
+            entity.name = dietPlan.name
+            entity.description = dietPlan.description
+            entity.dietType = dietPlan.type
+            entity.duration = dietPlan.duration
+
+            // Eliminar platos existentes
+            DietDishes.deleteWhere { DietDishes.dietId eq dietPlan.dietId }
+
+            // Agregar nuevos platos
+            dietPlan.dishes.forEach { (weekDay, dishes) ->
+                dishes.forEach { dietDish ->
+                    // Buscar o crear el plato
+                    val dishEntity = DishEntity.find {
+                        es.gaspardev.database.Dishes.name eq dietDish.dish.name
+                    }.firstOrNull() ?: DishEntity.new {
+                        name = dietDish.dish.name
+                    }
+
+                    // Crear la relación diet-dish
+                    DietDishEntity.new {
+                        diet = DietEntity.findById(dietPlan.dietId)!!
+                        dish = dishEntity
+                        this.weekDay = weekDay
+                        amount = dietDish.amout
+                        mealType = dietDish.mealType
+                    }
+                }
+            }
+
+            entity.toModel()
+        }
+    }
+
+    fun deleteDiet(dietId: Int): Boolean = transaction {
+        try {
+            val dietEntity = DietPlanEntity.findById(dietId)
+
+            if (dietEntity != null) {
+                // Verificar si hay atletas asignados
+                if (dietEntity.athletes.count() > 0) {
+                    throw IllegalStateException("No se puede eliminar una dieta que tiene atletas asignados")
+                }
+
+                // Eliminar platos relacionados
+                DietDishes.deleteWhere { DietDishes.dietId eq dietId }
+
+                // Eliminar la dieta
+                dietEntity.delete()
+                true
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    fun assignDietToAthlete(dietId: Int, athleteId: Int): Boolean = transaction {
+        try {
+            val athlete = AthleteEntity.findById(athleteId)
+            val diet = DietEntity.findById(dietId)
+
+            if (athlete != null && diet != null) {
+                athlete.diet = diet
+                true
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            false
+        }
     }
 }

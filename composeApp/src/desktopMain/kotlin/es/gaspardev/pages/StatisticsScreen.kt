@@ -1,9 +1,6 @@
 package es.gaspardev.pages
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -15,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import es.gaspardev.components.AutoCompleteTextField
 import es.gaspardev.components.ToastManager
 import es.gaspardev.components.UserAvatar
 import es.gaspardev.core.domain.entities.stadistics.*
@@ -37,23 +35,6 @@ fun StatisticsScreen() {
     var timeRange by remember { mutableStateOf(30.toDuration(DurationUnit.DAYS)) }
     var activeTab by remember { mutableStateOf("strength") }
     var statistics: ComprehensiveStatistics? by remember { mutableStateOf(null) }
-
-    // Estados para el autocomplete
-    var searchText by remember { mutableStateOf(selectedAthlete.user.fullname) }
-    var expanded by remember { mutableStateOf(false) }
-
-    // Filtrar atletas basándose en el texto de búsqueda
-    val filteredAthletes by remember {
-        derivedStateOf {
-            if (searchText.isBlank()) {
-                LoggedTrainer.state.athletes ?: emptyList()
-            } else {
-                LoggedTrainer.state.athletes?.filter { athlete ->
-                    athlete.user.fullname.contains(searchText, ignoreCase = true)
-                } ?: emptyList()
-            }
-        }
-    }
 
     LaunchedEffect(selectedAthlete, timeRange) {
         GetAthleteStadistics().run(Pair(selectedAthlete, timeRange)).fold(
@@ -110,54 +91,19 @@ fun StatisticsScreen() {
                     }
                 }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        OutlinedTextField(
-                            value = searchText,
-                            onValueChange = {
-                                searchText = it
-                                expanded = it.isNotBlank()
-                            },
-                            label = { Text("Buscar atleta") },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
-                        )
+                Spacer(Modifier.height(8.dp))
 
-                        if (expanded && filteredAthletes.isNotEmpty()) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 4.dp)
-                                    .border(
-                                        1.dp,
-                                        MaterialTheme.colors.onSurface.copy(alpha = 0.5f),
-                                        shape = MaterialTheme.shapes.small
-                                    )
-                                    .background(MaterialTheme.colors.surface)
-                            ) {
-                                filteredAthletes.take(5).forEach { athlete ->
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clickable {
-                                                selectedAthlete = athlete
-                                                searchText = athlete.user.fullname
-                                                expanded = false
-                                            }
-                                            .padding(8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        UserAvatar(athlete.user)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                AutoCompleteTextField(
+                    initialValue = selectedAthlete.user.fullname,
+                    options = LoggedTrainer.state.athletes!!,
+                    onItemSelected = { athlete ->
+                        selectedAthlete = athlete
+                    },
+                    label = { Text("Buscar atleta") },
+                    modifier = Modifier.fillMaxWidth(),
+                    getFilterableText = { athlete -> athlete.user.fullname },
+                    dropDownComponent = { athlete -> UserAvatar(athlete.user) },
+                )
             }
         }
 
