@@ -6,7 +6,6 @@ import es.gaspardev.enums.WeekDay
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.sql.SizedCollection
 
 class ExerciseEntity(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<ExerciseEntity>(Exercises)
@@ -44,7 +43,6 @@ class WorkoutEntity(id: EntityID<Int>) : IntEntity(id) {
     val exercises by WorkoutExerciseEntity referrersOn WorkoutExercises.workoutId
     val athletes by AthleteEntity optionalReferrersOn Athletes.workoutId
     val completions by CompletionWorkoutStatisticEntity referrersOn CompletionWorkoutStatistics.workoutId
-    var notes by NoteEntity via WorkoutNotes
 
     fun toModel(): Workout {
         return Workout(
@@ -54,8 +52,8 @@ class WorkoutEntity(id: EntityID<Int>) : IntEntity(id) {
             difficulty = this.difficulty,
             duration = this.duration,
             workoutType = this.workoutType,
-            exercises = this.exercises.map { it.toModel() }.groupBy({ it.first }, { it.second }),
-            notes = this.notes.map { it.toModel() },
+            exercises = this.exercises.map { it.toModel() }.groupBy({ it.first }, { it.second })
+                .mapValues { it.value.toMutableList() }.toMutableMap(),
             startAt = this.startAt
         )
     }
@@ -74,7 +72,6 @@ class WorkoutExerciseEntity(id: EntityID<Int>) : IntEntity(id) {
 
     // Relaciones
     val childExercises by WorkoutExerciseEntity optionalReferrersOn WorkoutExercises.parentExerciseId
-    var notes by NoteEntity via WorkoutExerciseNotes
 
     fun toModel(): Pair<WeekDay, WorkoutExecise> {
         return Pair(
@@ -83,8 +80,7 @@ class WorkoutExerciseEntity(id: EntityID<Int>) : IntEntity(id) {
                 reps = this.reps,
                 sets = this.sets,
                 isOption = this.isOptional,
-                exercise = this.exercise.toModel(),
-                notes = notes.map { it.toModel() }
+                exercise = this.exercise.toModel()
             )
         )
     }
@@ -109,6 +105,7 @@ class WorkoutTemplateEntity(id: EntityID<Int>) : IntEntity(id) {
             difficulty = this.difficulty,
             workoutType = this.workoutType,
             exercises = this.exercises.map { it.toModel() }.groupBy({ it.first }, { it.second })
+                .mapValues { it.value.toMutableList() }.toMutableMap()
         )
     }
 }
@@ -128,7 +125,6 @@ class WorkoutPlanEntity(id: EntityID<Int>) : IntEntity(id) {
     val exercises by WorkoutExerciseEntity referrersOn WorkoutExercises.workoutId
     val athletes by AthleteEntity optionalReferrersOn Athletes.workoutId
     val completions by CompletionWorkoutStatisticEntity referrersOn CompletionWorkoutStatistics.workoutId
-    var notes by NoteEntity via WorkoutNotes
 
     fun toModel(): WorkoutPlan {
         return WorkoutPlan(
@@ -136,9 +132,10 @@ class WorkoutPlanEntity(id: EntityID<Int>) : IntEntity(id) {
             name = this.name,
             description = this.description,
             difficulty = this.difficulty,
-            duration = this.duration.toIsoString(),
+            duration = this.duration,
             type = this.workoutType,
-            exercises = this.exercises.map { it.toModel() }.groupBy({ it.first }, { it.second }),
+            exercises = this.exercises.map { it.toModel() }.groupBy({ it.first }, { it.second })
+                .mapValues { it.value.toMutableList() }.toMutableMap(),
             frequency = this.exercises.map { it.toModel() }.groupBy({ it.first }, { it.second }).keys.count()
                 .toString(),
             asignedCount = athletes.count().toInt(),
@@ -164,8 +161,7 @@ class WorkoutTemplateExerciseEntity(id: EntityID<Int>) : IntEntity(id) {
                 reps = this.reps,
                 sets = this.sets,
                 isOption = this.isOption,
-                exercise = this.exercise.toModel(),
-                notes = listOf()
+                exercise = this.exercise.toModel()
             )
         )
     }

@@ -50,8 +50,8 @@ class DietEntity(id: EntityID<Int>) : IntEntity(id) {
             description = this.description,
             dietType = this.dietType,
             duration = this.duration,
-            dishes = this.dishes.map { it.toModel() }.groupBy({ it.first }, { it.second }),
-            notes = this.notes.map { it.toModel() },
+            dishes = this.dishes.map { it.toModel() }.groupBy({ it.first }, { it.second })
+                .mapValues { it.value.toMutableList() }.toMutableMap(),
             startAt = this.startAt
         )
     }
@@ -65,7 +65,6 @@ class DietDishEntity(id: EntityID<Int>) : IntEntity(id) {
     var weekDay by DietDishes.weekDay
     var amount by DietDishes.amount
     var mealType by DietDishes.mealType
-    var notes by NoteEntity via DietDishNotes
 
     fun toModel(): Pair<WeekDay, DietDish> {
         return Pair(
@@ -73,8 +72,7 @@ class DietDishEntity(id: EntityID<Int>) : IntEntity(id) {
             DietDish(
                 amout = this.amount,
                 mealType = this.mealType,
-                dish = this.dish.toModel(),
-                notes = notes.map { it.toModel() }
+                dish = this.dish.toModel()
             )
         )
     }
@@ -97,7 +95,8 @@ class DietTemplateEntity(id: EntityID<Int>) : IntEntity(id) {
             name = this.name,
             description = this.description,
             dietType = this.dietType,
-            dishes = this.dishes.map { it.toModel() }.groupBy({ it.first }, { it.second }),
+            dishes = this.dishes.map { it.toModel() }.groupBy({ it.first }, { it.second })
+                .mapValues { it.value.toMutableList() }.toMutableMap(),
         )
     }
 }
@@ -123,10 +122,11 @@ class DietPlanEntity(id: EntityID<Int>) : IntEntity(id) {
             name = this.name,
             description = this.description,
             type = this.dietType,
-            duration = this.duration.toIsoString(),
+            duration = this.duration,
             frequency = this.dishes.map { it.toModel() }.groupBy({ it.first }, { it.second }).keys.count().toString(),
             asignedCount = this.athletes.count().toInt(),
             dishes = this.dishes.map { it.toModel() }.groupBy({ it.first }, { it.second })
+                .mapValues { it.value.toMutableList() }.toMutableMap()
         )
     }
 }
@@ -146,7 +146,6 @@ class DietTemplateDishEntity(id: EntityID<Int>) : IntEntity(id) {
             DietDish(
                 amout = this.amount,
                 mealType = this.mealType,
-                notes = listOf(),
                 dish = this.dish.toModel()
             )
         )

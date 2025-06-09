@@ -13,7 +13,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.time.Duration
 
 
-class DietDao {
+object DietDao {
     fun createDiet(
         name: String,
         description: String,
@@ -50,14 +50,12 @@ class DietDao {
         }
     }
 
-    fun getPlans(trainerID: String): List<DietPlan> = transaction {
-        DietPlanEntity.all().filter { it ->
-            it.athletes.any { it.trainer?.id?.value == trainerID.toInt() }
-        }.map { it.toModel() }
+    fun getPlans(trainerID: Int): List<DietPlan> = transaction {
+        DietPlanEntity.all().filter { it.createdBy.user.id.value == trainerID }.map { it.toModel() }
     }
 
-    fun getTemplates(trainerID: String): List<DietTemplate> = transaction {
-        DietTemplateEntity.all().filter { it.createdBy.user.id.value == trainerID.toInt() }.map { it.toModel() }
+    fun getTemplates(trainerID: Int): List<DietTemplate> = transaction {
+        DietTemplateEntity.all().filter { it.createdBy.user.id.value == trainerID }.map { it.toModel() }
     }
 
     fun completeDiet(dietId: Int, athleteId: Int): CompletionDietStatisticEntity = transaction {
@@ -75,11 +73,11 @@ class DietDao {
     fun getCompletedDietsInTimeRange(
         baseRange: Instant,
         upRange: Instant,
-        trainerId: String
+        trainerId: Int
     ): List<CompletionDietStatistics> = transaction {
         CompletionDietStatisticEntity.all().toList()
             .filter { it ->
-                it.athlete.trainer?.user?.id?._value = trainerId.toInt()
+                it.athlete.trainer?.user?.id?._value = trainerId
                 it.completeAt in upRange..baseRange
             }.map { it.toModel() }
     }

@@ -62,12 +62,16 @@ fun Application.module() {
     upload()
     resources()
 
-    user()
-    trainer()
-    athlete()
-    workout()
-    diet()
-    comunication()
+    routing {
+        user()
+        trainer()
+        athlete()
+        workout()
+        diet()
+        comunication()
+        statistics()
+    }
+
 }
 
 fun startDB() {

@@ -15,7 +15,7 @@ import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
-class CommunicationDao {
+object CommunicationDao {
 
     // Conversaciones
     fun getChat(conversationId: Int): ConversationEntity = transaction {
@@ -26,15 +26,10 @@ class CommunicationDao {
         ConversationEntity[conversationId].toModel(userId)
     }
 
-    fun getConversations(userId: Int): List<ConversationEntity> = transaction {
+    fun getConversations(userId: Int): List<Conversation> = transaction {
         ConversationEntity.find {
             (Conversations.trainerId eq userId) or (Conversations.athleteId eq userId)
-        }.orderBy(Conversations.lastActivityAt to SortOrder.DESC)
-            .toList()
-    }
-
-    fun getConversationsWithUserData(userId: Int) = transaction {
-        getConversations(userId).map { it.toModel(userId) }
+        }.orderBy(Conversations.lastActivityAt to SortOrder.DESC).map { it.toModel() }
     }
 
     fun createConversation(trainerId: Int, athleteId: Int): ConversationEntity = transaction {
@@ -75,7 +70,7 @@ class CommunicationDao {
     }
 
     fun createMessage(
-        messageId: String = UUID.randomUUID().toString(),
+        messageId: String,
         conversationId: Int,
         senderId: Int,
         receiverId: Int,

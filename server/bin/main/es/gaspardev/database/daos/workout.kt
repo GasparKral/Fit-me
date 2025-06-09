@@ -2,7 +2,6 @@ package es.gaspardev.database.daos
 
 import es.gaspardev.core.domain.entities.Note
 import es.gaspardev.core.domain.entities.workouts.*
-import es.gaspardev.database.WorkoutExercises
 import es.gaspardev.database.Workouts
 import es.gaspardev.database.entities.*
 import es.gaspardev.enums.Difficulty
@@ -10,13 +9,11 @@ import es.gaspardev.enums.WeekDay
 import es.gaspardev.enums.WorkoutType
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import org.jetbrains.exposed.sql.SizedCollection
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.time.Duration
 
 
-class WorkoutDao {
+object WorkoutDao {
     fun createWorkout(
         name: String,
         description: String,
@@ -42,21 +39,21 @@ class WorkoutDao {
         WorkoutEntity.findById(id)
     }
 
-    fun getWorkouts(trainerID: String): List<Workout> = transaction {
+    fun getWorkouts(trainerID: Int): List<Workout> = transaction {
         WorkoutEntity.all().filter { it ->
-            it.createdBy.user.id.value == trainerID.toInt()
+            it.createdBy.user.id.value == trainerID
         }
     }.map { it.toModel() }
 
-    fun getPlans(trainerID: String): List<WorkoutPlan> = transaction {
+    fun getPlans(trainerID: Int): List<WorkoutPlan> = transaction {
         WorkoutPlanEntity.all().filter { it ->
-            it.createdBy.user.id.value == trainerID.toInt()
+            it.createdBy.user.id.value == trainerID
         }.map { it.toModel() }
     }
 
-    fun getTemplates(trainerID: String): List<WorkoutTemplate> = transaction {
+    fun getTemplates(trainerID: Int): List<WorkoutTemplate> = transaction {
         WorkoutTemplateEntity.all().filter { it ->
-            it.createdBy.user.id.value == trainerID.toInt()
+            it.createdBy.user.id.value == trainerID
         }.map { it.toModel() }
     }
 
@@ -95,99 +92,17 @@ class WorkoutDao {
     fun getCompletedWorkoutsInTimeRange(
         baseRange: Instant,
         upRange: Instant,
-        trainerId: String
+        trainerId: Int
     ): List<CompletionWorkoutStatistic> = transaction {
         CompletionWorkoutStatisticEntity.all()
             .filter {
                 it.completeAt in baseRange..upRange
                         &&
-                        it.athlete.trainer?.user?.id?.value == trainerId.toInt()
+                        it.athlete.trainer?.user?.id?.value == trainerId
             }
             .map { it.toModel() }
     }
 
-    fun updateWorkout(newValues: WorkoutPlan) = transaction {
-        val workoutEntity = WorkoutEntity.findById(newValues.workoutId)
-            ?: throw IllegalArgumentException("Workout not found")
-
-        // Actualizar campos básicos
-        workoutEntity.apply {
-            name = newValues.name
-            description = newValues.description
-            workoutType = newValues.type
-            duration = Duration.parse(newValues.duration)
-            difficulty = newValues.difficulty
-        }
-
-        // Gestionar ejercicios
-        updateWorkoutExercises(workoutEntity, newValues.exercises)
-    }
-
-    private fun updateWorkoutExercises(
-        workoutEntity: WorkoutEntity,
-        newExercises: Map<WeekDay, List<WorkoutExecise>>
-    ) {
-        // Obtener ejercicios actuales
-        val currentExercises = workoutEntity.exercises.toList()
-
-        // Crear un mapa de los nuevos ejercicios para comparación
-        val newExercisesFlat = newExercises.flatMap { (weekDay, exercises) ->
-            exercises.map { exercise -> Triple(weekDay, exercise.exercise.id, exercise) }
-        }
-
-        // Eliminar ejercicios que ya no están en la nueva lista
-        currentExercises.forEach { current ->
-            val exists = newExercisesFlat.any { (weekDay, exerciseId, _) ->
-                current.weekDay == weekDay && current.exercise.id.value == exerciseId
-            }
-            if (!exists) {
-                current.delete()
-            }
-        }
-
-        // Actualizar o crear ejercicios
-        newExercisesFlat.forEach { (weekDay, exerciseId, exercise) ->
-            val existing = currentExercises.find {
-                it.weekDay == weekDay && it.exercise.id.value == exerciseId
-            }
-
-            if (existing != null) {
-                // Actualizar existente
-                existing.apply {
-                    reps = exercise.reps
-                    sets = exercise.sets
-                    isOptional = exercise.isOptional()
-                }
-                updateExerciseNotes(existing, exercise.notes)
-            } else {
-                // Crear nuevo
-                val newEntity = WorkoutExerciseEntity.new {
-                    workout = workoutEntity
-                    this.weekDay = weekDay
-                    reps = exercise.reps
-                    sets = exercise.sets
-                    isOptional = exercise.isOptional()
-                    this.exercise = ExerciseEntity.findById(exerciseId)
-                        ?: throw IllegalArgumentException("Exercise not found: $exerciseId")
-                }
-                updateExerciseNotes(newEntity, exercise.notes)
-            }
-        }
-    }
-
-    private fun updateExerciseNotes(exerciseEntity: WorkoutExerciseEntity, newNotes: List<Note>) {
-        // Limpiar notas actuales
-        exerciseEntity.notes = SizedCollection(emptyList())
-
-        // Agregar nuevas notas
-        newNotes.forEach { note ->
-            val noteEntity = NoteEntity.findById(note.id)
-                ?: NoteEntity.new {
-                    content = note.content
-                }
-            exerciseEntity.notes = SizedCollection(exerciseEntity.notes + noteEntity)
-        }
-    }
 
     fun deleteWorkout(workoutId: String) {
         transaction {

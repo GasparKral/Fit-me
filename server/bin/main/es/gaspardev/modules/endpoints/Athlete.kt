@@ -3,45 +3,38 @@ package es.gaspardev.modules.endpoints
 import es.gaspardev.core.domain.entities.users.Athlete
 import es.gaspardev.database.daos.AthleteDao
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
-fun Application.athlete() {
+fun Route.athlete() {
 
-    routing {
-        get(Athlete.URLPATH + "/data/workouthistory") {
-            val athleteId = call.request.queryParameters["user_id"]
+    route(Athlete.URLPATH) {
 
-            if (athleteId != null) {
-                val history = AthleteDao().getWorkoutHistory(athleteId.toInt()).map { it.toModel() }
-                call.respond(history)
-            } else {
-                call.respondText("Parámetros requeridos faltantes", status = HttpStatusCode.BadRequest)
+        route("/data") {
+
+            get("/workouthistory/{athlete_id}") {
+                val athleteId = call.parameters["athlete_id"]?.toInt() ?: return@get call.respondText(
+                    "Parámetros requeridos faltantes",
+                    status = HttpStatusCode.BadRequest
+                )
+                call.respond(AthleteDao.getWorkoutHistory(athleteId))
             }
-        }
 
-        get(Athlete.URLPATH + "/data/diethitory") {
-            val athleteId = call.request.queryParameters["user_id"]
-
-            if (athleteId != null) {
-                val history = AthleteDao().getDietHistory(athleteId.toInt()).map { it.toModel() }
-                call.respond(history)
-            } else {
-                call.respondText("Parámetros requeridos faltantes", status = HttpStatusCode.BadRequest)
+            get("/diethitory/{athlete_id}") {
+                val athleteId = call.parameters["athlete_id"]?.toInt() ?: return@get call.respondText(
+                    "Parámetros requeridos faltantes",
+                    status = HttpStatusCode.BadRequest
+                )
+                call.respond(AthleteDao.getDietHistory(athleteId))
             }
-        }
 
-        get(Athlete.URLPATH + "/data/sessions") {
-            val athleteId = call.request.queryParameters["user_id"]
-
-            if (athleteId != null) {
-                val sessions = AthleteDao().getCommingSessions(athleteId.toInt()).map { it.toModel() }
-                call.respond(sessions)
-            } else {
-                call.respondText("Parámetros requeridos faltantes", status = HttpStatusCode.BadRequest)
+            get("/sessions/{athlete_id}") {
+                val athleteId = call.parameters["athlete_id"]?.toInt() ?: return@get call.respondText(
+                    "Parámetros requeridos faltantes",
+                    status = HttpStatusCode.BadRequest
+                )
+                call.respond(AthleteDao.getCommingSessions(athleteId))
             }
         }
     }
-
 }

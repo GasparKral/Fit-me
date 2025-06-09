@@ -1,5 +1,8 @@
 package es.gaspardev.database.daos
 
+import es.gaspardev.core.domain.entities.comunication.Session
+import es.gaspardev.core.domain.entities.diets.CompletionDietStatistics
+import es.gaspardev.core.domain.entities.workouts.CompletionWorkoutStatistic
 import es.gaspardev.database.Measurements
 import es.gaspardev.database.entities.CompletionDietStatisticEntity
 import es.gaspardev.database.entities.DietEntity
@@ -10,7 +13,7 @@ import kotlinx.datetime.Instant
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 
-class AthleteDao {
+object AthleteDao {
     fun createAthlete(
         userId: Int,
         age: Int,
@@ -25,12 +28,21 @@ class AthleteDao {
         }
     }
 
-    fun getWorkoutHistory(userId: Int): List<CompletionWorkoutStatisticEntity> = transaction {
-        CompletionWorkoutStatisticEntity.all().filter { it.athlete.userEntity.id.value == userId }
+    /*
+     *
+     *  DATA
+     *
+     */
+    fun getWorkoutHistory(userId: Int): List<CompletionWorkoutStatistic> = transaction {
+        CompletionWorkoutStatisticEntity.all().filter { it.athlete.userEntity.id.value == userId }.map { it.toModel() }
     }
 
-    fun getDietHistory(userId: Int): List<CompletionDietStatisticEntity> = transaction {
-        CompletionDietStatisticEntity.all().filter { it.athlete.userEntity.id.value == userId }
+    fun getDietHistory(userId: Int): List<CompletionDietStatistics> = transaction {
+        CompletionDietStatisticEntity.all().filter { it.athlete.userEntity.id.value == userId }.map { it.toModel() }
+    }
+
+    fun getCommingSessions(athleteId: Int): List<Session> = transaction {
+        SessionEntity.all().filter { it.athlete.id.value == athleteId && !it.completed }.map { it.toModel() }
     }
 
     fun findAthleteByUserId(userId: Int): AthleteEntity? = transaction {
@@ -91,14 +103,10 @@ class AthleteDao {
         }.singleOrNull()
     }
 
-    fun needAssistant(trainerID: String): Int = transaction {
+    fun needAssistant(trainerID: Int): Int = transaction {
         AthleteEntity.all().count {
-            it.trainer?.id?.value == trainerID.toInt() && it.needAssistant
+            it.trainer?.id?.value == trainerID && it.needAssistant
         }
-    }
-
-    fun getCommingSessions(athleteId: Int): List<SessionEntity> = transaction {
-        SessionEntity.all().filter { it.athlete.id.value == athleteId && !it.completed }
     }
 
 

@@ -184,8 +184,8 @@ INSERT INTO dishes (name) VALUES
 INSERT INTO diet_templates (name, description, diet_type, created_by) VALUES
 ('Weight Loss Standard', 'Balanced diet for weight loss', 'WEIGHT_LOSS', 1),
 ('Muscle Gain High Protein', 'High protein diet for muscle gain', 'MUSCLE_GAIN', 1),
-('Athlete Maintenance', 'Diet for maintaining athletic performance', 'MAINTENANCE', 2),
-('Swimmer Nutrition', 'Nutrition plan for swimmers', 'MAINTENANCE', 3);
+('Athlete Maintenance', 'Diet for maintaining athletic performance', 'BALANCED', 2),
+('Swimmer Nutrition', 'Nutrition plan for swimmers', 'BALANCED', 3);
 
 -- Insert diet template dishes
 INSERT INTO diet_template_dishes (template_id, dish_id, week_day, amount, meal_type) VALUES
@@ -210,8 +210,8 @@ INSERT INTO diet_template_dishes (template_id, dish_id, week_day, amount, meal_t
 INSERT INTO diets (name, description, diet_type, duration_days, created_by, start_at) VALUES
 ('Sarah Weight Loss', 'Custom weight loss plan for Sarah', 'WEIGHT_LOSS', 30, 1, NOW()),
 ('Mike Muscle Gain', 'High protein diet for Mike', 'MUSCLE_GAIN', 60, 1, NOW() + INTERVAL '1 day'),
-('Emma Swimmer Diet', 'Nutrition for competitive swimming', 'MAINTENANCE', 90, 3, NOW() + INTERVAL '2 days'),
-('David Cutting Phase', 'Diet for cutting phase', 'CUTTING', 45, 1, NOW() + INTERVAL '1 week');
+('Emma Swimmer Diet', 'Nutrition for competitive swimming', 'BALANCED', 90, 3, NOW() + INTERVAL '2 days'),
+('David Cutting Phase', 'Diet for cutting phase', 'LOW_CARB', 45, 1, NOW() + INTERVAL '1 week');
 
 -- Update athletes with their diet IDs
 UPDATE athletes SET diet_id = 1 WHERE id = 1;
@@ -351,3 +351,70 @@ INSERT INTO key_gen (key, trainer_id) VALUES
 ('IJKL9012', 2),
 ('MNOP3456', 3),
 ('QRST7890', 3);
+
+
+-- Insert strength statistics
+INSERT INTO strength_statistics (athlete_id, recorded_at, bench_press_max, squat_max, deadlift_max, pull_ups_max, push_ups_max, strength_index, muscular_endurance, power_output) VALUES
+-- Sarah Athlete (ID: 1) - Female, 28 años
+(1, NOW() - INTERVAL '1 month', 45.0, 60.0, 70.0, 8, 25, 75.5, 68.0, 280.0),
+(1, NOW() - INTERVAL '2 weeks', 47.5, 62.5, 75.0, 10, 30, 78.2, 72.0, 295.0),
+(1, NOW() - INTERVAL '1 week', 50.0, 65.0, 80.0, 12, 35, 82.1, 75.0, 310.0),
+
+-- Mike Coach (ID: 2) - Male, 32 años
+(2, NOW() - INTERVAL '3 weeks', 85.0, 120.0, 140.0, 15, 50, 92.3, 85.0, 450.0),
+(2, NOW() - INTERVAL '1 week', 87.5, 125.0, 145.0, 18, 55, 95.1, 88.0, 465.0),
+(2, NOW() - INTERVAL '3 days', 90.0, 130.0, 150.0, 20, 60, 98.5, 90.0, 480.0),
+
+-- David Lifter (ID: 3) - Male, 25 años, enfocado en fuerza
+(3, NOW() - INTERVAL '1 month', 110.0, 160.0, 180.0, 20, 45, 95.8, 82.0, 520.0),
+(3, NOW() - INTERVAL '2 weeks', 115.0, 170.0, 190.0, 22, 50, 98.2, 85.0, 540.0),
+(3, NOW() - INTERVAL '5 days', 120.0, 175.0, 200.0, 25, 55, 100.0, 88.0, 560.0),
+
+-- Lisa Swimmer (ID: 4) - Female, 30 años, más enfocada en resistencia
+(4, NOW() - INTERVAL '3 weeks', 35.0, 50.0, 60.0, 6, 20, 65.2, 88.0, 250.0),
+(4, NOW() - INTERVAL '1 week', 37.5, 52.5, 65.0, 8, 25, 68.5, 90.0, 265.0),
+(4, NOW() - INTERVAL '2 days', 40.0, 55.0, 70.0, 10, 30, 72.1, 92.0, 280.0);
+
+-- Insert endurance statistics
+INSERT INTO endurance_statistics (athlete_id, recorded_at, vo2_max, resting_heart_rate, max_heart_rate, running_pace_min_km, cardio_endurance, aerobic_capacity, recovery_time_minutes, distance_covered_km) VALUES
+-- Sarah Athlete - Buena condición cardiovascular
+(1, NOW() - INTERVAL '1 month', 42.5, 65, 185, 5.8, 78.0, 82.0, 2.5, 8.5),
+(1, NOW() - INTERVAL '2 weeks', 44.2, 63, 185, 5.6, 81.0, 85.0, 2.3, 10.0),
+(1, NOW() - INTERVAL '1 week', 45.8, 62, 186, 5.4, 84.0, 87.5, 2.1, 12.0),
+
+-- Mike Coach - Resistencia moderada
+(2, NOW() - INTERVAL '3 weeks', 38.5, 72, 188, 6.2, 65.0, 70.0, 3.2, 6.5),
+(2, NOW() - INTERVAL '1 week', 40.1, 70, 188, 6.0, 68.0, 73.0, 3.0, 8.0),
+(2, NOW() - INTERVAL '3 days', 41.5, 68, 189, 5.9, 71.0, 75.5, 2.8, 9.5),
+
+-- David Lifter - Resistencia básica, enfocado en fuerza
+(3, NOW() - INTERVAL '1 month', 35.2, 75, 190, 6.8, 58.0, 62.0, 4.0, 5.0),
+(3, NOW() - INTERVAL '2 weeks', 36.8, 73, 190, 6.6, 61.0, 65.0, 3.8, 6.2),
+(3, NOW() - INTERVAL '5 days', 38.1, 72, 191, 6.4, 64.0, 67.5, 3.5, 7.5),
+
+-- Lisa Swimmer - Excelente resistencia cardiovascular
+(4, NOW() - INTERVAL '3 weeks', 52.5, 58, 182, 4.8, 95.0, 96.0, 1.8, 15.0),
+(4, NOW() - INTERVAL '1 week', 54.2, 56, 182, 4.6, 97.0, 98.0, 1.6, 18.0),
+(4, NOW() - INTERVAL '2 days', 55.8, 55, 183, 4.4, 98.5, 99.0, 1.5, 20.0);
+
+-- Insert body measurement history
+INSERT INTO body_measurement_history (athlete_id, measurement_id, recorded_at, weight_change, body_fat_change, muscle_mass_gain, bmi, body_composition) VALUES
+-- Sarah Athlete (measurement_id: 1) - Progreso en composición corporal
+(1, 1, NOW() - INTERVAL '1 month', 0.0, 0.0, 0.0, 22.7, 78.0),
+(1, 1, NOW() - INTERVAL '2 weeks', -1.5, -1.2, 0.8, 22.2, 79.2),
+(1, 1, NOW() - INTERVAL '1 week', -0.8, -0.5, 0.5, 21.9, 80.5),
+
+-- Mike Coach (measurement_id: 2) - Ganancia de masa muscular
+(2, 2, NOW() - INTERVAL '3 weeks', 0.0, 0.0, 0.0, 24.7, 82.0),
+(2, 2, NOW() - INTERVAL '1 week', 2.0, -0.8, 1.5, 25.1, 83.8),
+(2, 2, NOW() - INTERVAL '3 days', 1.0, -0.3, 0.8, 25.4, 84.6),
+
+-- David Lifter (measurement_id: 3) - Desarrollo muscular significativo
+(3, 3, NOW() - INTERVAL '1 month', 0.0, 0.0, 0.0, 24.5, 85.0),
+(3, 3, NOW() - INTERVAL '2 weeks', 3.0, -1.5, 2.2, 25.4, 87.5),
+(3, 3, NOW() - INTERVAL '5 days', 1.5, -0.8, 1.1, 25.9, 88.8),
+
+-- Lisa Swimmer (measurement_id: 4) - Mantenimiento con ligeras mejoras
+(4, 4, NOW() - INTERVAL '3 weeks', 0.0, 0.0, 0.0, 22.0, 80.0),
+(4, 4, NOW() - INTERVAL '1 week', -0.5, -0.8, 0.3, 21.8, 80.8),
+(4, 4, NOW() - INTERVAL '2 days', -0.3, -0.4, 0.2, 21.7, 81.2);

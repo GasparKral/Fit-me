@@ -48,7 +48,7 @@ fun Application.chat() {
         masking = false
     }
 
-    val communicationDao = CommunicationDao()
+    val communicationDao = CommunicationDao
     val activeSessions = Collections.synchronizedMap(mutableMapOf<String, UserSession>())
 
     routing {
@@ -161,7 +161,6 @@ suspend fun WebSocketSession.handleSendMessage(
 ) {
     try {
         val now = Clock.System.now()
-        val messageId = UUID.randomUUID().toString()
 
         // Determinar destinatario
         val receiverId = if (userId == conversation.trainer.id) {
@@ -179,6 +178,7 @@ suspend fun WebSocketSession.handleSendMessage(
         // Verificar si el destinatario está online
         val recipientSessionKey = "${receiverId}_${conversationId}"
         val isRecipientOnline = activeSessions.containsKey(recipientSessionKey)
+        val messageId = wsMessage.tempId!!
 
         // **FIX 1: Guardar mensaje en una sola transacción**
         val savedMessage = transaction {

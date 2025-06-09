@@ -65,11 +65,12 @@ CREATE TYPE workout_type AS ENUM (
 -- Diet Type Enum
 CREATE TYPE diet_type AS ENUM (
     'WEIGHT_LOSS',
-    'WEIGHT_GAIN',
-    'MAINTENANCE',
     'MUSCLE_GAIN',
-    'CUTTING',
-    'BULKING'
+    'BALANCED',
+    'VEGETARIAN',
+    'VEGAN',
+    'LOW_CARB',
+    'PERFORMANCE'
 );
 
 -- Meal Type Enum
@@ -473,6 +474,55 @@ CREATE TABLE session_notes (
     PRIMARY KEY (session_id, note_id)
 );
 
+CREATE TABLE strength_statistics (
+    id SERIAL PRIMARY KEY,
+    athlete_id INTEGER NOT NULL,
+    recorded_at TIMESTAMP NOT NULL,
+    bench_press_max DOUBLE PRECISION, -- Peso máximo en press de banca (kg)
+    squat_max DOUBLE PRECISION, -- Peso máximo en sentadilla (kg)
+    deadlift_max DOUBLE PRECISION, -- Peso máximo en peso muerto (kg)
+    pull_ups_max INTEGER, -- Máximo de dominadas
+    push_ups_max INTEGER, -- Máximo de flexiones
+    strength_index DOUBLE PRECISION NOT NULL DEFAULT 0.0, -- Índice de fuerza calculado
+    muscular_endurance DOUBLE PRECISION NOT NULL DEFAULT 0.0, -- Resistencia muscular
+    power_output DOUBLE PRECISION, -- Potencia de salida (watts)
+
+    FOREIGN KEY (athlete_id) REFERENCES athletes(id)
+);
+
+-- Tabla de estadísticas de resistencia
+CREATE TABLE endurance_statistics (
+    id SERIAL PRIMARY KEY,
+    athlete_id INTEGER NOT NULL,
+    recorded_at TIMESTAMP NOT NULL,
+    vo2_max DOUBLE PRECISION, -- VO2 máximo (ml/kg/min)
+    resting_heart_rate INTEGER, -- Frecuencia cardíaca en reposo
+    max_heart_rate INTEGER, -- Frecuencia cardíaca máxima
+    running_pace_min_km DOUBLE PRECISION, -- Ritmo de carrera (min/km)
+    cardio_endurance DOUBLE PRECISION NOT NULL DEFAULT 0.0, -- Resistencia cardiovascular (0-100)
+    aerobic_capacity DOUBLE PRECISION NOT NULL DEFAULT 0.0, -- Capacidad aeróbica
+    recovery_time_minutes DOUBLE PRECISION, -- Tiempo de recuperación
+    distance_covered_km DOUBLE PRECISION NOT NULL DEFAULT 0.0, -- Distancia cubierta en km
+
+    FOREIGN KEY (athlete_id) REFERENCES athletes(id)
+);
+
+-- Tabla de historial de mediciones corporales
+CREATE TABLE body_measurement_history (
+    id SERIAL PRIMARY KEY,
+    athlete_id INTEGER NOT NULL,
+    measurement_id INTEGER NOT NULL,
+    recorded_at TIMESTAMP NOT NULL,
+    weight_change DOUBLE PRECISION NOT NULL DEFAULT 0.0, -- Cambio de peso respecto a medición anterior
+    body_fat_change DOUBLE PRECISION NOT NULL DEFAULT 0.0, -- Cambio de grasa corporal
+    muscle_mass_gain DOUBLE PRECISION NOT NULL DEFAULT 0.0, -- Ganancia de masa muscular
+    bmi DOUBLE PRECISION NOT NULL DEFAULT 0.0, -- Índice de masa corporal
+    body_composition DOUBLE PRECISION NOT NULL DEFAULT 0.0, -- Composición corporal general
+
+    FOREIGN KEY (athlete_id) REFERENCES athletes(id),
+    FOREIGN KEY (measurement_id) REFERENCES measurements(id)
+);
+
 -- ============================================================================
 -- ACCESS KEYS TABLE
 -- ============================================================================
@@ -538,3 +588,13 @@ CREATE INDEX idx_completion_workout_stats_workout_id ON completion_workout_stati
 CREATE INDEX idx_completion_workout_stats_athlete_id ON completion_workout_statistics(athlete_id);
 CREATE INDEX idx_completion_diet_stats_diet_id ON completion_diet_statistics(diet_id);
 CREATE INDEX idx_completion_diet_stats_athlete_id ON completion_diet_statistics(athlete_id);
+
+CREATE INDEX idx_strength_statistics_athlete_id ON strength_statistics(athlete_id);
+CREATE INDEX idx_strength_statistics_recorded_at ON strength_statistics(recorded_at);
+
+CREATE INDEX idx_endurance_statistics_athlete_id ON endurance_statistics(athlete_id);
+CREATE INDEX idx_endurance_statistics_recorded_at ON endurance_statistics(recorded_at);
+
+CREATE INDEX idx_body_measurement_history_athlete_id ON body_measurement_history(athlete_id);
+CREATE INDEX idx_body_measurement_history_measurement_id ON body_measurement_history(measurement_id);
+CREATE INDEX idx_body_measurement_history_recorded_at ON body_measurement_history(recorded_at);

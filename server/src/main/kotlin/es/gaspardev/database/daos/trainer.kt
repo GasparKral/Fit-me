@@ -1,12 +1,14 @@
 package es.gaspardev.database.daos
 
+import es.gaspardev.core.domain.entities.users.Athlete
+import es.gaspardev.core.domain.entities.users.Trainer
 import es.gaspardev.database.entities.*
 import es.gaspardev.enums.WeekDay
 import kotlinx.datetime.Instant
 import org.jetbrains.exposed.sql.transactions.transaction
 
 
-class TrainerDao {
+object TrainerDao {
     fun createTrainer(
         userId: Int,
         specialization: String,
@@ -19,9 +21,10 @@ class TrainerDao {
         }
     }
 
-    fun findTrainerByCredencials(identification: String, password: String): TrainerEntity? = transaction {
+    fun findTrainerByCredencials(identification: String, password: String): Trainer? = transaction {
         TrainerEntity.all()
             .firstOrNull { (it.user.fullname == identification || it.user.email == identification && it.user.password == password) }
+            ?.toModel()
     }
 
     fun findTrainerByUserId(userId: Int): TrainerEntity? = transaction {
@@ -32,8 +35,8 @@ class TrainerDao {
         TrainerEntity.all().toList()
     }
 
-    fun getAthletes(trainerId: String): List<AthleteEntity> = transaction {
-        AthleteEntity.all().filter { it.trainer?.user?.id?.value == trainerId.toInt() }
+    fun getAthletes(trainerId: Int): List<Athlete> = transaction {
+        AthleteEntity.all().filter { it.trainer?.user?.id?.value == trainerId }.map { it.toModel() }
     }
 
     fun addCertification(

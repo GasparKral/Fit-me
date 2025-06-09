@@ -122,6 +122,10 @@ class TrainerSocialEntity(id: EntityID<Int>) : IntEntity(id) {
 class AthleteEntity(id: EntityID<Int>) : Entity<Int>(id) {
     companion object : EntityClass<Int, AthleteEntity>(Athletes) {
         override fun createInstance(entityId: EntityID<Int>, row: ResultRow?) = AthleteEntity(entityId)
+
+        fun getByUserId(userId: Int): AthleteEntity {
+            return AthleteEntity.all().first { it.userEntity.id.value == userId }
+        }
     }
 
     var userEntity by UserEntity referencedOn Athletes.userId

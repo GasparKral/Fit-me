@@ -218,6 +218,49 @@ object CompletionWorkoutStatistics : IntIdTable("completion_workout_statistics")
         unwrap = { java.time.Instant.ofEpochMilli(it.toEpochMilliseconds()) })
 }
 
+object StrengthStatistics : IntIdTable("strength_statistics") {
+    val athleteId = reference("athlete_id", Athletes)
+    val recordedAt = timestamp("recorded_at").transform(
+        wrap = { Instant.fromEpochMilliseconds(it.toEpochMilli()) },
+        unwrap = { java.time.Instant.ofEpochMilli(it.toEpochMilliseconds()) })
+    val benchPressMax = double("bench_press_max").nullable() // Peso máximo en press de banca (kg)
+    val squatMax = double("squat_max").nullable() // Peso máximo en sentadilla (kg)
+    val deadliftMax = double("deadlift_max").nullable() // Peso máximo en peso muerto (kg)
+    val pullUpsMax = integer("pull_ups_max").nullable() // Máximo de dominadas
+    val pushUpsMax = integer("push_ups_max").nullable() // Máximo de flexiones
+    val strengthIndex = double("strength_index").default(0.0) // Índice de fuerza calculado
+    val muscularEndurance = double("muscular_endurance").default(0.0) // Resistencia muscular
+    val powerOutput = double("power_output").nullable() // Potencia de salida (watts)
+}
+
+object EnduranceStatistics : IntIdTable("endurance_statistics") {
+    val athleteId = reference("athlete_id", Athletes)
+    val recordedAt = timestamp("recorded_at").transform(
+        wrap = { Instant.fromEpochMilliseconds(it.toEpochMilli()) },
+        unwrap = { java.time.Instant.ofEpochMilli(it.toEpochMilliseconds()) })
+    val vo2Max = double("vo2_max").nullable() // VO2 máximo (ml/kg/min)
+    val restingHeartRate = integer("resting_heart_rate").nullable() // Frecuencia cardíaca en reposo
+    val maxHeartRate = integer("max_heart_rate").nullable() // Frecuencia cardíaca máxima
+    val runningPace = double("running_pace_min_km").nullable() // Ritmo de carrera (min/km)
+    val cardioEndurance = double("cardio_endurance").default(0.0) // Resistencia cardiovascular (0-100)
+    val aerobicCapacity = double("aerobic_capacity").default(0.0) // Capacidad aeróbica
+    val recoveryTime = double("recovery_time_minutes").nullable() // Tiempo de recuperación
+    val distanceCovered = double("distance_covered_km").default(0.0) // Distancia cubierta en km
+}
+
+object BodyMeasurementHistory : IntIdTable("body_measurement_history") {
+    val athleteId = reference("athlete_id", Athletes)
+    val measurementId = reference("measurement_id", Measurements)
+    val recordedAt = timestamp("recorded_at").transform(
+        wrap = { Instant.fromEpochMilliseconds(it.toEpochMilli()) },
+        unwrap = { java.time.Instant.ofEpochMilli(it.toEpochMilliseconds()) })
+    val weightChange = double("weight_change").default(0.0) // Cambio de peso respecto a medición anterior
+    val bodyFatChange = double("body_fat_change").default(0.0) // Cambio de grasa corporal
+    val muscleMassGain = double("muscle_mass_gain").default(0.0) // Ganancia de masa muscular
+    val bmi = double("bmi").default(0.0) // Índice de masa corporal
+    val bodyComposition = double("body_composition").default(0.0) // Composición corporal general
+}
+
 // ============================================================================
 // TABLAS DE DIETAS Y COMIDAS
 // ============================================================================
