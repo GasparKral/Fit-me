@@ -1,0 +1,434 @@
+openapi: 3.0.3
+info:
+  title: Fit-me Diet API
+  description: API endpoints for diet management in Fit-me application
+  version: 1.0.0
+  contact:
+    name: Gaspar Dev
+    email: contact@gaspardev.es
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+  - url: https://api.fit-me.com
+    description: Production server
+
+paths:
+  /diet/plans/{trainer_id}:
+    get:
+      summary: Get diet plans by trainer
+      description: Retrieves all diet plans created by a specific trainer
+      tags:
+        - Diet Management
+      parameters:
+        - name: trainer_id
+          in: path
+          required: true
+          description: The unique identifier of the trainer
+          schema:
+            type: integer
+            minimum: 1
+          example: 789
+      responses:
+        '200':
+          description: Successful response with diet plans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DietPlan'
+              example:
+                - id: 1
+                  name: "High Protein Diet"
+                  description: "A diet focused on high protein intake for muscle building"
+                  dietType: "high_protein"
+                  duration: 30
+                  createdBy: 789
+                  createdAt: "2025-06-01T00:00:00Z"
+        '400':
+          description: Bad request - missing or invalid trainer_id parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Parámetros requeridos faltantes o inválidos"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /diet/templates/{trainer_id}:
+    get:
+      summary: Get diet templates by trainer
+      description: Retrieves all diet templates created by a specific trainer
+      tags:
+        - Diet Management
+      parameters:
+        - name: trainer_id
+          in: path
+          required: true
+          description: The unique identifier of the trainer
+          schema:
+            type: integer
+            minimum: 1
+          example: 789
+      responses:
+        '200':
+          description: Successful response with diet templates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DietTemplate'
+              example:
+                - id: 1
+                  name: "Basic Weight Loss Template"
+                  description: "Template for basic weight loss diet plans"
+                  dietType: "weight_loss"
+                  isTemplate: true
+                  createdBy: 789
+        '400':
+          description: Bad request - missing or invalid trainer_id parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Parámetros requeridos faltantes o inválidos"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /diet/create/{trainer_id}:
+    post:
+      summary: Create a new diet plan
+      description: Creates a new diet plan for the specified trainer
+      tags:
+        - Diet Management
+      parameters:
+        - name: trainer_id
+          in: path
+          required: true
+          description: The unique identifier of the trainer creating the diet
+          schema:
+            type: integer
+            minimum: 1
+          example: 789
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDietRequest'
+            example:
+              name: "Custom Keto Diet"
+              description: "A customized ketogenic diet plan for fat loss"
+              dietType: "ketogenic"
+              duration: 60
+              meals:
+                - name: "Breakfast"
+                  calories: 400
+                  macros:
+                    protein: 25
+                    carbs: 5
+                    fat: 35
+      responses:
+        '201':
+          description: Diet plan created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DietPlan'
+              example:
+                id: 123
+                name: "Custom Keto Diet"
+                description: "A customized ketogenic diet plan for fat loss"
+                dietType: "ketogenic"
+                duration: 60
+                createdBy: 789
+                createdAt: "2025-06-07T12:00:00Z"
+        '400':
+          description: Bad request - missing required fields or invalid data
+          content:
+            text/plain:
+              schema:
+                type: string
+                examples:
+                  missing_params:
+                    value: "Parámetros requeridos faltantes o inválidos"
+                  missing_name:
+                    value: "El nombre de la dieta es requerido"
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Error al crear la dieta"
+
+components:
+  schemas:
+    DietPlan:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the diet plan
+        name:
+          type: string
+          description: Name of the diet plan
+          minLength: 1
+        description:
+          type: string
+          description: Description of the diet plan
+        dietType:
+          type: string
+          enum: [weight_loss, muscle_gain, maintenance, ketogenic, high_protein, low_carb, mediterranean]
+          description: Type of diet plan
+        duration:
+          type: integer
+          minimum: 1
+          description: Duration of the diet plan in days
+        createdBy:
+          type: integer
+          description: ID of the trainer who created the diet plan
+        createdAt:
+          type: string
+          format: date-time
+          description: Date and time when the diet plan was created
+        meals:
+          type: array
+          items:
+            $ref: '#/components/schemas/Meal'
+          description: List of meals in the diet plan
+      required:
+        - id
+        - name
+        - dietType
+        - duration
+        - createdBy
+
+    DietTemplate:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the diet template
+        name:
+          type: string
+          description: Name of the diet template
+        description:
+          type: string
+          description: Description of the diet template
+        dietType:
+          type: string
+          enum: [weight_loss, muscle_gain, maintenance, ketogenic, high_protein, low_carb, mediterranean]
+          description: Type of diet template
+        isTemplate:
+          type: boolean
+          description: Indicates if this is a template
+          default: true
+        createdBy:
+          type: integer
+          description: ID of the trainer who created the template
+        templateMeals:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateMeal'
+          description: List of template meals
+      required:
+        - id
+        - name
+        - dietType
+        - createdBy
+
+    CreateDietRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the diet plan
+          minLength: 1
+        description:
+          type: string
+          description: Description of the diet plan
+        dietType:
+          type: string
+          enum: [weight_loss, muscle_gain, maintenance, ketogenic, high_protein, low_carb, mediterranean]
+          description: Type of diet plan
+        duration:
+          type: integer
+          minimum: 1
+          description: Duration of the diet plan in days
+        meals:
+          type: array
+          items:
+            $ref: '#/components/schemas/MealInput'
+          description: List of meals for the diet plan
+      required:
+        - name
+        - dietType
+        - duration
+
+    Meal:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the meal
+        name:
+          type: string
+          description: Name of the meal
+        calories:
+          type: integer
+          minimum: 0
+          description: Total calories in the meal
+        macros:
+          $ref: '#/components/schemas/Macronutrients'
+        foods:
+          type: array
+          items:
+            $ref: '#/components/schemas/Food'
+          description: List of foods in the meal
+      required:
+        - id
+        - name
+        - calories
+
+    TemplateMeal:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the template meal
+        calories:
+          type: integer
+          minimum: 0
+          description: Target calories for the meal
+        macros:
+          $ref: '#/components/schemas/Macronutrients'
+        mealType:
+          type: string
+          enum: [breakfast, lunch, dinner, snack]
+          description: Type of meal
+      required:
+        - name
+        - calories
+
+    MealInput:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the meal
+        calories:
+          type: integer
+          minimum: 0
+          description: Total calories in the meal
+        macros:
+          $ref: '#/components/schemas/Macronutrients'
+        foods:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodInput'
+          description: List of foods in the meal
+      required:
+        - name
+        - calories
+
+    Macronutrients:
+      type: object
+      properties:
+        protein:
+          type: number
+          format: float
+          minimum: 0
+          description: Protein content in grams
+        carbs:
+          type: number
+          format: float
+          minimum: 0
+          description: Carbohydrate content in grams
+        fat:
+          type: number
+          format: float
+          minimum: 0
+          description: Fat content in grams
+        fiber:
+          type: number
+          format: float
+          minimum: 0
+          description: Fiber content in grams
+      required:
+        - protein
+        - carbs
+        - fat
+
+    Food:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the food
+        name:
+          type: string
+          description: Name of the food
+        quantity:
+          type: number
+          format: float
+          minimum: 0
+          description: Quantity of the food
+        unit:
+          type: string
+          description: Unit of measurement (g, ml, pieces, etc.)
+        calories:
+          type: integer
+          minimum: 0
+          description: Calories per serving
+      required:
+        - id
+        - name
+        - quantity
+        - unit
+
+    FoodInput:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the food
+        quantity:
+          type: number
+          format: float
+          minimum: 0
+          description: Quantity of the food
+        unit:
+          type: string
+          description: Unit of measurement (g, ml, pieces, etc.)
+        calories:
+          type: integer
+          minimum: 0
+          description: Calories per serving
+      required:
+        - name
+        - quantity
+        - unit
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: integer
+          description: Error code
+      required:
+        - error
+        - code

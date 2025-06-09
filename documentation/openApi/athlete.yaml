@@ -1,0 +1,237 @@
+openapi: 3.0.3
+info:
+  title: Fit-me Athlete API
+  description: API endpoints for athlete data management in Fit-me application
+  version: 1.0.0
+  contact:
+    name: Gaspar Dev
+    email: contact@gaspardev.es
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+  - url: https://api.fit-me.com
+    description: Production server
+
+paths:
+  /athlete/data/workouthistory/{athlete_id}:
+    get:
+      summary: Get workout history for an athlete
+      description: Retrieves the complete workout history for a specific athlete
+      tags:
+        - Athlete Data
+      parameters:
+        - name: athlete_id
+          in: path
+          required: true
+          description: The unique identifier of the athlete
+          schema:
+            type: integer
+            minimum: 1
+          example: 123
+      responses:
+        '200':
+          description: Successful response with workout history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkoutHistory'
+              example:
+                - id: 1
+                  workoutName: "Morning Cardio"
+                  completedAt: "2025-06-01T08:00:00Z"
+                  duration: 45
+                  caloriesBurned: 300
+        '400':
+          description: Bad request - missing or invalid athlete_id parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Parámetros requeridos faltantes"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /athlete/data/diethitory/{athlete_id}:
+    get:
+      summary: Get diet history for an athlete
+      description: Retrieves the complete diet history for a specific athlete
+      tags:
+        - Athlete Data
+      parameters:
+        - name: athlete_id
+          in: path
+          required: true
+          description: The unique identifier of the athlete
+          schema:
+            type: integer
+            minimum: 1
+          example: 123
+      responses:
+        '200':
+          description: Successful response with diet history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DietHistory'
+              example:
+                - id: 1
+                  dietName: "High Protein Diet"
+                  startDate: "2025-05-01T00:00:00Z"
+                  endDate: "2025-05-31T00:00:00Z"
+                  compliance: 85
+        '400':
+          description: Bad request - missing or invalid athlete_id parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Parámetros requeridos faltantes"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /athlete/data/sessions/{athlete_id}:
+    get:
+      summary: Get upcoming sessions for an athlete
+      description: Retrieves the upcoming training sessions for a specific athlete
+      tags:
+        - Athlete Data
+      parameters:
+        - name: athlete_id
+          in: path
+          required: true
+          description: The unique identifier of the athlete
+          schema:
+            type: integer
+            minimum: 1
+          example: 123
+      responses:
+        '200':
+          description: Successful response with upcoming sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Session'
+              example:
+                - id: 1
+                  sessionName: "Personal Training"
+                  scheduledAt: "2025-06-08T10:00:00Z"
+                  duration: 60
+                  location: "Gym A"
+        '400':
+          description: Bad request - missing or invalid athlete_id parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Parámetros requeridos faltantes"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    WorkoutHistory:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the workout history entry
+        workoutName:
+          type: string
+          description: Name of the completed workout
+        completedAt:
+          type: string
+          format: date-time
+          description: Date and time when the workout was completed
+        duration:
+          type: integer
+          description: Duration of the workout in minutes
+        caloriesBurned:
+          type: integer
+          description: Estimated calories burned during the workout
+      required:
+        - id
+        - workoutName
+        - completedAt
+
+    DietHistory:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the diet history entry
+        dietName:
+          type: string
+          description: Name of the diet plan
+        startDate:
+          type: string
+          format: date-time
+          description: Date when the diet plan started
+        endDate:
+          type: string
+          format: date-time
+          description: Date when the diet plan ended
+        compliance:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Compliance percentage for the diet plan
+      required:
+        - id
+        - dietName
+        - startDate
+
+    Session:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the session
+        sessionName:
+          type: string
+          description: Name of the training session
+        scheduledAt:
+          type: string
+          format: date-time
+          description: Date and time when the session is scheduled
+        duration:
+          type: integer
+          description: Duration of the session in minutes
+        location:
+          type: string
+          description: Location where the session will take place
+      required:
+        - id
+        - sessionName
+        - scheduledAt
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: integer
+          description: Error code
+      required:
+        - error
+        - code

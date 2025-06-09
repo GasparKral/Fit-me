@@ -1,0 +1,246 @@
+openapi: 3.0.3
+info:
+  title: Fit-me User API
+  description: API endpoints for user management in Fit-me application
+  version: 1.0.0
+  contact:
+    name: Gaspar Dev
+    email: contact@gaspardev.es
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+  - url: https://api.fit-me.com
+    description: Production server
+
+paths:
+  /user/key_gen:
+    get:
+      summary: Generate registration key
+      description: Generates a registration key for a trainer to onboard new athletes
+      tags:
+        - User Management
+      parameters:
+        - name: trainer_id
+          in: query
+          required: true
+          description: The unique identifier of the trainer requesting the key
+          schema:
+            type: integer
+            minimum: 1
+          example: 789
+      responses:
+        '200':
+          description: Registration key generated successfully
+          content:
+            application/json:
+              schema:
+                type: string
+                description: The generated registration key
+              example: "abc123def456ghi789"
+        '400':
+          description: Bad request - missing trainer_id parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Parámetros requeridos faltantes"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the user
+        name:
+          type: string
+          description: Full name of the user
+        email:
+          type: string
+          format: email
+          description: Email address of the user
+        phone:
+          type: string
+          description: Phone number of the user
+        dateOfBirth:
+          type: string
+          format: date
+          description: Date of birth of the user
+        gender:
+          type: string
+          enum: [male, female, other]
+          description: Gender of the user
+        address:
+          $ref: '#/components/schemas/Address'
+        emergencyContact:
+          $ref: '#/components/schemas/EmergencyContact'
+        createdAt:
+          type: string
+          format: date-time
+          description: Date when the user account was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date when the user account was last updated
+        isActive:
+          type: boolean
+          description: Whether the user account is active
+          default: true
+      required:
+        - id
+        - name
+        - email
+
+    Address:
+      type: object
+      properties:
+        street:
+          type: string
+          description: Street address
+        city:
+          type: string
+          description: City
+        state:
+          type: string
+          description: State or province
+        postalCode:
+          type: string
+          description: Postal or ZIP code
+        country:
+          type: string
+          description: Country
+      required:
+        - city
+        - country
+
+    EmergencyContact:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the emergency contact
+        relationship:
+          type: string
+          description: Relationship to the user
+        phone:
+          type: string
+          description: Phone number of the emergency contact
+        email:
+          type: string
+          format: email
+          description: Email address of the emergency contact
+      required:
+        - name
+        - phone
+
+    RegistrationKey:
+      type: object
+      properties:
+        key:
+          type: string
+          description: The registration key
+        trainerId:
+          type: integer
+          description: ID of the trainer who generated the key
+        createdAt:
+          type: string
+          format: date-time
+          description: Date and time when the key was created
+        expiresAt:
+          type: string
+          format: date-time
+          description: Date and time when the key expires
+        isUsed:
+          type: boolean
+          description: Whether the key has been used
+          default: false
+        usedBy:
+          type: integer
+          description: ID of the user who used the key (if applicable)
+        usedAt:
+          type: string
+          format: date-time
+          description: Date and time when the key was used (if applicable)
+      required:
+        - key
+        - trainerId
+        - createdAt
+        - expiresAt
+
+    CreateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Full name of the user
+          minLength: 1
+        email:
+          type: string
+          format: email
+          description: Email address of the user
+        password:
+          type: string
+          description: Password for the user account
+          minLength: 8
+        phone:
+          type: string
+          description: Phone number of the user
+        dateOfBirth:
+          type: string
+          format: date
+          description: Date of birth of the user
+        gender:
+          type: string
+          enum: [male, female, other]
+          description: Gender of the user
+        registrationKey:
+          type: string
+          description: Registration key provided by trainer
+      required:
+        - name
+        - email
+        - password
+        - registrationKey
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Full name of the user
+        phone:
+          type: string
+          description: Phone number of the user
+        dateOfBirth:
+          type: string
+          format: date
+          description: Date of birth of the user
+        gender:
+          type: string
+          enum: [male, female, other]
+          description: Gender of the user
+        address:
+          $ref: '#/components/schemas/Address'
+        emergencyContact:
+          $ref: '#/components/schemas/EmergencyContact'
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: integer
+          description: Error code
+      required:
+        - error
+        - code

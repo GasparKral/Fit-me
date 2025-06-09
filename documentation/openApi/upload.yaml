@@ -1,0 +1,95 @@
+openapi: 3.0.3
+info:
+  title: Fit-me Upload API
+  description: API endpoints for file upload management in Fit-me application
+  version: 1.0.0
+  contact:
+    name: Gaspar Dev
+    email: contact@gaspardev.es
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+  - url: https://api.fit-me.com
+    description: Production server
+
+paths:
+  /upload:
+    post:
+      summary: Upload a file
+      description: Uploads a file to the server's bucket directory
+      tags:
+        - File Upload
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The file to be uploaded
+            encoding:
+              file:
+                style: form
+      responses:
+        '200':
+          description: File uploaded successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "File correctly save: 1717769400000.jpg"
+        '400':
+          description: Bad request - invalid file or multipart data
+          content:
+            text/plain:
+              schema:
+                type: string
+        '500':
+          description: Internal server error - bucket directory not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Error al encontrar la carpeta bucket"
+
+components:
+  schemas:
+    UploadResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Success message with the saved filename
+        filename:
+          type: string
+          description: The generated filename for the uploaded file
+        originalName:
+          type: string
+          description: The original filename of the uploaded file
+        size:
+          type: integer
+          description: Size of the uploaded file in bytes
+        uploadedAt:
+          type: string
+          format: date-time
+          description: Date and time when the file was uploaded
+      required:
+        - message
+        - filename
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: integer
+          description: Error code
+      required:
+        - error
+        - code

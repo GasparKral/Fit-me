@@ -1,0 +1,238 @@
+openapi: 3.0.3
+info:
+  title: Fit-me API
+  description: Complete API documentation for the Fit-me fitness management application
+  version: 1.0.0
+  contact:
+    name: Gaspar Dev
+    email: contact@gaspardev.es
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+  - url: https://api.fit-me.com
+    description: Production server
+
+tags:
+  - name: Athlete Data
+    description: Operations related to athlete data management
+  - name: Communication
+    description: Operations for messaging and communication between trainers and athletes
+  - name: Diet Management
+    description: Operations for diet planning and management
+  - name: Resources
+    description: Operations for accessing system resources
+  - name: Statistics
+    description: Operations for retrieving statistics and analytics
+  - name: Trainer Authentication
+    description: Operations for trainer authentication
+  - name: Trainer Dashboard
+    description: Operations for trainer dashboard data
+  - name: Trainer Communication
+    description: Operations for trainer communication management
+  - name: File Upload
+    description: Operations for file upload management
+  - name: User Management
+    description: Operations for user management and registration
+  - name: Workout Management
+    description: Operations for workout planning and management
+
+paths:
+  # Athlete endpoints
+  /athlete/data/workouthistory/{athlete_id}:
+    $ref: './athlete.yaml#/paths/~1athlete~1data~1workouthistory~1{athlete_id}'
+  /athlete/data/diethitory/{athlete_id}:
+    $ref: './athlete.yaml#/paths/~1athlete~1data~1diethitory~1{athlete_id}'
+  /athlete/data/sessions/{athlete_id}:
+    $ref: './athlete.yaml#/paths/~1athlete~1data~1sessions~1{athlete_id}'
+
+  # Communication endpoints
+  /comunication/conversations/{conversationId}:
+    $ref: './communication.yaml#/paths/~1comunication~1conversations~1{conversationId}'
+  /comunication/messages/{messageId}/read:
+    $ref: './communication.yaml#/paths/~1comunication~1messages~1{messageId}~1read'
+
+  # Diet endpoints
+  /diet/plans/{trainer_id}:
+    $ref: './diet.yaml#/paths/~1diet~1plans~1{trainer_id}'
+  /diet/templates/{trainer_id}:
+    $ref: './diet.yaml#/paths/~1diet~1templates~1{trainer_id}'
+  /diet/create/{trainer_id}:
+    $ref: './diet.yaml#/paths/~1diet~1create~1{trainer_id}'
+
+  # Resources endpoints
+  /resources:
+    $ref: './resources.yaml#/paths/~1resources'
+
+  # Statistics endpoints
+  /statistics/athlete:
+    $ref: './statistics.yaml#/paths/~1statistics~1athlete'
+  /statistics/strength/{athleteId}:
+    $ref: './statistics.yaml#/paths/~1statistics~1strength~1{athleteId}'
+  /statistics/endurance/{athleteId}:
+    $ref: './statistics.yaml#/paths/~1statistics~1endurance~1{athleteId}'
+  /statistics/measurements/{athleteId}:
+    $ref: './statistics.yaml#/paths/~1statistics~1measurements~1{athleteId}'
+  /statistics/nutrition/{athleteId}:
+    $ref: './statistics.yaml#/paths/~1statistics~1nutrition~1{athleteId}'
+  /statistics/summary/{athleteId}:
+    $ref: './statistics.yaml#/paths/~1statistics~1summary~1{athleteId}'
+
+  # Trainer endpoints
+  /trainer/{userIdentification}/{userPassword}:
+    $ref: './trainer.yaml#/paths/~1trainer~1{userIdentification}~1{userPassword}'
+  /data/{trainer_id}/pending:
+    $ref: './trainer.yaml#/paths/~1data~1{trainer_id}~1pending'
+  /data/{trainer_id}/dashboardChartInfo:
+    $ref: './trainer.yaml#/paths/~1data~1{trainer_id}~1dashboardChartInfo'
+  /data/{trainer_id}/plans:
+    $ref: './trainer.yaml#/paths/~1data~1{trainer_id}~1plans'
+  /data/{trainer_id}/session:
+    $ref: './trainer.yaml#/paths/~1data~1{trainer_id}~1session'
+  /data/{trainer_id}/messages:
+    $ref: './trainer.yaml#/paths/~1data~1{trainer_id}~1messages'
+  /data/{trainer_id}/new_athletes:
+    $ref: './trainer.yaml#/paths/~1data~1{trainer_id}~1new_athletes'
+  /data/{trainer_id}/new_active_plans:
+    $ref: './trainer.yaml#/paths/~1data~1{trainer_id}~1new_active_plans'
+  /data/{trainer_id}/new_messages:
+    $ref: './trainer.yaml#/paths/~1data~1{trainer_id}~1new_messages'
+  /{trainer_id}/comunication:
+    $ref: './trainer.yaml#/paths/~1{trainer_id}~1comunication'
+
+  # Upload endpoints
+  /upload:
+    $ref: './upload.yaml#/paths/~1upload'
+
+  # User endpoints
+  /user/key_gen:
+    $ref: './user.yaml#/paths/~1user~1key_gen'
+
+  # Workout endpoints
+  /workout/{trainer_id}:
+    $ref: './workout.yaml#/paths/~1workout~1{trainer_id}'
+  /workout/plans/{trainer_id}:
+    $ref: './workout.yaml#/paths/~1workout~1plans~1{trainer_id}'
+  /workout/templates/{trainer_id}:
+    $ref: './workout.yaml#/paths/~1workout~1templates~1{trainer_id}'
+  /workout:
+    $ref: './workout.yaml#/paths/~1workout'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    # Common schemas used across multiple endpoints
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the user
+        name:
+          type: string
+          description: Full name of the user
+        email:
+          type: string
+          format: email
+          description: Email address of the user
+        phone:
+          type: string
+          description: Phone number of the user
+        createdAt:
+          type: string
+          format: date-time
+          description: Date when the user account was created
+      required:
+        - id
+        - name
+        - email
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: integer
+          description: Error code
+        timestamp:
+          type: string
+          format: date-time
+          description: When the error occurred
+        path:
+          type: string
+          description: API path where the error occurred
+      required:
+        - error
+        - code
+
+    SuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Success message
+        data:
+          type: object
+          description: Response data
+        timestamp:
+          type: string
+          format: date-time
+          description: When the response was generated
+      required:
+        - message
+
+    PaginationInfo:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          description: Current page number
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: Number of items per page
+        totalPages:
+          type: integer
+          description: Total number of pages
+        totalItems:
+          type: integer
+          description: Total number of items
+        hasNext:
+          type: boolean
+          description: Whether there is a next page
+        hasPrev:
+          type: boolean
+          description: Whether there is a previous page
+      required:
+        - page
+        - limit
+        - totalPages
+        - totalItems
+        - hasNext
+        - hasPrev
+
+# Security definitions
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []
+
+# External documentation
+externalDocs:
+  description: Find more information about Fit-me API
+  url: https://docs.fit-me.com

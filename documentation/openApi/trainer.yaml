@@ -1,0 +1,657 @@
+openapi: 3.0.3
+info:
+  title: Fit-me Trainer API
+  description: API endpoints for trainer management and dashboard in Fit-me application
+  version: 1.0.0
+  contact:
+    name: Gaspar Dev
+    email: contact@gaspardev.es
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+  - url: https://api.fit-me.com
+    description: Production server
+
+paths:
+  /trainer/{userIdentification}/{userPassword}:
+    get:
+      summary: Authenticate trainer and get trainer data
+      description: Authenticates a trainer using credentials and returns trainer information along with their athletes
+      tags:
+        - Trainer Authentication
+      parameters:
+        - name: userIdentification
+          in: path
+          required: true
+          description: Trainer's identification (username or email)
+          schema:
+            type: string
+          example: "trainer123"
+        - name: userPassword
+          in: path
+          required: true
+          description: Trainer's password hash
+          schema:
+            type: string
+          example: "hashed_password_string"
+      responses:
+        '200':
+          description: Successful authentication with trainer and athletes data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  first:
+                    $ref: '#/components/schemas/Trainer'
+                  second:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Athlete'
+              example:
+                first:
+                  id: 789
+                  name: "John Trainer"
+                  email: "john@example.com"
+                  specialization: "Strength Training"
+                second:
+                  - id: 123
+                    name: "Jane Athlete"
+                    email: "jane@example.com"
+                    trainingSince: "2025-01-01T00:00:00Z"
+        '400':
+          description: Bad request - missing required parameters
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Parámetros requeridos faltantes"
+        '404':
+          description: Trainer not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Entrenador no encontrado"
+
+  /data/{trainer_id}/pending:
+    get:
+      summary: Get athletes needing assistance
+      description: Retrieves a list of athletes who need assistance from the trainer
+      tags:
+        - Trainer Dashboard
+      parameters:
+        - name: trainer_id
+          in: path
+          required: true
+          description: The unique identifier of the trainer
+          schema:
+            type: integer
+            minimum: 1
+          example: 789
+      responses:
+        '200':
+          description: Successful response with athletes needing assistance
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Athlete'
+        '400':
+          description: Bad request - missing trainer_id parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Parámetro trainer_id requerido"
+
+  /data/{trainer_id}/dashboardChartInfo:
+    get:
+      summary: Get dashboard chart information
+      description: Retrieves chart data for the trainer's dashboard showing workouts and diets completion over the last month
+      tags:
+        - Trainer Dashboard
+      parameters:
+        - name: trainer_id
+          in: path
+          required: true
+          description: The unique identifier of the trainer
+          schema:
+            type: integer
+            minimum: 1
+          example: 789
+      responses:
+        '200':
+          description: Successful response with dashboard chart data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardChartInfo'
+        '400':
+          description: Bad request - missing trainer_id parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Parámetro trainer_id requerido"
+        '417':
+          description: Expectation failed - error processing request
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /data/{trainer_id}/plans:
+    get:
+      summary: Get total active plans count
+      description: Returns the total number of active workout and diet plans for the trainer's athletes
+      tags:
+        - Trainer Dashboard
+      parameters:
+        - name: trainer_id
+          in: path
+          required: true
+          description: The unique identifier of the trainer
+          schema:
+            type: integer
+            minimum: 1
+          example: 789
+      responses:
+        '200':
+          description: Successful response with total plans count
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: 15
+        '400':
+          description: Bad request - missing trainer_id parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Parámetro trainer_id requerido"
+
+  /data/{trainer_id}/session:
+    get:
+      summary: Get upcoming sessions count
+      description: Returns the number of uncompleted sessions for the trainer in the next 2 days
+      tags:
+        - Trainer Dashboard
+      parameters:
+        - name: trainer_id
+          in: path
+          required: true
+          description: The unique identifier of the trainer
+          schema:
+            type: integer
+            minimum: 1
+          example: 789
+      responses:
+        '200':
+          description: Successful response with upcoming sessions count
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: 5
+        '400':
+          description: Bad request - missing trainer_id parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Parámetro trainer_id requerido"
+
+  /data/{trainer_id}/messages:
+    get:
+      summary: Get unread messages count
+      description: Returns the number of unread messages for the trainer
+      tags:
+        - Trainer Dashboard
+      parameters:
+        - name: trainer_id
+          in: path
+          required: true
+          description: The unique identifier of the trainer
+          schema:
+            type: integer
+            minimum: 1
+          example: 789
+      responses:
+        '200':
+          description: Successful response with unread messages count
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: 8
+        '400':
+          description: Bad request - missing trainer_id parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Parámetro trainer_id requerido"
+
+  /data/{trainer_id}/new_athletes:
+    get:
+      summary: Get new athletes count
+      description: Returns the number of athletes who joined in the last day
+      tags:
+        - Trainer Dashboard
+      parameters:
+        - name: trainer_id
+          in: path
+          required: true
+          description: The unique identifier of the trainer
+          schema:
+            type: integer
+            minimum: 1
+          example: 789
+      responses:
+        '200':
+          description: Successful response with new athletes count
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: 2
+        '400':
+          description: Bad request - missing trainer_id parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Parámetro trainer_id requerido"
+
+  /data/{trainer_id}/new_active_plans:
+    get:
+      summary: Get new active plans count
+      description: Returns the number of plans that became active in the last 30 days
+      tags:
+        - Trainer Dashboard
+      parameters:
+        - name: trainer_id
+          in: path
+          required: true
+          description: The unique identifier of the trainer
+          schema:
+            type: integer
+            minimum: 1
+          example: 789
+      responses:
+        '200':
+          description: Successful response with new active plans count
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: 7
+        '400':
+          description: Bad request - missing trainer_id parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Parámetro trainer_id requerido"
+
+  /data/{trainer_id}/new_messages:
+    get:
+      summary: Get new messages count
+      description: Returns the number of new messages received in the last day
+      tags:
+        - Trainer Dashboard
+      parameters:
+        - name: trainer_id
+          in: path
+          required: true
+          description: The unique identifier of the trainer
+          schema:
+            type: integer
+            minimum: 1
+          example: 789
+      responses:
+        '200':
+          description: Successful response with new messages count
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: 3
+        '400':
+          description: Bad request - missing trainer_id parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Parámetro trainer_id requerido"
+
+  /{trainer_id}/comunication:
+    get:
+      summary: Get trainer conversations
+      description: Retrieves all conversations for a specific trainer
+      tags:
+        - Trainer Communication
+      parameters:
+        - name: trainer_id
+          in: path
+          required: true
+          description: The unique identifier of the trainer
+          schema:
+            type: integer
+            minimum: 1
+          example: 789
+      responses:
+        '200':
+          description: Successful response with trainer conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Conversation'
+        '400':
+          description: Bad request - missing trainer_id parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Parámetro trainer_id requerido"
+
+components:
+  schemas:
+    Trainer:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the trainer
+        user:
+          $ref: '#/components/schemas/User'
+        specialization:
+          type: string
+          description: Trainer's area of specialization
+        certifications:
+          type: array
+          items:
+            type: string
+          description: List of trainer's certifications
+        experience:
+          type: integer
+          description: Years of experience
+        createdAt:
+          type: string
+          format: date-time
+          description: Date when the trainer account was created
+      required:
+        - id
+        - user
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the user
+        name:
+          type: string
+          description: Full name of the user
+        email:
+          type: string
+          format: email
+          description: Email address of the user
+        phone:
+          type: string
+          description: Phone number of the user
+        createdAt:
+          type: string
+          format: date-time
+          description: Date when the user account was created
+      required:
+        - id
+        - name
+        - email
+
+    Athlete:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the athlete
+        user:
+          $ref: '#/components/schemas/User'
+        trainingSince:
+          type: string
+          format: date-time
+          description: Date when the athlete started training
+        workout:
+          $ref: '#/components/schemas/WorkoutPlan'
+        diet:
+          $ref: '#/components/schemas/DietPlan'
+        goals:
+          type: array
+          items:
+            type: string
+          description: List of athlete's fitness goals
+        currentWeight:
+          type: number
+          format: float
+          description: Current weight in kg
+        targetWeight:
+          type: number
+          format: float
+          description: Target weight in kg
+      required:
+        - id
+        - user
+        - trainingSince
+
+    WorkoutPlan:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the workout plan
+        name:
+          type: string
+          description: Name of the workout plan
+        description:
+          type: string
+          description: Description of the workout plan
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          description: Difficulty level of the workout
+        duration:
+          type: integer
+          description: Duration of the workout in minutes
+        workoutType:
+          type: string
+          description: Type of workout
+      required:
+        - id
+        - name
+
+    DietPlan:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the diet plan
+        name:
+          type: string
+          description: Name of the diet plan
+        description:
+          type: string
+          description: Description of the diet plan
+        dietType:
+          type: string
+          description: Type of diet plan
+        duration:
+          type: integer
+          description: Duration of the diet plan in days
+      required:
+        - id
+        - name
+
+    DashboardChartInfo:
+      type: object
+      properties:
+        workouts:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompletedWorkout'
+          description: List of completed workouts in the time range
+        diets:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompletedDiet'
+          description: List of completed diets in the time range
+      required:
+        - workouts
+        - diets
+
+    CompletedWorkout:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the completed workout
+        workoutName:
+          type: string
+          description: Name of the workout
+        athleteName:
+          type: string
+          description: Name of the athlete who completed the workout
+        completedAt:
+          type: string
+          format: date-time
+          description: Date and time when the workout was completed
+        duration:
+          type: integer
+          description: Duration of the workout in minutes
+      required:
+        - id
+        - workoutName
+        - athleteName
+        - completedAt
+
+    CompletedDiet:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the completed diet
+        dietName:
+          type: string
+          description: Name of the diet
+        athleteName:
+          type: string
+          description: Name of the athlete who completed the diet
+        completedAt:
+          type: string
+          format: date-time
+          description: Date and time when the diet was completed
+        compliance:
+          type: number
+          format: float
+          description: Compliance percentage (0-100)
+      required:
+        - id
+        - dietName
+        - athleteName
+        - completedAt
+
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the conversation
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Participant'
+          description: List of conversation participants
+        lastMessage:
+          $ref: '#/components/schemas/Message'
+        unreadCount:
+          type: integer
+          description: Number of unread messages
+        createdAt:
+          type: string
+          format: date-time
+          description: Date and time when the conversation was created
+        lastActivity:
+          type: string
+          format: date-time
+          description: Date and time of the last activity
+      required:
+        - id
+        - participants
+        - createdAt
+
+    Participant:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the participant
+        name:
+          type: string
+          description: Name of the participant
+        role:
+          type: string
+          enum: [trainer, athlete]
+          description: Role of the participant
+        avatar:
+          type: string
+          format: uri
+          description: URL to the participant's avatar
+      required:
+        - id
+        - name
+        - role
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the message
+        senderId:
+          type: integer
+          description: ID of the user who sent the message
+        content:
+          type: string
+          description: Content of the message
+        sentAt:
+          type: string
+          format: date-time
+          description: Date and time when the message was sent
+        status:
+          type: string
+          enum: [delivered, read]
+          description: Current status of the message
+      required:
+        - id
+        - senderId
+        - content
+        - sentAt
+        - status
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: integer
+          description: Error code
+      required:
+        - error
+        - code

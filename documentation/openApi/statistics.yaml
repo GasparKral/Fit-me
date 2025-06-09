@@ -1,0 +1,686 @@
+openapi: 3.0.3
+info:
+  title: Fit-me Statistics API
+  description: API endpoints for statistics and analytics in Fit-me application
+  version: 1.0.0
+  contact:
+    name: Gaspar Dev
+    email: contact@gaspardev.es
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+  - url: https://api.fit-me.com
+    description: Production server
+
+paths:
+  /statistics/athlete:
+    get:
+      summary: Get comprehensive athlete statistics
+      description: Retrieves comprehensive statistics for an athlete including general stats, strength, endurance, measurements, and nutrition
+      tags:
+        - Statistics
+      parameters:
+        - name: athlete_id
+          in: query
+          required: true
+          description: The unique identifier of the athlete
+          schema:
+            type: integer
+            minimum: 1
+          example: 123
+        - name: timeRange
+          in: query
+          required: false
+          description: Time range for the statistics
+          schema:
+            type: string
+            enum: [1week, 1month, 3months, 6months, 1year]
+            default: 1month
+          example: "1month"
+      responses:
+        '200':
+          description: Successful response with comprehensive athlete statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComprehensiveStatistics'
+        '400':
+          description: Bad request - missing athlete_id parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Parámetro trainer_id requerido"
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Error retrieving statistics: {error_message}"
+
+  /statistics/strength/{athleteId}:
+    get:
+      summary: Get strength statistics for an athlete
+      description: Retrieves strength-specific statistics and chart data for an athlete
+      tags:
+        - Statistics
+      parameters:
+        - name: athleteId
+          in: path
+          required: true
+          description: The unique identifier of the athlete
+          schema:
+            type: integer
+            minimum: 1
+          example: 123
+        - name: timeRange
+          in: query
+          required: false
+          description: Time range for the statistics
+          schema:
+            type: string
+            enum: [1week, 1month, 3months, 6months, 1year]
+            default: 1month
+          example: "1month"
+      responses:
+        '200':
+          description: Successful response with strength statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statistics:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StrengthStatistic'
+                  chartData:
+                    $ref: '#/components/schemas/StrengthChartData'
+        '400':
+          description: Bad request - invalid athlete ID
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Invalid athlete ID"
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Error retrieving strength statistics: {error_message}"
+
+  /statistics/endurance/{athleteId}:
+    get:
+      summary: Get endurance statistics for an athlete
+      description: Retrieves endurance-specific statistics and chart data for an athlete
+      tags:
+        - Statistics
+      parameters:
+        - name: athleteId
+          in: path
+          required: true
+          description: The unique identifier of the athlete
+          schema:
+            type: integer
+            minimum: 1
+          example: 123
+        - name: timeRange
+          in: query
+          required: false
+          description: Time range for the statistics
+          schema:
+            type: string
+            enum: [1week, 1month, 3months, 6months, 1year]
+            default: 1month
+          example: "1month"
+      responses:
+        '200':
+          description: Successful response with endurance statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statistics:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EnduranceStatistic'
+                  chartData:
+                    $ref: '#/components/schemas/EnduranceChartData'
+        '400':
+          description: Bad request - invalid athlete ID
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Invalid athlete ID"
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Error retrieving endurance statistics: {error_message}"
+
+  /statistics/measurements/{athleteId}:
+    get:
+      summary: Get body measurement history for an athlete
+      description: Retrieves body measurement history and chart data for an athlete
+      tags:
+        - Statistics
+      parameters:
+        - name: athleteId
+          in: path
+          required: true
+          description: The unique identifier of the athlete
+          schema:
+            type: integer
+            minimum: 1
+          example: 123
+        - name: timeRange
+          in: query
+          required: false
+          description: Time range for the measurements
+          schema:
+            type: string
+            enum: [1week, 1month, 3months, 6months, 1year]
+            default: 1month
+          example: "1month"
+      responses:
+        '200':
+          description: Successful response with measurement history
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  history:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BodyMeasurementHistoric'
+                  chartData:
+                    $ref: '#/components/schemas/MeasurementChartData'
+        '400':
+          description: Bad request - invalid athlete ID
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Invalid athlete ID"
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Error retrieving measurement history: {error_message}"
+
+  /statistics/nutrition/{athleteId}:
+    get:
+      summary: Get nutrition statistics for an athlete
+      description: Retrieves nutrition-specific statistics for an athlete
+      tags:
+        - Statistics
+      parameters:
+        - name: athleteId
+          in: path
+          required: true
+          description: The unique identifier of the athlete
+          schema:
+            type: integer
+            minimum: 1
+          example: 123
+        - name: timeRange
+          in: query
+          required: false
+          description: Time range for the nutrition statistics
+          schema:
+            type: string
+            enum: [1week, 1month, 3months, 6months, 1year]
+            default: 1month
+          example: "1month"
+      responses:
+        '200':
+          description: Successful response with nutrition statistics
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NutritionStatistic'
+        '400':
+          description: Bad request - invalid athlete ID
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Invalid athlete ID"
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Error retrieving nutrition statistics: {error_message}"
+
+  /statistics/summary/{athleteId}:
+    get:
+      summary: Get statistics summary for an athlete
+      description: Retrieves a summary of the latest statistics for dashboard display
+      tags:
+        - Statistics
+      parameters:
+        - name: athleteId
+          in: path
+          required: true
+          description: The unique identifier of the athlete
+          schema:
+            type: integer
+            minimum: 1
+          example: 123
+      responses:
+        '200':
+          description: Successful response with statistics summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatisticsSummary'
+        '400':
+          description: Bad request - invalid athlete ID
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Invalid athlete ID"
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Error retrieving statistics summary: {error_message}"
+
+components:
+  schemas:
+    ComprehensiveStatistics:
+      type: object
+      properties:
+        athlete:
+          $ref: '#/components/schemas/Athlete'
+        timeRange:
+          type: string
+          description: Time range for the statistics
+        generalStats:
+          type: array
+          items:
+            $ref: '#/components/schemas/AthleteStatistic'
+        strengthStats:
+          type: array
+          items:
+            $ref: '#/components/schemas/StrengthStatistic'
+        enduranceStats:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnduranceStatistic'
+        measurementHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/BodyMeasurementHistoric'
+        nutritionStats:
+          type: array
+          items:
+            $ref: '#/components/schemas/NutritionStatistic'
+        chartData:
+          $ref: '#/components/schemas/StatisticsChartData'
+        strengthChartData:
+          $ref: '#/components/schemas/StrengthChartData'
+        enduranceChartData:
+          $ref: '#/components/schemas/EnduranceChartData'
+        measurementChartData:
+          $ref: '#/components/schemas/MeasurementChartData'
+      required:
+        - athlete
+        - timeRange
+
+    AthleteStatistic:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the statistic
+        athleteId:
+          type: integer
+          description: ID of the athlete
+        strengthScore:
+          type: number
+          format: float
+          description: Overall strength score
+        enduranceScore:
+          type: number
+          format: float
+          description: Overall endurance score
+        recordedAt:
+          type: string
+          format: date-time
+          description: Date and time when the statistic was recorded
+      required:
+        - id
+        - athleteId
+        - recordedAt
+
+    StrengthStatistic:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the strength statistic
+        athleteId:
+          type: integer
+          description: ID of the athlete
+        benchPressMax:
+          type: number
+          format: float
+          description: Maximum bench press weight in kg
+        squatMax:
+          type: number
+          format: float
+          description: Maximum squat weight in kg
+        deadliftMax:
+          type: number
+          format: float
+          description: Maximum deadlift weight in kg
+        pullUpsMax:
+          type: integer
+          description: Maximum number of pull-ups
+        strengthIndex:
+          type: number
+          format: float
+          description: Overall strength index score
+        recordedAt:
+          type: string
+          format: date-time
+          description: Date and time when the statistic was recorded
+      required:
+        - id
+        - athleteId
+        - strengthIndex
+        - recordedAt
+
+    EnduranceStatistic:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the endurance statistic
+        athleteId:
+          type: integer
+          description: ID of the athlete
+        vo2Max:
+          type: number
+          format: float
+          description: VO2 max measurement
+        cardioEndurance:
+          type: number
+          format: float
+          description: Cardio endurance score
+        distanceCovered:
+          type: number
+          format: float
+          description: Distance covered in km
+        runningPace:
+          type: number
+          format: float
+          description: Average running pace in min/km
+        recordedAt:
+          type: string
+          format: date-time
+          description: Date and time when the statistic was recorded
+      required:
+        - id
+        - athleteId
+        - cardioEndurance
+        - distanceCovered
+        - recordedAt
+
+    BodyMeasurementHistoric:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the measurement
+        athleteId:
+          type: integer
+          description: ID of the athlete
+        measurements:
+          $ref: '#/components/schemas/BodyMeasurement'
+        bmi:
+          type: number
+          format: float
+          description: Calculated BMI
+        recordedAt:
+          type: string
+          format: date-time
+          description: Date and time when the measurement was recorded
+      required:
+        - id
+        - athleteId
+        - measurements
+        - bmi
+        - recordedAt
+
+    BodyMeasurement:
+      type: object
+      properties:
+        weight:
+          type: number
+          format: float
+          description: Weight in kg
+        height:
+          type: number
+          format: float
+          description: Height in cm
+        bodyFat:
+          type: number
+          format: float
+          description: Body fat percentage
+        muscleMass:
+          type: number
+          format: float
+          description: Muscle mass in kg
+        waistCircumference:
+          type: number
+          format: float
+          description: Waist circumference in cm
+      required:
+        - weight
+        - bodyFat
+
+    NutritionStatistic:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the nutrition statistic
+        athleteId:
+          type: integer
+          description: ID of the athlete
+        nutritionScore:
+          type: number
+          format: float
+          description: Overall nutrition score
+        caloriesConsumed:
+          type: integer
+          description: Total calories consumed
+        proteinIntake:
+          type: number
+          format: float
+          description: Protein intake in grams
+        carbIntake:
+          type: number
+          format: float
+          description: Carbohydrate intake in grams
+        fatIntake:
+          type: number
+          format: float
+          description: Fat intake in grams
+        recordedAt:
+          type: string
+          format: date-time
+          description: Date and time when the statistic was recorded
+      required:
+        - id
+        - athleteId
+        - nutritionScore
+        - recordedAt
+
+    StatisticsChartData:
+      type: object
+      properties:
+        strengthData:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChartDataPoint'
+        enduranceData:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChartDataPoint'
+        measurementData:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChartDataPoint'
+        nutritionData:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChartDataPoint'
+
+    StrengthChartData:
+      type: object
+      properties:
+        benchPressData:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChartDataPoint'
+        squatData:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChartDataPoint'
+        deadliftData:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChartDataPoint'
+        pullUpsData:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChartDataPoint'
+        strengthIndexData:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChartDataPoint'
+
+    EnduranceChartData:
+      type: object
+      properties:
+        vo2MaxData:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChartDataPoint'
+        cardioEnduranceData:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChartDataPoint'
+        distanceCoveredData:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChartDataPoint'
+        pacingData:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChartDataPoint'
+
+    MeasurementChartData:
+      type: object
+      properties:
+        weightData:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChartDataPoint'
+        bodyFatData:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChartDataPoint'
+        bmiData:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChartDataPoint'
+
+    ChartDataPoint:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp for the data point
+        value:
+          type: number
+          format: float
+          description: Value for the data point
+        label:
+          type: string
+          description: Label for the data point
+      required:
+        - timestamp
+        - value
+        - label
+
+    StatisticsSummary:
+      type: object
+      properties:
+        athlete:
+          $ref: '#/components/schemas/AthleteStatistic'
+        strength:
+          $ref: '#/components/schemas/StrengthStatistic'
+        endurance:
+          $ref: '#/components/schemas/EnduranceStatistic'
+        measurements:
+          $ref: '#/components/schemas/BodyMeasurementHistoric'
+        nutrition:
+          $ref: '#/components/schemas/NutritionStatistic'
+
+    Athlete:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the athlete
+        name:
+          type: string
+          description: Name of the athlete
+        email:
+          type: string
+          format: email
+          description: Email address of the athlete
+        trainingSince:
+          type: string
+          format: date-time
+          description: Date when the athlete started training
+      required:
+        - id
+        - name
+        - email
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: integer
+          description: Error code
+      required:
+        - error
+        - code

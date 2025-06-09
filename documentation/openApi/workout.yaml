@@ -1,0 +1,591 @@
+openapi: 3.0.3
+info:
+  title: Fit-me Workout API
+  description: API endpoints for workout management in Fit-me application
+  version: 1.0.0
+  contact:
+    name: Gaspar Dev
+    email: contact@gaspardev.es
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+  - url: https://api.fit-me.com
+    description: Production server
+
+paths:
+  /workout/{trainer_id}:
+    get:
+      summary: Get workouts by trainer
+      description: Retrieves all workouts created by a specific trainer
+      tags:
+        - Workout Management
+      parameters:
+        - name: trainer_id
+          in: path
+          required: true
+          description: The unique identifier of the trainer
+          schema:
+            type: integer
+            minimum: 1
+          example: 789
+      responses:
+        '200':
+          description: Successful response with workouts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workout'
+              example:
+                - id: 1
+                  name: "Full Body Strength"
+                  description: "Complete full body strength training workout"
+                  difficulty: "intermediate"
+                  duration: 60
+                  workoutType: "strength"
+                  createdBy: 789
+        '400':
+          description: Bad request - missing trainer_id parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Parámetro trainer_id requerido"
+
+    post:
+      summary: Create a new workout
+      description: Creates a new workout for the specified trainer
+      tags:
+        - Workout Management
+      parameters:
+        - name: trainer_id
+          in: path
+          required: true
+          description: The unique identifier of the trainer creating the workout
+          schema:
+            type: integer
+            minimum: 1
+          example: 789
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkoutRequest'
+            example:
+              name: "HIIT Cardio Blast"
+              description: "High-intensity interval training for cardiovascular fitness"
+              difficulty: "advanced"
+              duration: 45
+              workoutType: "cardio"
+              exercises:
+                - name: "Burpees"
+                  sets: 4
+                  reps: 12
+                  restTime: 30
+                - name: "Mountain Climbers"
+                  sets: 4
+                  reps: 20
+                  restTime: 30
+      responses:
+        '200':
+          description: Workout created successfully
+          content:
+            application/json:
+              schema:
+                type: integer
+                description: ID of the created workout
+              example: 123
+        '400':
+          description: Bad request - missing trainer_id parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Parámetro trainer_id requerido"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /workout/plans/{trainer_id}:
+    get:
+      summary: Get workout plans by trainer
+      description: Retrieves all workout plans created by a specific trainer
+      tags:
+        - Workout Management
+      parameters:
+        - name: trainer_id
+          in: path
+          required: true
+          description: The unique identifier of the trainer
+          schema:
+            type: integer
+            minimum: 1
+          example: 789
+      responses:
+        '200':
+          description: Successful response with workout plans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkoutPlan'
+        '400':
+          description: Bad request - missing trainer_id parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Parámetro trainer_id requerido"
+
+  /workout/templates/{trainer_id}:
+    get:
+      summary: Get workout templates by trainer
+      description: Retrieves all workout templates created by a specific trainer
+      tags:
+        - Workout Management
+      parameters:
+        - name: trainer_id
+          in: path
+          required: true
+          description: The unique identifier of the trainer
+          schema:
+            type: integer
+            minimum: 1
+          example: 789
+      responses:
+        '200':
+          description: Successful response with workout templates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkoutTemplate'
+        '400':
+          description: Bad request - missing trainer_id parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Parámetro trainer_id requerido"
+
+  /workout:
+    patch:
+      summary: Update a workout plan
+      description: Updates an existing workout plan
+      tags:
+        - Workout Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkoutPlan'
+      responses:
+        '200':
+          description: Workout plan updated successfully
+        '400':
+          description: Bad request - invalid workout plan data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Workout plan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete a workout
+      description: Deletes an existing workout
+      tags:
+        - Workout Management
+      parameters:
+        - name: workout_id
+          in: query
+          required: true
+          description: The unique identifier of the workout to delete
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Workout deleted successfully
+        '400':
+          description: Bad request - missing workout_id parameter
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Parámetros requeridos faltantes"
+        '404':
+          description: Workout not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "No se encontró el entrenamiento"
+        '417':
+          description: Expectation failed - error deleting workout
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Error al eliminar: {error_message}"
+
+components:
+  schemas:
+    Workout:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the workout
+        name:
+          type: string
+          description: Name of the workout
+        description:
+          type: string
+          description: Description of the workout
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          description: Difficulty level of the workout
+        duration:
+          type: integer
+          minimum: 1
+          description: Duration of the workout in minutes
+        workoutType:
+          type: string
+          enum: [strength, cardio, flexibility, sports, rehabilitation, mixed]
+          description: Type of workout
+        createdBy:
+          type: integer
+          description: ID of the trainer who created the workout
+        createdAt:
+          type: string
+          format: date-time
+          description: Date and time when the workout was created
+        exercises:
+          type: array
+          items:
+            $ref: '#/components/schemas/Exercise'
+          description: List of exercises in the workout
+        equipment:
+          type: array
+          items:
+            type: string
+          description: List of equipment needed for the workout
+      required:
+        - id
+        - name
+        - difficulty
+        - duration
+        - workoutType
+        - createdBy
+
+    WorkoutPlan:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the workout plan
+        name:
+          type: string
+          description: Name of the workout plan
+        description:
+          type: string
+          description: Description of the workout plan
+        duration:
+          type: integer
+          description: Duration of the plan in weeks
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          description: Difficulty level of the plan
+        goal:
+          type: string
+          enum: [weight_loss, muscle_gain, endurance, strength, general_fitness]
+          description: Primary goal of the workout plan
+        workouts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScheduledWorkout'
+          description: List of scheduled workouts in the plan
+        createdBy:
+          type: integer
+          description: ID of the trainer who created the plan
+        createdAt:
+          type: string
+          format: date-time
+          description: Date and time when the plan was created
+        isActive:
+          type: boolean
+          description: Whether the plan is currently active
+          default: true
+      required:
+        - id
+        - name
+        - duration
+        - difficulty
+        - goal
+        - createdBy
+
+    WorkoutTemplate:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the workout template
+        name:
+          type: string
+          description: Name of the workout template
+        description:
+          type: string
+          description: Description of the workout template
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          description: Difficulty level of the template
+        workoutType:
+          type: string
+          enum: [strength, cardio, flexibility, sports, rehabilitation, mixed]
+          description: Type of workout template
+        estimatedDuration:
+          type: integer
+          description: Estimated duration in minutes
+        templateExercises:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateExercise'
+          description: List of template exercises
+        isTemplate:
+          type: boolean
+          description: Indicates if this is a template
+          default: true
+        createdBy:
+          type: integer
+          description: ID of the trainer who created the template
+      required:
+        - id
+        - name
+        - difficulty
+        - workoutType
+        - createdBy
+
+    CreateWorkoutRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the workout
+          minLength: 1
+        description:
+          type: string
+          description: Description of the workout
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          description: Difficulty level of the workout
+        duration:
+          type: integer
+          minimum: 1
+          description: Duration of the workout in minutes
+        workoutType:
+          type: string
+          enum: [strength, cardio, flexibility, sports, rehabilitation, mixed]
+          description: Type of workout
+        exercises:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseInput'
+          description: List of exercises for the workout
+      required:
+        - name
+        - difficulty
+        - duration
+        - workoutType
+
+    Exercise:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the exercise
+        name:
+          type: string
+          description: Name of the exercise
+        description:
+          type: string
+          description: Description of how to perform the exercise
+        sets:
+          type: integer
+          minimum: 1
+          description: Number of sets
+        reps:
+          type: integer
+          minimum: 1
+          description: Number of repetitions per set
+        weight:
+          type: number
+          format: float
+          minimum: 0
+          description: Weight to be used in kg
+        restTime:
+          type: integer
+          minimum: 0
+          description: Rest time between sets in seconds
+        duration:
+          type: integer
+          minimum: 1
+          description: Duration of the exercise in seconds (for time-based exercises)
+        targetMuscleGroups:
+          type: array
+          items:
+            type: string
+          description: List of target muscle groups
+        equipment:
+          type: array
+          items:
+            type: string
+          description: Equipment needed for the exercise
+        instructions:
+          type: string
+          description: Detailed instructions for performing the exercise
+      required:
+        - id
+        - name
+        - sets
+
+    ScheduledWorkout:
+      type: object
+      properties:
+        workoutId:
+          type: integer
+          description: ID of the workout
+        dayOfWeek:
+          type: integer
+          minimum: 1
+          maximum: 7
+          description: Day of the week (1=Monday, 7=Sunday)
+        week:
+          type: integer
+          minimum: 1
+          description: Week number in the plan
+        isCompleted:
+          type: boolean
+          description: Whether the workout has been completed
+          default: false
+        completedAt:
+          type: string
+          format: date-time
+          description: Date and time when the workout was completed
+        notes:
+          type: string
+          description: Notes about the workout completion
+      required:
+        - workoutId
+        - dayOfWeek
+        - week
+
+    TemplateExercise:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the template exercise
+        description:
+          type: string
+          description: Description of the exercise
+        recommendedSets:
+          type: integer
+          minimum: 1
+          description: Recommended number of sets
+        recommendedReps:
+          type: integer
+          minimum: 1
+          description: Recommended number of repetitions
+        targetMuscleGroups:
+          type: array
+          items:
+            type: string
+          description: Target muscle groups
+        equipment:
+          type: array
+          items:
+            type: string
+          description: Required equipment
+      required:
+        - name
+        - recommendedSets
+
+    ExerciseInput:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the exercise
+        description:
+          type: string
+          description: Description of the exercise
+        sets:
+          type: integer
+          minimum: 1
+          description: Number of sets
+        reps:
+          type: integer
+          minimum: 1
+          description: Number of repetitions per set
+        weight:
+          type: number
+          format: float
+          minimum: 0
+          description: Weight to be used in kg
+        restTime:
+          type: integer
+          minimum: 0
+          description: Rest time between sets in seconds
+        duration:
+          type: integer
+          minimum: 1
+          description: Duration in seconds (for time-based exercises)
+        targetMuscleGroups:
+          type: array
+          items:
+            type: string
+          description: Target muscle groups
+        equipment:
+          type: array
+          items:
+            type: string
+          description: Required equipment
+      required:
+        - name
+        - sets
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: integer
+          description: Error code
+      required:
+        - error
+        - code

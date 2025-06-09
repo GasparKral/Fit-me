@@ -1,0 +1,104 @@
+openapi: 3.0.3
+info:
+  title: Fit-me Resources API
+  description: API endpoints for resource management in Fit-me application
+  version: 1.0.0
+  contact:
+    name: Gaspar Dev
+    email: contact@gaspardev.es
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+  - url: https://api.fit-me.com
+    description: Production server
+
+paths:
+  /resources:
+    get:
+      summary: Get resources
+      description: Retrieves available resources in the system (implementation pending)
+      tags:
+        - Resources
+      responses:
+        '200':
+          description: Successful response with resources data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Resource'
+              example:
+                - id: 1
+                  name: "Exercise Library"
+                  type: "exercise_database"
+                  description: "Comprehensive exercise database"
+                  url: "/resources/exercises"
+                - id: 2
+                  name: "Nutrition Guide"
+                  type: "nutrition_guide"
+                  description: "Complete nutrition and meal planning guide"
+                  url: "/resources/nutrition"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Resource:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the resource
+        name:
+          type: string
+          description: Name of the resource
+        type:
+          type: string
+          enum: [exercise_database, nutrition_guide, training_material, documentation]
+          description: Type of resource
+        description:
+          type: string
+          description: Description of the resource
+        url:
+          type: string
+          description: URL to access the resource
+        category:
+          type: string
+          description: Category of the resource
+        tags:
+          type: array
+          items:
+            type: string
+          description: Tags associated with the resource
+        createdAt:
+          type: string
+          format: date-time
+          description: Date and time when the resource was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date and time when the resource was last updated
+      required:
+        - id
+        - name
+        - type
+        - description
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: integer
+          description: Error code
+      required:
+        - error
+        - code

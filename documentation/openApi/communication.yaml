@@ -1,0 +1,208 @@
+openapi: 3.0.3
+info:
+  title: Fit-me Communication API
+  description: API endpoints for communication management in Fit-me application
+  version: 1.0.0
+  contact:
+    name: Gaspar Dev
+    email: contact@gaspardev.es
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+  - url: https://api.fit-me.com
+    description: Production server
+
+paths:
+  /comunication/conversations/{conversationId}:
+    get:
+      summary: Get conversation details
+      description: Retrieves the details and messages of a specific conversation
+      tags:
+        - Communication
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          description: The unique identifier of the conversation
+          schema:
+            type: integer
+            minimum: 1
+          example: 456
+      responses:
+        '200':
+          description: Successful response with conversation details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+              example:
+                id: 456
+                participants:
+                  - id: 1
+                    name: "John Trainer"
+                    role: "trainer"
+                  - id: 2
+                    name: "Jane Athlete"
+                    role: "athlete"
+                messages:
+                  - id: "msg_1"
+                    senderId: 1
+                    content: "How was your workout today?"
+                    sentAt: "2025-06-07T10:30:00Z"
+                    status: "read"
+                createdAt: "2025-06-01T00:00:00Z"
+                lastActivity: "2025-06-07T10:30:00Z"
+        '400':
+          description: Bad request - invalid conversation ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /comunication/messages/{messageId}/read:
+    post:
+      summary: Mark message as read
+      description: Updates the status of a specific message to read
+      tags:
+        - Communication
+      parameters:
+        - name: messageId
+          in: path
+          required: true
+          description: The unique identifier of the message
+          schema:
+            type: string
+          example: "msg_123"
+      responses:
+        '200':
+          description: Message successfully marked as read
+        '400':
+          description: Bad request - invalid message ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Message not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the conversation
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Participant'
+          description: List of conversation participants
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+          description: List of messages in the conversation
+        createdAt:
+          type: string
+          format: date-time
+          description: Date and time when the conversation was created
+        lastActivity:
+          type: string
+          format: date-time
+          description: Date and time of the last activity in the conversation
+      required:
+        - id
+        - participants
+        - messages
+        - createdAt
+
+    Participant:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the participant
+        name:
+          type: string
+          description: Name of the participant
+        role:
+          type: string
+          enum: [trainer, athlete]
+          description: Role of the participant in the conversation
+        avatar:
+          type: string
+          format: uri
+          description: URL to the participant's avatar image
+      required:
+        - id
+        - name
+        - role
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the message
+        senderId:
+          type: integer
+          description: ID of the user who sent the message
+        content:
+          type: string
+          description: Content of the message
+        sentAt:
+          type: string
+          format: date-time
+          description: Date and time when the message was sent
+        status:
+          type: string
+          enum: [delivered, read]
+          description: Current status of the message
+        messageType:
+          type: string
+          enum: [text, image, file]
+          description: Type of the message content
+          default: text
+      required:
+        - id
+        - senderId
+        - content
+        - sentAt
+        - status
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: integer
+          description: Error code
+      required:
+        - error
+        - code
