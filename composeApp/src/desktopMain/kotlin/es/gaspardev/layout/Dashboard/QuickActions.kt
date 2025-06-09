@@ -93,7 +93,7 @@ fun QuickActions(controller: RouterState, toaster: ToasterState) {
         QuickAction(
             icon = FitMeIcons.Messages,
             labelRes = Res.string.send_message,
-            actionType = Action.SuspendAction.create { }
+            actionType = Action.Navigation(Routes.Messages)
         )
     )
 

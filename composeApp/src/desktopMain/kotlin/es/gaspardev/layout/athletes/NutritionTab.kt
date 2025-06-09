@@ -9,28 +9,27 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import es.gaspardev.core.domain.entities.diets.CompletionDietStatistics
 import es.gaspardev.core.domain.entities.users.Athlete
-import es.gaspardev.core.domain.entities.workouts.CompletionWorkoutStatistic
-import es.gaspardev.core.domain.usecases.read.GetAthleteWorkoutHistory
+import es.gaspardev.core.domain.usecases.read.GetAthleteDietHystory
 import fit_me.composeapp.generated.resources.Res
-import fit_me.composeapp.generated.resources.workout_history
+import fit_me.composeapp.generated.resources.diet_history
 import org.jetbrains.compose.resources.stringResource
 
-
 @Composable
-fun WorkoutsTab(athlete: Athlete) {
+fun NutritionTab(athlete: Athlete) {
 
-    var workoutHistory: List<CompletionWorkoutStatistic> by remember { mutableStateOf(emptyList()) }
+    var dietHistory: List<CompletionDietStatistics> by remember { mutableStateOf(emptyList()) }
 
     LaunchedEffect(athlete) {
-        GetAthleteWorkoutHistory().run(athlete).fold(
-            { value -> workoutHistory = value }
-        )
+        GetAthleteDietHystory().run(athlete).fold({ value ->
+            dietHistory = value
+        })
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
-            text = stringResource(Res.string.workout_history),
+            text = stringResource(Res.string.diet_history),
             style = MaterialTheme.typography.h3,
             fontWeight = FontWeight.Medium
         )
@@ -41,9 +40,11 @@ fun WorkoutsTab(athlete: Athlete) {
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(1.dp)
         ) {
-            items(workoutHistory) { workout ->
-                WorkoutHistoryItem(history = workout)
+            items(dietHistory) { diet ->
+                DietHistoryItem(history = diet)
             }
         }
     }
+
 }
+

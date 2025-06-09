@@ -37,7 +37,7 @@ fun ConversationItem(
     ) {
         Box {
             UserAvatar(conversation.athlete)
-            if (true) {
+            if (conversation.isOnline) { // ✅ FIX: Usar el campo correcto para online status
                 Box(
                     modifier = Modifier
                         .size(12.dp)
@@ -60,28 +60,74 @@ fun ConversationItem(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Text(
-                    text = conversation.id.toString(),
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
-                )
+
+                // ✅ FIX: Mostrar el tiempo correcto de la última actividad
+                conversation.lastActivity?.let { lastActivity ->
+                    Text(
+                        text = formatTimeAgo(lastActivity),
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                    )
+                }
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                if (conversation.lastMessage != null) {
+                // ✅ FIX: Manejo seguro de lastMessage y sus campos opcionales
+                conversation.lastMessage?.let { lastMessage ->
                     Text(
-                        text = conversation.lastMessage!!.deliveredAt!!.toLocalDateTime(TimeZone.currentSystemDefault())
-                            .toString(),
+                        text = lastMessage.content,
                         fontSize = 14.sp,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
+                } ?: run {
+                    Text(
+                        text = "No messages yet",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.4f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                // ✅ FIX: Mostrar contador de mensajes no leídos si existe
+                if (conversation.unreadCount > 0) {
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colors.primary)
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = if (conversation.unreadCount > 99) "99+" else conversation.unreadCount.toString(),
+                            color = MaterialTheme.colors.onPrimary,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
+        }
+    }
+}
+
+private fun formatTimeAgo(instant: kotlinx.datetime.Instant): String {
+    val now = kotlinx.datetime.Clock.System.now()
+    val diff = now - instant
+
+    return when {
+        diff.inWholeMinutes < 1 -> "Ahora"
+        diff.inWholeMinutes < 60 -> "${diff.inWholeMinutes}m"
+        diff.inWholeHours < 24 -> "${diff.inWholeHours}h"
+        diff.inWholeDays < 7 -> "${diff.inWholeDays}d"
+        else -> {
+            val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+            "${localDateTime.dayOfMonth}/${localDateTime.monthNumber}"
         }
     }
 }

@@ -41,71 +41,68 @@ fun OverviewTab(
 
     LaunchedEffect(Unit) {
         GetAthleteWorkoutHistory().run(athlete).fold(
-            { value -> workoutHistory = value },
-            { _ -> }
+            { value -> workoutHistory = value }
         )
         GetAthleteCommingSessions().run(athlete).fold(
-            { value -> sessions = value },
-            { _ -> }
+            { value -> sessions = value }
         )
         GetAthleteDietHystory().run(athlete).fold(
-            { value -> dietsHistory = value },
-            { _ -> }
+            { value -> dietsHistory = value }
         )
     }
 
-    LazyColumn(
+    Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
 
         // Stats section
-        item {
-            Text(
-                text = stringResource(Res.string.stats),
-                style = MaterialTheme.typography.h3,
-                fontWeight = FontWeight.Medium
+
+        Text(
+            text = stringResource(Res.string.stats),
+            style = MaterialTheme.typography.h3,
+            fontWeight = FontWeight.Medium
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            StatCard(
+                icon = Icons.Default.AccountBox,
+                value = workoutHistory.size.toString(),
+                label = stringResource(Res.string.workouts_completed),
+                modifier = Modifier.weight(1f)
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            StatCard(
+                icon = FitMeIcons.Calendar,
+                value = sessions.minByOrNull { it.dateTime }?.dateTime?.toLocalDateTime(TimeZone.currentSystemDefault())?.date?.toString()
+                    ?: stringResource(Res.string.no_appointment),
+                label = stringResource(Res.string.upcoming_sessions_tab),
+                modifier = Modifier.weight(1f)
+            )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                StatCard(
-                    icon = Icons.Default.AccountBox,
-                    value = workoutHistory.size.toString(),
-                    label = stringResource(Res.string.workouts_completed),
-                    modifier = Modifier.weight(1f)
-                )
+            StatCard(
+                icon = FitMeIcons.Weight,
+                value = "${workoutHistory.map { it.workout.getWorkoutProgression() }.average().toInt()}%",
+                label = stringResource(Res.string.avg_performance),
+                modifier = Modifier.weight(1f)
+            )
 
-                StatCard(
-                    icon = FitMeIcons.Calendar,
-                    value = sessions.minByOrNull { it.dateTime }?.dateTime?.toLocalDateTime(TimeZone.currentSystemDefault())?.date?.toString()
-                        ?: stringResource(Res.string.no_appointment),
-                    label = stringResource(Res.string.upcoming_sessions_tab),
-                    modifier = Modifier.weight(1f)
-                )
-
-                StatCard(
-                    icon = FitMeIcons.Weight,
-                    value = "${workoutHistory.map { it.workout.getWorkoutProgression() }.average().toInt()}%",
-                    label = stringResource(Res.string.avg_performance),
-                    modifier = Modifier.weight(1f)
-                )
-
-                StatCard(
-                    icon = FitMeIcons.Nutrition,
-                    value = "${dietsHistory.map { it.diet.getDietProgression() }.average().toInt()}%",
-                    label = stringResource(Res.string.diet_adherence),
-                    modifier = Modifier.weight(1f)
-                )
-            }
+            StatCard(
+                icon = FitMeIcons.Nutrition,
+                value = "${dietsHistory.map { it.diet.getDietProgression() }.average().toInt()}%",
+                label = stringResource(Res.string.diet_adherence),
+                modifier = Modifier.weight(1f)
+            )
         }
 
+
         // Recent Activity section
-        item {
+        Column(Modifier.fillMaxHeight(.5f)) {
             Text(
                 text = stringResource(Res.string.recent_activity),
                 style = MaterialTheme.typography.h3,
@@ -113,24 +110,28 @@ fun OverviewTab(
             )
 
             Spacer(modifier = Modifier.height(8.dp))
-        }
-        items(workoutHistory) { workout ->
-            WorkoutItem(workout = workout.workout)
-        }
-
-        item {
-            Text(
-                text = stringResource(Res.string.upcoming_sessions_tab),
-                style = MaterialTheme.typography.h3,
-                fontWeight = FontWeight.Medium
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
+            LazyColumn {
+                items(workoutHistory) { historic ->
+                    WorkoutItem(historic)
+                }
+            }
         }
 
-        items(sessions) { session ->
-            SessionItem(session = session)
-        }
+        if (sessions.isNotEmpty()) {
+            Column(Modifier.fillMaxHeight(.5f)) {
+                Text(
+                    text = stringResource(Res.string.upcoming_sessions_tab),
+                    style = MaterialTheme.typography.h3,
+                    fontWeight = FontWeight.Medium
+                )
 
+                Spacer(modifier = Modifier.height(8.dp))
+                LazyColumn {
+                    items(sessions) { session ->
+                        SessionItem(session = session)
+                    }
+                }
+            }
+        }
     }
 }

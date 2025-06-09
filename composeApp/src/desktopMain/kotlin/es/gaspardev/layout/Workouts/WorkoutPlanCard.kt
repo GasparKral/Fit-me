@@ -5,7 +5,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,6 +22,8 @@ import es.gaspardev.core.domain.usecases.create.CreateNewWorkout
 import es.gaspardev.core.domain.usecases.delete.DeleteWorkout
 import es.gaspardev.core.domain.usecases.update.UpdateWorkout
 import es.gaspardev.enums.OpeningMode
+import es.gaspardev.helpers.resDifficulty
+import es.gaspardev.helpers.resWorkoutType
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
 import es.gaspardev.layout.dialogs.AsignDialog
@@ -30,7 +32,6 @@ import es.gaspardev.states.LoggedTrainer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
-import kotlin.time.Duration
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -92,11 +93,10 @@ fun WorkoutPlanCard(
                                             name = plan.name,
                                             description = plan.description,
                                             difficulty = plan.difficulty,
-                                            duration = Duration.parse(plan.duration),
+                                            duration = plan.duration,
                                             startAt = Instant.DISTANT_FUTURE,
                                             workoutType = plan.type,
-                                            exercises = plan.exercises,
-                                            notes = listOf()
+                                            exercises = plan.exercises
                                         ),
                                         mode = OpeningMode.EDIT
                                     ) {
@@ -117,11 +117,10 @@ fun WorkoutPlanCard(
                                     name = plan.name + " copy",
                                     description = plan.description,
                                     difficulty = plan.difficulty,
-                                    duration = Duration.parse(plan.duration),
+                                    duration = plan.duration,
                                     startAt = Instant.DISTANT_FUTURE,
                                     workoutType = plan.type,
-                                    exercises = plan.exercises,
-                                    notes = listOf()
+                                    exercises = plan.exercises
                                 )
 
                                 scope.launch {
@@ -169,15 +168,14 @@ fun WorkoutPlanCard(
             }
 
             Spacer(Modifier.height(16.dp))
-            DifficultyBadge(plan.difficulty.toString())
+            DifficultyBadge(resDifficulty(plan.difficulty))
             // Badges row
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 AssistChip(
-                    onClick = {},
-                    label = { Text(plan.type.toString()) },
+                    label = { Text(resWorkoutType(plan.type)) },
                     leadingIcon = {
                         Icon(
                             FitMeIcons.Weight,
@@ -187,8 +185,7 @@ fun WorkoutPlanCard(
                     }
                 )
                 AssistChip(
-                    onClick = {},
-                    label = { Text(plan.duration) },
+                    label = { Text(plan.duration.toString()) },
                     leadingIcon = {
                         Icon(
                             FitMeIcons.Calendar,
@@ -199,8 +196,7 @@ fun WorkoutPlanCard(
                 )
 
                 AssistChip(
-                    onClick = {},
-                    label = { Text(plan.frequency) },
+                    label = { Text("Días de entrenamiento: " + plan.frequency) },
                     leadingIcon = {
                         Icon(
                             Icons.Default.Refresh,
@@ -262,20 +258,14 @@ fun WorkoutPlanCard(
                                 name = plan.name,
                                 description = plan.description,
                                 difficulty = plan.difficulty,
-                                duration = Duration.parse(plan.duration),
+                                duration = plan.duration,
                                 startAt = Instant.DISTANT_FUTURE,
                                 workoutType = plan.type,
-                                exercises = plan.exercises,
-                                notes = listOf()
+                                exercises = plan.exercises
                             ),
                             mode = OpeningMode.VISUALIZE
                         ) {
-                            scope.launch {
-                                UpdateWorkout().run(plan).fold(
-                                    { value -> onEditAction(value) },
-                                    { err -> ToastManager.showError(err.message!!) }
-                                )
-                            }
+
                         }
                     }
                 }) {

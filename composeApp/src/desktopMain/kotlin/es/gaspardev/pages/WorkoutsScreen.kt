@@ -27,6 +27,8 @@ import es.gaspardev.core.domain.usecases.create.CreateNewWorkout
 import es.gaspardev.core.domain.usecases.read.GetTrainerWorkoutsPlans
 import es.gaspardev.core.domain.usecases.read.GetTrainerWorkoutsTemplates
 import es.gaspardev.enums.WorkoutType
+import es.gaspardev.helpers.createWorkout
+import es.gaspardev.helpers.resWorkoutType
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
 import es.gaspardev.layout.dialogs.WorkoutDialog
@@ -43,16 +45,6 @@ fun WorkoutsScreen(width: Dp) {
 
     val toaster = rememberToasterState { }
     val scope = rememberCoroutineScope()
-    val tabs = listOf(
-        WorkoutType.ALL to stringResource(Res.string.all),
-        WorkoutType.STRENGTH to stringResource(Res.string.strength),
-        WorkoutType.CARDIO to stringResource(Res.string.cardio),
-        WorkoutType.CORE to stringResource(Res.string.core),
-        WorkoutType.FLEXIBILITY to stringResource(Res.string.flexibility),
-        WorkoutType.FULL_BODY to stringResource(Res.string.full_body),
-        WorkoutType.LOWER_BODY to stringResource(Res.string.lower_body),
-        WorkoutType.UPPER_BODY to stringResource(Res.string.upper_body)
-    )
 
     var searchQuery by remember { mutableStateOf("") }
     var activeTab by remember { mutableStateOf(WorkoutType.ALL) }
@@ -126,7 +118,7 @@ fun WorkoutsScreen(width: Dp) {
                                                             name = workout.name,
                                                             description = workout.description,
                                                             type = workout.workoutType,
-                                                            duration = workout.duration.toIsoString(),
+                                                            duration = workout.duration,
                                                             frequency = workout.exercises.keys.count().toString(),
                                                             difficulty = workout.difficulty,
                                                             asignedCount = 0,
@@ -186,26 +178,27 @@ fun WorkoutsScreen(width: Dp) {
             Column {
                 // Tabs section
                 ScrollableTabRow(
-                    selectedTabIndex = tabs.indexOfFirst { it.first == activeTab }.takeIf { it >= 0 } ?: 0,
+                    selectedTabIndex = WorkoutType.entries.indexOfFirst { it == WorkoutType.ALL }.takeIf { it >= 0 }
+                        ?: 0,
                     edgePadding = 0.dp
                 ) {
-                    tabs.forEachIndexed { _, (workoutType, title) ->
+                    WorkoutType.entries.forEachIndexed { _, type ->
                         Tab(
-                            selected = activeTab == workoutType,
-                            onClick = { activeTab = workoutType },
-                            text = { Text(title) }
+                            selected = activeTab == type,
+                            onClick = { activeTab = type },
+                            text = { Text(resWorkoutType(type)) }
                         )
                     }
                 }
 
                 Spacer(Modifier.height(16.dp))
 
-                // Workout plans grid
+                // Workout plans
                 Box(Modifier.fillMaxHeight(.45f).fillMaxWidth()) {
                     if (filteredPlans.isNotEmpty()) {
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(if (width > 1440.dp) 4 else 3),
-                            modifier = Modifier.padding(12.dp).fillMaxSize(),
+                            modifier = Modifier.fillMaxSize().padding(12.dp),
                             state = lazyGridState1,
                             verticalArrangement = Arrangement.spacedBy(16.dp),
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -267,40 +260,26 @@ fun WorkoutsScreen(width: Dp) {
                             Spacer(Modifier.height(16.dp))
                             Button(
                                 onClick = {
-                                    DialogState.openWith {
-                                        WorkoutDialog(onAcceptAction = { workout ->
-                                            scope.launch {
-                                                CreateNewWorkout().run(Pair(workout, LoggedTrainer.state.trainer!!))
-                                                    .fold(
-                                                        { value ->
-                                                            workoutPlans = workoutPlans + (
-                                                                    WorkoutPlan(
-                                                                        workoutId = value,
-                                                                        name = workout.name,
-                                                                        description = workout.description,
-                                                                        type = workout.workoutType,
-                                                                        duration = workout.duration.toIsoString(),
-                                                                        frequency = workout.exercises.keys.count()
-                                                                            .toString(),
-                                                                        difficulty = workout.difficulty,
-                                                                        asignedCount = 0,
-                                                                        exercises = workout.exercises
-                                                                    )
-                                                                    )
-                                                            toaster.show(
-                                                                "La rutina se ha creado correctamente",
-                                                                type = ToastType.Success
-                                                            )
-                                                        },
-                                                        { err -> // Error
-                                                            toaster.show(
-                                                                if (err.message != null) "Error al crear la rutina" else "Error al crear la rutina: ${err.message!!}",
-                                                                type = ToastType.Error
-                                                            )
-                                                        }
-                                                    )
-                                            }
-                                        })
+                                    createWorkout { workout ->
+                                        scope.launch {
+                                            CreateNewWorkout().run(Pair(workout, LoggedTrainer.state.trainer!!))
+                                                .fold(
+                                                    { value ->
+                                                        workoutPlans =
+                                                            workoutPlans + WorkoutPlan.fromWorkout(workout.copy(id = value))
+                                                        toaster.show(
+                                                            "La rutina se ha creado correctamente",
+                                                            type = ToastType.Success
+                                                        )
+                                                    },
+                                                    { err ->
+                                                        toaster.show(
+                                                            if (err.message != null) "Error al crear la rutina" else "Error al crear la rutina: ${err.message!!}",
+                                                            type = ToastType.Error
+                                                        )
+                                                    }
+                                                )
+                                        }
                                     }
                                 },
                                 contentPadding = ButtonDefaults.ContentPadding
@@ -341,7 +320,7 @@ fun WorkoutsScreen(width: Dp) {
                                                             name = workout.name,
                                                             description = workout.description,
                                                             type = workout.workoutType,
-                                                            duration = workout.duration.toIsoString(),
+                                                            duration = workout.duration,
                                                             frequency = workout.exercises.keys.count()
                                                                 .toString(),
                                                             difficulty = workout.difficulty,

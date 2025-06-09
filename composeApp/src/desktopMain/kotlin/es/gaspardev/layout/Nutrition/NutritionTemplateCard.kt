@@ -9,6 +9,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import es.gaspardev.core.domain.entities.diets.Diet
 import es.gaspardev.core.domain.entities.diets.DietTemplate
+import es.gaspardev.helpers.resDietType
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
 import es.gaspardev.layout.dialogs.DietDialog
@@ -44,7 +45,7 @@ fun NutritionTemplateCard(template: DietTemplate, onAcceptAction: (Diet) -> Unit
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                PlanBadge(icon = FitMeIcons.Nutrition, text = template.dietType.toString())
+                PlanBadge(icon = FitMeIcons.Nutrition, text = resDietType(template.dietType))
             }
 
             Text(

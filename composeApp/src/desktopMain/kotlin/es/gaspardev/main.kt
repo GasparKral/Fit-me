@@ -35,6 +35,7 @@ import org.jetbrains.compose.resources.stringResource
 fun main() = application {
 
     var router: RouterState? by remember { mutableStateOf(null) }
+    var isSidebarCollapsed by remember { mutableStateOf(false) }
 
     val actions: (KeyEvent) -> Boolean = { event ->
         when {
@@ -93,19 +94,24 @@ fun main() = application {
                 LaunchedEffect(controller) {
                     router = controller
                 }
-                // En tu función main(), cambia esta parte:
+
                 BoxWithConstraints(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     val isVisible = controller.currentRoute != Routes.Login && controller.currentRoute != Routes.Regist
+                    val sidebarWidth = if (isSidebarCollapsed) 80.dp else 255.dp
 
                     if (isVisible) {
-                        SideBarMenu(controller)
+                        SideBarMenu(
+                            controller = controller,
+                            isCollapsed = isSidebarCollapsed,
+                            onToggleCollapse = { isSidebarCollapsed = !isSidebarCollapsed }
+                        )
                     }
 
                     Box(
                         modifier = Modifier
-                            .padding(start = if (isVisible) 255.dp else 0.dp)
+                            .padding(start = if (isVisible) sidebarWidth else 0.dp)
                             .background(MaterialTheme.colors.background)
                     ) {
                         content(this@BoxWithConstraints.maxWidth, this@BoxWithConstraints.maxHeight)
@@ -117,4 +123,3 @@ fun main() = application {
         }
     }
 }
-

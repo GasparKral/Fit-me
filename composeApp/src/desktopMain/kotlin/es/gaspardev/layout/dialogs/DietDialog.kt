@@ -16,9 +16,17 @@ import androidx.compose.ui.unit.dp
 import es.gaspardev.core.domain.entities.diets.Diet
 import es.gaspardev.core.domain.entities.diets.DietTemplate
 import es.gaspardev.enums.DietType
+import es.gaspardev.enums.OpeningMode
+import es.gaspardev.helpers.resDietType
+import es.gaspardev.helpers.resMealType
+import es.gaspardev.helpers.resWeekDay
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
+import fit_me.composeapp.generated.resources.Res
+import fit_me.composeapp.generated.resources.cancel
+import fit_me.composeapp.generated.resources.close
 import kotlinx.datetime.Clock
+import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration.Companion.days
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -26,8 +34,11 @@ import kotlin.time.Duration.Companion.days
 fun DietDialog(
     diet: Diet = Diet(),
     template: DietTemplate? = null,
+    mode: OpeningMode = OpeningMode.CREATION,
     onAcceptAction: (Diet) -> Unit
 ) {
+    val isNotEditable = mode == OpeningMode.VISUALIZE
+
     var state: Diet by remember {
         mutableStateOf(
             if (template == null) {
@@ -39,25 +50,27 @@ fun DietDialog(
                     dietType = template.dietType,
                     duration = 28.days,
                     startAt = Clock.System.now(),
-                    dishes = template.dishes,
-                    notes = emptyList()
+                    dishes = template.dishes
                 )
             }
         )
     }
 
-    // Expanded states for dropdowns
+    // Expanded states for dropdowns - disabled when not editable
     var typeExpanded by remember { mutableStateOf(false) }
     var durationExpanded by remember { mutableStateOf(false) }
-    var showDishSelector by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .padding(24.dp)
     ) {
-        // Header
+        // Header - Dynamic title based on mode
         Text(
-            text = "Create New Diet Plan",
+            text = when (mode) {
+                OpeningMode.CREATION -> "Create New Diet Plan"
+                OpeningMode.EDIT -> "Edit Diet Plan"
+                OpeningMode.VISUALIZE -> "Diet Plan Details"
+            },
             style = MaterialTheme.typography.h3,
             fontWeight = FontWeight.Bold
         )
@@ -65,35 +78,43 @@ fun DietDialog(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Create a new diet plan for your athletes. You can add dishes and meals after creating the basic plan.",
+            text = when (mode) {
+                OpeningMode.CREATION -> "Create a new diet plan for your athletes. You can add dishes and meals after creating the basic plan."
+                OpeningMode.EDIT -> "Modify your diet plan details and dishes."
+                OpeningMode.VISUALIZE -> "View the details of this diet plan."
+            },
             style = MaterialTheme.typography.body1,
             color = MaterialTheme.colors.onSurface
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Diet Name
+        // Diet Name - Read-only when not editable
         OutlinedTextField(
             value = state.name,
-            onValueChange = { state = state.copy(name = it) },
+            onValueChange = { if (!isNotEditable) state = state.copy(name = it) },
             label = { Text("Diet Plan Name") },
             placeholder = { Text("e.g., 4-Week Muscle Gain Diet") },
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            singleLine = true,
+            enabled = !isNotEditable,
+            readOnly = isNotEditable
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Description
+        // Description - Read-only when not editable
         OutlinedTextField(
             value = state.description,
-            onValueChange = { state = state.copy(description = it) },
+            onValueChange = { if (!isNotEditable) state = state.copy(description = it) },
             label = { Text("Description") },
             placeholder = { Text("Describe the goals and focus of this diet plan") },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(100.dp),
-            maxLines = 4
+            maxLines = 4,
+            enabled = !isNotEditable,
+            readOnly = isNotEditable
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -103,42 +124,49 @@ fun DietDialog(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Diet Type Dropdown
+            // Diet Type Dropdown - Disabled when not editable
             ExposedDropdownMenuBox(
-                expanded = typeExpanded,
-                onExpandedChange = { typeExpanded = !typeExpanded },
+                expanded = typeExpanded && !isNotEditable,
+                onExpandedChange = { if (!isNotEditable) typeExpanded = !typeExpanded },
                 modifier = Modifier.weight(1f)
             ) {
                 OutlinedTextField(
-                    value = state.dietType.toString(),
+                    value = resDietType(state.dietType),
                     onValueChange = { },
                     readOnly = true,
                     label = { Text("Diet Type") },
                     placeholder = { Text("Select type") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeExpanded) },
-                    modifier = Modifier.fillMaxWidth()
+                    trailingIcon = {
+                        if (!isNotEditable) {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeExpanded)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isNotEditable
                 )
-                ExposedDropdownMenu(
-                    expanded = typeExpanded,
-                    onDismissRequest = { typeExpanded = false }
-                ) {
-                    DietType.entries.filter { it != DietType.ALL }.forEach { type ->
-                        DropdownMenuItem(
-                            onClick = {
-                                state = state.copy(dietType = type)
-                                typeExpanded = false
+                if (!isNotEditable) {
+                    ExposedDropdownMenu(
+                        expanded = typeExpanded,
+                        onDismissRequest = { typeExpanded = false }
+                    ) {
+                        DietType.entries.filter { it != DietType.ALL }.forEach { type ->
+                            DropdownMenuItem(
+                                onClick = {
+                                    state = state.copy(dietType = type)
+                                    typeExpanded = false
+                                }
+                            ) {
+                                Text(resDietType(type))
                             }
-                        ) {
-                            Text(type.toString())
                         }
                     }
                 }
             }
 
-            // Duration Dropdown
+            // Duration Dropdown - Disabled when not editable
             ExposedDropdownMenuBox(
-                expanded = durationExpanded,
-                onExpandedChange = { durationExpanded = !durationExpanded },
+                expanded = durationExpanded && !isNotEditable,
+                onExpandedChange = { if (!isNotEditable) durationExpanded = !durationExpanded },
                 modifier = Modifier.weight(1f)
             ) {
                 OutlinedTextField(
@@ -154,27 +182,34 @@ fun DietDialog(
                     readOnly = true,
                     label = { Text("Duration") },
                     placeholder = { Text("Select duration") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = durationExpanded) },
-                    modifier = Modifier.fillMaxWidth()
+                    trailingIcon = {
+                        if (!isNotEditable) {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = durationExpanded)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isNotEditable
                 )
-                ExposedDropdownMenu(
-                    expanded = durationExpanded,
-                    onDismissRequest = { durationExpanded = false }
-                ) {
-                    listOf(
-                        "2 weeks" to 14.days,
-                        "4 weeks" to 28.days,
-                        "6 weeks" to 42.days,
-                        "8 weeks" to 56.days,
-                        "12 weeks" to 84.days
-                    ).forEach { (label, duration) ->
-                        DropdownMenuItem(
-                            onClick = {
-                                state = state.copy(duration = duration)
-                                durationExpanded = false
+                if (!isNotEditable) {
+                    ExposedDropdownMenu(
+                        expanded = durationExpanded,
+                        onDismissRequest = { durationExpanded = false }
+                    ) {
+                        listOf(
+                            "2 weeks" to 14.days,
+                            "4 weeks" to 28.days,
+                            "6 weeks" to 42.days,
+                            "8 weeks" to 56.days,
+                            "12 weeks" to 84.days
+                        ).forEach { (label, duration) ->
+                            DropdownMenuItem(
+                                onClick = {
+                                    state = state.copy(duration = duration)
+                                    durationExpanded = false
+                                }
+                            ) {
+                                Text(label)
                             }
-                        ) {
-                            Text(label)
                         }
                     }
                 }
@@ -195,16 +230,34 @@ fun DietDialog(
                 fontWeight = FontWeight.Medium
             )
 
-            OutlinedButton(
-                onClick = { showDishSelector = true }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Agregar Plato")
+            if (!isNotEditable) {
+                OutlinedButton(
+                    onClick = {
+                        DialogState.changeContent {
+                            AddDishDialog(
+                                onCreateDish = { dish, weekday ->
+                                    state.dishes[weekday]?.add(dish) ?: state.dishes.put(
+                                        weekday,
+                                        mutableListOf(dish)
+                                    )
+                                },
+                                onCancel = {
+                                    DialogState.changeContent {
+                                        DietDialog(state, mode = mode, onAcceptAction = onAcceptAction)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Agregar Plato")
+                }
             }
         }
 
@@ -213,21 +266,21 @@ fun DietDialog(
         // Dishes List
         if (state.dishes.values.flatten().isNotEmpty()) {
             LazyColumn(
-                modifier = Modifier.height(200.dp),
+                modifier = Modifier.height(400.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 state.dishes.entries.forEach { (weekDay, dishes) ->
                     if (dishes.isNotEmpty()) {
                         item {
                             Text(
-                                text = weekDay.toString(),
+                                text = resWeekDay(weekDay),
                                 style = MaterialTheme.typography.h6,
                                 fontWeight = FontWeight.Medium,
                                 modifier = Modifier.padding(vertical = 4.dp)
                             )
                         }
 
-                        itemsIndexed(dishes) { _, dish ->
+                        itemsIndexed(dishes.sortedBy { it.mealType }) { index, dish ->
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(8.dp)
@@ -246,21 +299,32 @@ fun DietDialog(
                                             fontWeight = FontWeight.Medium
                                         )
                                         Text(
-                                            text = "${dish.amout}g - ${dish.mealType}",
+                                            text = "${dish.amout}g - ${resMealType(dish.mealType)}",
                                             style = MaterialTheme.typography.body2,
                                             color = MaterialTheme.colors.onSurface
                                         )
                                     }
 
-                                    IconButton(
-                                        onClick = {
-                                            // Remove dish logic would go here
+                                    if (!isNotEditable) {
+                                        IconButton(
+                                            onClick = {
+                                                state = state.copy(
+                                                    dishes = state.dishes.mapValues { (day, dayDishes) ->
+                                                        if (day == weekDay) {
+                                                            dayDishes.filterIndexed { i, _ -> i != index }
+                                                                .toMutableList()
+                                                        } else {
+                                                            dayDishes
+                                                        }
+                                                    }.toMutableMap()
+                                                )
+                                            }
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Close,
+                                                contentDescription = "Remove dish"
+                                            )
                                         }
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Close,
-                                            contentDescription = "Remove dish"
-                                        )
                                     }
                                 }
                             }
@@ -284,15 +348,17 @@ fun DietDialog(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "No hay platos agregados",
+                    text = if (isNotEditable) "No hay platos en este plan" else "No hay platos agregados",
                     style = MaterialTheme.typography.body1,
                     color = MaterialTheme.colors.onSurface
                 )
-                Text(
-                    text = "Haz clic en \"Agregar Plato\" para comenzar",
-                    style = MaterialTheme.typography.body2,
-                    color = MaterialTheme.colors.onSurface
-                )
+                if (!isNotEditable) {
+                    Text(
+                        text = "Haz clic en \"Agregar Plato\" para comenzar",
+                        style = MaterialTheme.typography.body2,
+                        color = MaterialTheme.colors.onSurface
+                    )
+                }
             }
         }
 
@@ -304,16 +370,23 @@ fun DietDialog(
             horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End)
         ) {
             OutlinedButton(onClick = { DialogState.close() }) {
-                Text("Cancel")
+                Text(if (mode == OpeningMode.VISUALIZE) stringResource(Res.string.close) else stringResource(Res.string.cancel))
             }
-
-            Button(
-                onClick = {
-                    onAcceptAction(state)
-                    DialogState.close()
+            if (mode != OpeningMode.VISUALIZE) {
+                Button(
+                    onClick = {
+                        onAcceptAction(state)
+                        DialogState.close()
+                    }
+                ) {
+                    Text(
+                        when (mode) {
+                            OpeningMode.CREATION -> "Create Diet Plan"
+                            OpeningMode.EDIT -> "Save Changes"
+                            else -> "Create Diet Plan"
+                        }
+                    )
                 }
-            ) {
-                Text("Create Diet Plan")
             }
         }
     }

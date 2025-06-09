@@ -2,9 +2,7 @@ package es.gaspardev.layout.sideBar
 
 import Anchor
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,24 +20,64 @@ fun SideBarMenuItem(
     text: String,
     path: Route,
     controller: RouterState,
-    icon: ImageVector
+    icon: ImageVector,
+    isCollapsed: Boolean = false
 ) {
     Anchor(
         href = path,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = if (controller.currentRoute == path)
+                MaterialTheme.colors.primary
+            else
+                Color.Transparent
+        )
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Icon(icon, stringResource(Res.string.icon_for, text))
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text,
-                color = if (controller.currentRoute == path) MaterialTheme.colors.onPrimary else Color(0xFF5F5F5F)
-            )
-        }
 
+        if (isCollapsed) {
+            // Vista colapsada: solo mostrar el ícono centrado
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    icon,
+                    contentDescription = text,
+                    tint = if (controller.currentRoute == path)
+                        MaterialTheme.colors.onPrimary
+                    else
+                        MaterialTheme.colors.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        } else {
+            // Vista expandida: mostrar ícono y texto
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Icon(
+                    icon,
+                    contentDescription = stringResource(Res.string.icon_for, text),
+                    tint = if (controller.currentRoute == path)
+                        MaterialTheme.colors.onPrimary
+                    else
+                        MaterialTheme.colors.primary
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text,
+                    color = if (controller.currentRoute == path)
+                        MaterialTheme.colors.onPrimary
+                    else
+                        MaterialTheme.colors.primary
+                )
+            }
+        }
     }
 }

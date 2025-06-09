@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import es.gaspardev.components.UserAvatar
 import es.gaspardev.core.RouterState
 import es.gaspardev.pages.Routes
 import es.gaspardev.states.LoggedTrainer
@@ -36,34 +37,7 @@ fun UserProfileDropdown(
             onExpandedChange = { expanded = !expanded },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp)
-            ) {
-                // Avatar
-                /*Image(
-                    painter = painterResource(Res.drawable.Home),
-                    contentDescription = "Trainer",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                )*/
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                // User info
-                Column {
-                    Text(
-                        text = LoggedTrainer.state.trainer!!.user.fullname,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-
-                }
-            }
+            UserAvatar(LoggedTrainer.state.trainer!!.user)
 
             ExposedDropdownMenu(
                 expanded = expanded,
@@ -87,16 +61,6 @@ fun UserProfileDropdown(
                 ) {
                     Text(stringResource(Res.string.profile))
                 }
-
-                DropdownMenuItem(
-                    onClick = { expanded = false }
-                ) { Text(stringResource(Res.string.subscription)) }
-
-                DropdownMenuItem(
-                    onClick = { expanded = false }
-                ) { Text(stringResource(Res.string.help_center)) }
-
-                Divider()
 
                 DropdownMenuItem(
                     onClick = {

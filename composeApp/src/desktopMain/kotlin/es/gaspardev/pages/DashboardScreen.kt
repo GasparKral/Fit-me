@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -36,6 +37,7 @@ fun DashboardScreen() {
     val router = LocalRouter.current
     val toaster = rememberToasterState()
     var info = TrainerDashBoardInfo()
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(LoggedTrainer.state.trainer) {
         LoggedTrainer.state.trainer?.let {
@@ -140,7 +142,9 @@ fun DashboardScreen() {
                                 if (data.first == stringResource(Res.string.unread_messages)) {
                                     Spacer(modifier = Modifier.height(8.dp))
                                     TextButton(
-                                        onClick = { router.navigateTo(Routes.Messages) },
+                                        onClick = {
+                                            router.navigateTo(Routes.Messages)
+                                        },
                                         colors = ButtonDefaults.textButtonColors(
                                             contentColor = MaterialTheme.colors.primary
                                         )
@@ -215,10 +219,10 @@ fun DashboardScreen() {
                             }
                             Button(
                                 onClick = {
-                                    router.executeAction(Action.SuspendAction.create({
+                                    router.executeAction(Action.SuspendAction.create {
                                         router.navigateTo(Routes.Athletes)
                                         agregateNewSportman(toaster)
-                                    }))
+                                    })
                                 },
                                 colors = ButtonDefaults.buttonColors(
                                     backgroundColor = MaterialTheme.colors.primary,
@@ -236,7 +240,7 @@ fun DashboardScreen() {
                             }
                         }
 
-                        AthletesList()
+                        AthletesList(scope)
                     }
                 }
             }

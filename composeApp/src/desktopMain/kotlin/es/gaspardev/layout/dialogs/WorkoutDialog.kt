@@ -18,6 +18,9 @@ import es.gaspardev.core.domain.entities.workouts.WorkoutTemplate
 import es.gaspardev.enums.Difficulty
 import es.gaspardev.enums.OpeningMode
 import es.gaspardev.enums.WorkoutType
+import es.gaspardev.helpers.resDifficulty
+import es.gaspardev.helpers.resWeekDay
+import es.gaspardev.helpers.resWorkoutType
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
 import es.gaspardev.utils.toWeeks
@@ -61,7 +64,6 @@ fun WorkoutDialog(
     var typeExpanded by remember { mutableStateOf(false) }
     var difficultyExpanded by remember { mutableStateOf(false) }
     var durationExpanded by remember { mutableStateOf(false) }
-    var showExerciseSelector by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -134,7 +136,7 @@ fun WorkoutDialog(
                 modifier = Modifier.weight(1f)
             ) {
                 OutlinedTextField(
-                    value = state.workoutType.toString(),
+                    value = resWorkoutType(state.workoutType),
                     onValueChange = { },
                     readOnly = true,
                     label = { Text("Type") },
@@ -158,7 +160,7 @@ fun WorkoutDialog(
                                     state = state.copy(workoutType = type)
                                     typeExpanded = false
                                 }
-                            ) { Text(type.toString()) }
+                            ) { Text(resWorkoutType(type)) }
                         }
                     }
                 }
@@ -171,7 +173,7 @@ fun WorkoutDialog(
                 modifier = Modifier.weight(1f)
             ) {
                 OutlinedTextField(
-                    value = state.difficulty.toString(),
+                    value = resDifficulty(state.difficulty),
                     onValueChange = { },
                     readOnly = true,
                     label = { Text("Difficulty") },
@@ -195,7 +197,7 @@ fun WorkoutDialog(
                                     state = state.copy(difficulty = difficulty)
                                     difficultyExpanded = false
                                 }
-                            ) { Text(difficulty.toString()) }
+                            ) { Text(resDifficulty(difficulty)) }
                         }
                     }
                 }
@@ -270,7 +272,23 @@ fun WorkoutDialog(
             // Hide "Add Exercise" button when not editable
             if (!isNotEditable) {
                 OutlinedButton(
-                    onClick = { showExerciseSelector = true }
+                    onClick = {
+                        DialogState.changeContent {
+                            AddExerciseDialog(
+                                onCreateExercise = { exercise, weekday ->
+                                    state.exercises[weekday]?.add(exercise) ?: state.exercises.put(
+                                        weekday,
+                                        mutableListOf(exercise)
+                                    )
+                                },
+                                onCancel = {
+                                    DialogState.changeContent {
+                                        WorkoutDialog(state, mode = mode, onAcceptAction = onAcceptAction)
+                                    }
+                                }
+                            )
+                        }
+                    }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -286,47 +304,67 @@ fun WorkoutDialog(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Exercises List
-        if (state.exercises.entries.flatMap { it.value }.isNotEmpty()) {
+        if (state.exercises.values.flatten().isNotEmpty()) {
             LazyColumn(
-                modifier = Modifier.height(200.dp),
+                modifier = Modifier.height(400.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                itemsIndexed(state.exercises.entries.flatMap { it.value }) { _, exercise ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = exercise.exercise.name,
-                                    style = MaterialTheme.typography.body1,
-                                    fontWeight = FontWeight.Medium
-                                )
-                                Text(
-                                    text = "${exercise.sets} series × ${exercise.reps} repeticiones",
-                                    style = MaterialTheme.typography.body2,
-                                    color = MaterialTheme.colors.onSurface
-                                )
-                            }
+                state.exercises.entries.forEach { (weekDay, exercises) ->
+                    if (exercises.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = resWeekDay(weekDay),
+                                style = MaterialTheme.typography.h6,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.padding(vertical = 4.dp)
+                            )
+                        }
+                    }
 
-                            // Hide remove button when not editable
-                            if (!isNotEditable) {
-                                IconButton(
-                                    onClick = {
-                                        // TODO: Implement remove exercise logic
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = "Remove exercise"
+                    itemsIndexed(exercises) { index, exercise ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = exercise.exercise.name,
+                                        style = MaterialTheme.typography.body1,
+                                        fontWeight = FontWeight.Medium
                                     )
+                                    Text(
+                                        text = "${exercise.sets} series × ${exercise.reps} repeticiones",
+                                        style = MaterialTheme.typography.body2,
+                                        color = MaterialTheme.colors.onSurface
+                                    )
+                                }
+
+                                if (!isNotEditable) {
+                                    IconButton(
+                                        onClick = {
+                                            state = state.copy(
+                                                exercises = state.exercises.mapValues { (day, dayExercise) ->
+                                                    if (day == weekDay) {
+                                                        dayExercise.filterIndexed { i, _ -> i != index }.toMutableList()
+                                                    } else {
+                                                        dayExercise
+                                                    }
+                                                }.toMutableMap()
+                                            )
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = "Remove exercise"
+                                        )
+                                    }
                                 }
                             }
                         }

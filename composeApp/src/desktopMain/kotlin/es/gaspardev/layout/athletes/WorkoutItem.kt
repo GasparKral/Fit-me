@@ -1,22 +1,21 @@
 package es.gaspardev.layout.athletes
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import es.gaspardev.core.domain.entities.workouts.Workout
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import es.gaspardev.core.domain.entities.workouts.CompletionWorkoutStatistic
+import es.gaspardev.helpers.toSpainDate
+import es.gaspardev.helpers.toSpainTime
+import es.gaspardev.utils.toWeeks
 
 @Composable
-fun WorkoutItem(workout: Workout) {
+fun WorkoutItem(history: CompletionWorkoutStatistic) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -31,7 +30,7 @@ fun WorkoutItem(workout: Workout) {
         ) {
             Column {
                 Text(
-                    text = workout.name,
+                    text = history.workout.name,
                     style = MaterialTheme.typography.body1,
                     fontWeight = FontWeight.Medium
                 )
@@ -41,7 +40,7 @@ fun WorkoutItem(workout: Workout) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = workout.startAt.toLocalDateTime(TimeZone.currentSystemDefault()).date.toString(),
+                        text = history.completeAt.toSpainDate(),
                         style = MaterialTheme.typography.body2,
                         color = MaterialTheme.colors.onSurface
                     )
@@ -53,23 +52,11 @@ fun WorkoutItem(workout: Workout) {
                     )
 
                     Text(
-                        text = workout.duration.toIsoString(),
+                        text = history.workout.duration.toSpainTime(),
                         style = MaterialTheme.typography.body2,
                         color = MaterialTheme.colors.onSurface
                     )
                 }
-            }
-
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colors.primary
-            ) {
-                Text(
-                    text = "${workout.getWorkoutProgression()}% Performance",
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    color = MaterialTheme.colors.onPrimary,
-                    style = MaterialTheme.typography.subtitle1
-                )
             }
         }
     }

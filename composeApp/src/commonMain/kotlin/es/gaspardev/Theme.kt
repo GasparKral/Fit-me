@@ -1,6 +1,5 @@
 package es.gaspardev
 
-import fit_me.composeapp.generated.resources.Outfit_Variable
 import fit_me.composeapp.generated.resources.Res
 import fit_me.composeapp.generated.resources.RobotoSerif_VariableFont
 import org.jetbrains.compose.resources.Font
@@ -15,12 +14,13 @@ import androidx.compose.material.Shapes
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
+import fit_me.composeapp.generated.resources.Nunito_Variable
 
 
 @Composable
 fun AppTheme(content: @Composable () -> Unit) {
     val robotoSerif = FontFamily(Font(Res.font.RobotoSerif_VariableFont))
-    val outFit = FontFamily(Font(Res.font.Outfit_Variable))
+    val nunito = FontFamily(Font(Res.font.Nunito_Variable))
 
     // Definición de la paleta de colores
     val customColorPalette = lightColors(
@@ -82,25 +82,25 @@ fun AppTheme(content: @Composable () -> Unit) {
             letterSpacing = 0.1.sp
         ),
         body1 = TextStyle(
-            fontFamily = outFit,
+            fontFamily = nunito,
             fontWeight = FontWeight.Medium,
             fontSize = 16.sp,
             letterSpacing = 0.5.sp
         ),
         body2 = TextStyle(
-            fontFamily = outFit,
+            fontFamily = nunito,
             fontWeight = FontWeight.Normal,
             fontSize = 14.sp,
             letterSpacing = 0.25.sp
         ),
         button = TextStyle(
-            fontFamily = outFit,
+            fontFamily = nunito,
             fontWeight = FontWeight.Bold,
             fontSize = 14.sp,
             letterSpacing = 1.25.sp
         ),
         caption = TextStyle(
-            fontFamily = outFit,
+            fontFamily = nunito,
             fontWeight = FontWeight.Medium,
             fontSize = 12.sp,
             letterSpacing = 0.4.sp

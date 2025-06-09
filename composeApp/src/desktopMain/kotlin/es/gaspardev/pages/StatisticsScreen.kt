@@ -1,7 +1,10 @@
 package es.gaspardev.pages
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
@@ -12,273 +15,287 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import es.gaspardev.layout.statistics.StatCard
-import es.gaspardev.layout.statistics.StatisticCard
+import es.gaspardev.components.ToastManager
+import es.gaspardev.components.UserAvatar
+import es.gaspardev.core.domain.entities.stadistics.*
+import es.gaspardev.core.domain.entities.stadistics.generatePerformanceReport
+import es.gaspardev.core.domain.entities.stadistics.generateReportFilename
+import es.gaspardev.core.domain.entities.stadistics.toFormattedReport
+import es.gaspardev.core.domain.usecases.read.GetAthleteStadistics
+import es.gaspardev.helpers.formatAsPercentage
+import es.gaspardev.layout.statistics.*
 import es.gaspardev.states.LoggedTrainer
+import es.gaspardev.utils.saveTextFile
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 
 @Composable
 fun StatisticsScreen() {
-    val selectedAthlete by remember { mutableStateOf(LoggedTrainer.state.athletes?.first()!!) }
-    var timeRange by remember { mutableStateOf("6months") }
+    var selectedAthlete by remember { mutableStateOf(LoggedTrainer.state.athletes?.first()!!) }
+    var timeRange by remember { mutableStateOf(30.toDuration(DurationUnit.DAYS)) }
     var activeTab by remember { mutableStateOf("strength") }
+    var statistics: ComprehensiveStatistics? by remember { mutableStateOf(null) }
 
-    val athlete = LoggedTrainer.state.athletes?.find { it == selectedAthlete } ?: LoggedTrainer.state.athletes?.first()
+    // Estados para el autocomplete
+    var searchText by remember { mutableStateOf(selectedAthlete.user.fullname) }
+    var expanded by remember { mutableStateOf(false) }
 
-    LazyColumn(
+    // Filtrar atletas basándose en el texto de búsqueda
+    val filteredAthletes by remember {
+        derivedStateOf {
+            if (searchText.isBlank()) {
+                LoggedTrainer.state.athletes ?: emptyList()
+            } else {
+                LoggedTrainer.state.athletes?.filter { athlete ->
+                    athlete.user.fullname.contains(searchText, ignoreCase = true)
+                } ?: emptyList()
+            }
+        }
+    }
+
+    LaunchedEffect(selectedAthlete, timeRange) {
+        GetAthleteStadistics().run(Pair(selectedAthlete, timeRange)).fold(
+            { value -> statistics = value },
+            { err -> ToastManager.showError(err.message!!) }
+        )
+    }
+
+    Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        text = "Historial de Progreso",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Seguimiento de la evolución de tus atletas",
-                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
-                    )
-                }
-                Button(
-                    onClick = { /* Handle export */ },
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = MaterialTheme.colors.onSurface,
-                        contentColor = MaterialTheme.colors.primary
-                    )
-                ) {
-                    Icon(Icons.Default.AccountBox, contentDescription = "Export")
-                    Spacer(Modifier.width(8.dp))
-                    Text("Exportar Datos")
-                }
-            }
-        }
 
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                var expanded by remember { mutableStateOf(false) }
-                Box(modifier = Modifier.weight(1f)) {
-                    OutlinedTextField(
-                        value = athlete!!.user.fullname,
-                        onValueChange = {},
-                        readOnly = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        /*sampleAthletes.forEach { athlete ->
-                            DropdownMenuItem(
-                                text = {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Avatar(
-                                            painter = painterResource(id = R.drawable.placeholder),
-                                            contentDescription = "Avatar",
-                                            modifier = Modifier.size(32.dp)
-                                        )
-                                        Spacer(Modifier.width(8.dp))
-                                        Column {
-                                            Text(athlete.name)
-                                            Text(
-                                                text = athlete.status,
-                                                color = when (athlete.status) {
-                                                    "active" -> Color.Green
-                                                    else -> MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
-                                                },
-                                                fontSize = 12.sp
-                                            )
-                                        }
-                                    }
-                                },
-                                onClick = {
-                                    selectedAthlete = athlete.id
-                                    expanded = false
-                                }
-                            )
-                        }*/
-                    }
-                }
-
-                Spacer(Modifier.width(8.dp))
-
+        Card(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    var timeRangeExpanded by remember { mutableStateOf(false) }
-                    Box {
-                        /* OutlinedTextField(
-                             value = when (timeRange) {
-                                 "1month" -> "Último mes"
-                                 "3months" -> "Últimos 3 meses"
-                                 "6months" -> "Últimos 6 meses"
-                                 "1year" -> "Último año"
-                                 "all" -> "Todo el historial"
-                                 else -> "Periodo de tiempo"
-                             },
-                             onValueChange = {},
-                             readOnly = true,
-                             modifier = Modifier.width(180.dp),
-                             onClick = { timeRangeExpanded = true }
-                         )*/
-                        DropdownMenu(
-                            expanded = timeRangeExpanded,
-                            onDismissRequest = { timeRangeExpanded = false }
-                        ) {
-                            DropdownMenuItem(
-                                onClick = {
-                                    timeRange = "1month"
-                                    timeRangeExpanded = false
-                                }
-                            ) { Text("Último mes") }
-                            DropdownMenuItem(
-                                onClick = {
-                                    timeRange = "3months"
-                                    timeRangeExpanded = false
-                                }
-                            ) { Text("Últimos 3 meses") }
-                            DropdownMenuItem(
-                                onClick = {
-                                    timeRange = "6months"
-                                    timeRangeExpanded = false
-                                }
-                            ) { Text("Últimos 6 meses") }
-                            DropdownMenuItem(
-                                onClick = {
-                                    timeRange = "1year"
-                                    timeRangeExpanded = false
-                                }
-                            ) { Text("Último año") }
-                            DropdownMenuItem(
-                                onClick = {
-                                    timeRange = "all"
-                                    timeRangeExpanded = false
-                                }
-                            ) { Text("Todo el historial") }
-                        }
-                    }
-
-                    Button(
-                        onClick = { /* Handle filter */ },
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = MaterialTheme.colors.surface,
-                            contentColor = MaterialTheme.colors.primary
+                    Column {
+                        Text(
+                            text = "Historial de Progreso",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold
                         )
+                        Text(
+                            text = "Seguimiento de la evolución de tus atletas",
+                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
+                    OutlinedButton(
+                        onClick = {
+                            val report = selectedAthlete.generatePerformanceReport(
+                                statistics?.strengthStats ?: emptyList(),
+                                statistics?.enduranceStats ?: emptyList(),
+                                statistics?.measurementHistory ?: emptyList(),
+                                LoggedTrainer.state.trainer!!.user.fullname,
+                                LoggedTrainer.state.trainer!!.user.email
+                            )
+
+                            val reportName = report.generateReportFilename("txt")
+                            val stringifyReport = report.toFormattedReport()
+
+                            saveTextFile(stringifyReport, reportName)
+                        },
+                        border = BorderStroke(2.dp, MaterialTheme.colors.primary)
                     ) {
-                        Icon(Icons.Default.AccountBox, contentDescription = "Filter")
+                        Icon(Icons.Default.AccountBox, contentDescription = "Export")
                         Spacer(Modifier.width(8.dp))
-                        Text("Filtros")
+                        Text("Exportar Datos")
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedTextField(
+                            value = searchText,
+                            onValueChange = {
+                                searchText = it
+                                expanded = it.isNotBlank()
+                            },
+                            label = { Text("Buscar atleta") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+
+                        if (expanded && filteredAthletes.isNotEmpty()) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 4.dp)
+                                    .border(
+                                        1.dp,
+                                        MaterialTheme.colors.onSurface.copy(alpha = 0.5f),
+                                        shape = MaterialTheme.shapes.small
+                                    )
+                                    .background(MaterialTheme.colors.surface)
+                            ) {
+                                filteredAthletes.take(5).forEach { athlete ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                selectedAthlete = athlete
+                                                searchText = athlete.user.fullname
+                                                expanded = false
+                                            }
+                                            .padding(8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        UserAvatar(athlete.user)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
 
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                StatCard(
-                    title = "Fuerza",
-                    value = "+28%",
-                    description = "Desde que comenzó el entrenamiento",
-                    icon = Icons.Default.AccountBox,
-                    modifier = Modifier.weight(1f)
-                )
-                StatCard(
-                    title = "Resistencia",
-                    value = "+35%",
-                    description = "Mejora en capacidad aeróbica",
-                    icon = Icons.Default.AccountBox,
-                    modifier = Modifier.weight(1f)
-                )
-                StatCard(
-                    title = "Cambios Corporales",
-                    value = "-8.5 kg",
-                    description = "Reducción de peso desde el inicio",
-                    icon = Icons.Default.AccountBox,
-                    modifier = Modifier.weight(1f)
-                )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            StatCard(
+                title = "Fuerza",
+                value =
+                    StrengthStatistic.calculatePerformance(statistics?.strengthStats ?: emptyList())
+                        .formatAsPercentage(),
+                description = "Desde que comenzó el entrenamiento",
+                icon = Icons.Default.AccountBox,
+                modifier = Modifier.weight(1f)
+            )
+            StatCard(
+                title = "Resistencia",
+                value =
+                    EnduranceStatistic.calculatePerformance(statistics?.enduranceStats ?: emptyList())
+                        .formatAsPercentage(),
+                description = "Mejora en capacidad aeróbica",
+                icon = Icons.Default.AccountBox,
+                modifier = Modifier.weight(1f)
+            )
+            StatCard(
+                title = "Cambios Corporales",
+                value =
+                    BodyMeasurementHistoric.calculatePerformance(statistics?.measurementHistory ?: emptyList())
+                        .formatAsPercentage(),
+                description = "Reducción de peso desde el inicio",
+                icon = Icons.Default.AccountBox,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        ScrollableTabRow(
+            selectedTabIndex = when (activeTab) {
+                "strength" -> 0
+                "endurance" -> 1
+                "measurements" -> 2
+                else -> 0
+            },
+            edgePadding = 0.dp,
+            backgroundColor = Color.Transparent,
+            contentColor = MaterialTheme.colors.primary
+        ) {
+            listOf("Fuerza", "Resistencia", "Medidas Corporales")
+                .forEachIndexed { index, title ->
+                    Tab(
+                        selected = when (index) {
+                            0 -> activeTab == "strength"
+                            1 -> activeTab == "endurance"
+                            2 -> activeTab == "measurements"
+                            else -> false
+                        },
+                        onClick = {
+                            activeTab = when (index) {
+                                0 -> "strength"
+                                1 -> "endurance"
+                                2 -> "measurements"
+                                else -> "strength"
+                            }
+                        },
+                        text = { Text(title) }
+                    )
+                }
+        }
+
+        val rangeComponent: @Composable () -> Unit = {
+
+            var timeRangeExpanded by remember { mutableStateOf(false) }
+            Box {
+                OutlinedButton(
+                    onClick = { timeRangeExpanded = true }
+                ) {
+                    Text(
+                        when (timeRange) {
+                            30.toDuration(DurationUnit.DAYS) -> "Último mes"
+                            (30 * 3).toDuration(DurationUnit.DAYS) -> "Últimos 3 meses"
+                            (30 * 6).toDuration(DurationUnit.DAYS) -> "Últimos 6 meses"
+                            (30 * 12).toDuration(DurationUnit.DAYS) -> "Último año"
+                            Duration.INFINITE -> "Todo el historial"
+                            else -> "Último mes"
+                        }
+                    )
+                }
+                DropdownMenu(
+                    expanded = timeRangeExpanded,
+                    onDismissRequest = { timeRangeExpanded = false }
+                ) {
+                    DropdownMenuItem(
+                        onClick = {
+                            timeRange = 30.toDuration(DurationUnit.DAYS)
+                            timeRangeExpanded = false
+                        }
+                    ) { Text("Último mes") }
+                    DropdownMenuItem(
+                        onClick = {
+                            timeRange = (30 * 3).toDuration(DurationUnit.DAYS)
+                            timeRangeExpanded = false
+                        }
+                    ) { Text("Últimos 3 meses") }
+                    DropdownMenuItem(
+                        onClick = {
+                            timeRange = (30 * 6).toDuration(DurationUnit.DAYS)
+                            timeRangeExpanded = false
+                        }
+                    ) { Text("Últimos 6 meses") }
+                    DropdownMenuItem(
+                        onClick = {
+                            timeRange = (30 * 12).toDuration(DurationUnit.DAYS)
+                            timeRangeExpanded = false
+                        }
+                    ) { Text("Último año") }
+                    DropdownMenuItem(
+                        onClick = {
+                            timeRange = Duration.INFINITE
+                            timeRangeExpanded = false
+                        }
+                    ) { Text("Todo el historial") }
+                }
             }
         }
 
-        item {
-            ScrollableTabRow(
-                selectedTabIndex = when (activeTab) {
-                    "strength" -> 0
-                    "endurance" -> 1
-                    "measurements" -> 2
-                    "history" -> 3
-                    else -> 0
-                },
-                edgePadding = 0.dp,
-                backgroundColor = Color.Transparent,
-                contentColor = MaterialTheme.colors.primary
-            ) {
-                listOf("Fuerza", "Resistencia", "Medidas Corporales", "Historial Completo")
-                    .forEachIndexed { index, title ->
-                        Tab(
-                            selected = when (index) {
-                                0 -> activeTab == "strength"
-                                1 -> activeTab == "endurance"
-                                2 -> activeTab == "measurements"
-                                3 -> activeTab == "history"
-                                else -> false
-                            },
-                            onClick = {
-                                activeTab = when (index) {
-                                    0 -> "strength"
-                                    1 -> "endurance"
-                                    2 -> "measurements"
-                                    3 -> "history"
-                                    else -> "strength"
-                                }
-                            },
-                            text = { Text(title) }
-                        )
-                    }
-            }
+        when (activeTab) {
+            "strength" -> StrengthEvolutionChart(
+                statistics?.strengthChartData ?: StrengthChartData(), rangeComponent = rangeComponent
+            )
+
+            "endurance" -> EnduranceEvolutionChart(
+                statistics?.enduranceChartData ?: EnduranceChartData(), rangeComponent = rangeComponent
+            )
+
+            "measurements" -> BodyMeasurementsChart(
+                statistics?.measurementChartData ?: MeasurementChartData(), rangeComponent = rangeComponent
+            )
         }
 
-        item {
-            when (activeTab) {
-                "strength" -> StatisticCard(
-                    title = "Evolución de Fuerza",
-                    description = "Progreso en levantamientos principales a lo largo del tiempo",
-                    content = { /* Strength chart would go here */ }
-                )
-
-                "endurance" -> StatisticCard(
-                    title = "Evolución de Resistencia",
-                    description = "Mejora en capacidad aeróbica y resistencia",
-                    content = { /* Endurance chart would go here */ }
-                )
-
-                "measurements" -> StatisticCard(
-                    title = "Cambios en Medidas Corporales",
-                    description = "Seguimiento de peso, % grasa corporal y medidas",
-                    content = { /* Measurements chart would go here */ }
-                )
-
-                "history" -> StatisticCard(
-                    title = "Historial Completo de Progreso",
-                    description = "Registro detallado de todas las métricas y evaluaciones",
-                    content = { /* History table would go here */ }
-                )
-            }
-        }
     }
 }

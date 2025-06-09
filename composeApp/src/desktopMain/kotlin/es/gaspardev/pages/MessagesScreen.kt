@@ -1,19 +1,19 @@
 package es.gaspardev.pages
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
@@ -22,17 +22,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.gaspardev.components.MessageBubble
-import es.gaspardev.components.UserAvatar
 import es.gaspardev.core.domain.entities.comunication.Conversation
 import es.gaspardev.core.domain.entities.comunication.Message
-import es.gaspardev.core.domain.usecases.read.GetConversations
-import es.gaspardev.core.infrastructure.repositories.TrainerRepositoryImp
 import es.gaspardev.core.infrastructure.shockets.ChatWebSocket
 import es.gaspardev.core.infrastructure.shockets.WebSocketMessage
 import es.gaspardev.enums.MessageStatus
@@ -51,9 +50,19 @@ import java.util.*
 @Composable
 fun MessagesScreen() {
     var searchQuery by remember { mutableStateOf("") }
-    var selectedConversation by remember { mutableStateOf<Conversation?>(null) }
-    var isModalOpen by remember { mutableStateOf(false) }
     var messageText by remember { mutableStateOf("") }
+    var selectedConversation by remember { mutableStateOf(ConversationsState.selection) }
+
+
+    // Estados para el redimensionamiento
+    var sidebarWidth by remember { mutableStateOf(350.dp) }
+    var isCollapsed by remember { mutableStateOf(false) }
+    var isDragging by remember { mutableStateOf(false) }
+
+    val density = LocalDensity.current
+    val minWidth = 250.dp
+    val maxWidth = 500.dp
+    val collapsedWidth = 60.dp
 
     // WebSocket states mejorados
     var webSocket by remember { mutableStateOf<ChatWebSocket?>(null) }
@@ -212,10 +221,6 @@ fun MessagesScreen() {
                 messageStatus = MessageStatus.SENDING
             )
 
-            // Agregar a la lista inmediatamente
-            currentMessages = currentMessages + localMessage
-            pendingMessages = pendingMessages + (tempId to localMessage)
-
             // Auto-scroll
             scrollToBottom()
 
@@ -284,11 +289,8 @@ fun MessagesScreen() {
         }
     }
 
-    LaunchedEffect(Unit) {
-        GetConversations(TrainerRepositoryImp()).run(LoggedTrainer.state.trainer!!.user).fold(
-            { res -> ConversationsState.loadConversations(res) },
-            { _ -> }
-        )
+    LaunchedEffect(selectedConversation) {
+        connectToConversation(selectedConversation!!)
     }
 
     // Typing indicator
@@ -316,93 +318,219 @@ fun MessagesScreen() {
 
     Box(modifier = Modifier.fillMaxSize()) {
         Row(modifier = Modifier.fillMaxSize()) {
+            // Sidebar con conversaciones (redimensionable)
             Card(
                 shape = RectangleShape,
                 modifier = Modifier
-                    .width(300.dp).fillMaxHeight()
+                    .width(if (isCollapsed) collapsedWidth else sidebarWidth)
+                    .fillMaxHeight()
             ) {
-                // Conversations sidebar
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                ) {
-                    Row(
+                if (isCollapsed) {
+                    // Vista colapsada - solo iconos
+                    Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                            .fillMaxHeight()
+                            .padding(8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(
-                            text = "Messages",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Button(
-                            onClick = { isModalOpen = true },
-                            colors = ButtonDefaults.buttonColors(
-                                backgroundColor = MaterialTheme.colors.primary,
-                                contentColor = MaterialTheme.colors.onPrimary
-                            )
+                        // Botón para expandir
+                        IconButton(
+                            onClick = { isCollapsed = false },
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        ) {
+                            Icon(Icons.Default.Menu, contentDescription = "Expand")
+                        }
+
+                        // Botón nuevo mensaje
+                        IconButton(
+                            onClick = { },
+                            modifier = Modifier.padding(vertical = 4.dp)
                         ) {
                             Icon(Icons.Default.Add, contentDescription = "New")
-                            Spacer(Modifier.width(4.dp))
-                            Text("New")
                         }
-                    }
 
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp)
-                            .height(56.dp),
-                        placeholder = { Text("Search conversations...") },
-                        leadingIcon = {
-                            Icon(Icons.Default.Search, contentDescription = "Search")
-                        },
-                        singleLine = true
-                    )
+                        Divider(modifier = Modifier.padding(vertical = 8.dp))
 
-                    Spacer(Modifier.height(8.dp))
-
-                    TabRow(
-                        selectedTabIndex = tabs.indexOfFirst { it.first == activeTab }.takeIf { it >= 0 } ?: 0,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        tabs.forEachIndexed { _, (type, title) ->
-                            Tab(
-                                selected = activeTab == type,
-                                onClick = { activeTab = type },
-                                text = { Text(title) }
-                            )
-                        }
-                    }
-
-                    LazyColumn(modifier = Modifier.weight(1f)) {
-                        items(ConversationsState.state.filter { conversation ->
-                            when (activeTab) {
-                                MessageStatus.ALL -> true
-                                MessageStatus.DELIVERED -> conversation.unreadCount > 0
-                                MessageStatus.READ -> conversation.unreadCount == 0
-                                else -> true
-                            }
-                        }) { conversation ->
-                            ConversationItem(
-                                conversation = conversation,
-                                isSelected = selectedConversation == conversation,
-                                onClick = {
-                                    selectedConversation = conversation
-                                    connectToConversation(conversation)
+                        // Lista compacta de conversaciones
+                        LazyColumn(modifier = Modifier.weight(1f)) {
+                            items(ConversationsState.state) { conversation ->
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(CircleShape)
+                                        .background(
+                                            if (selectedConversation == conversation)
+                                                MaterialTheme.colors.primary.copy(alpha = 0.2f)
+                                            else Color.Transparent
+                                        )
+                                        .clickable {
+                                            ConversationsState.selectConversation(conversation.athlete)
+                                            connectToConversation(conversation)
+                                        }
+                                        .padding(4.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    // Avatar o inicial del nombre
+                                    Box(
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .clip(CircleShape)
+                                            .background(MaterialTheme.colors.primary),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = conversation.athlete.fullname.first().toString(),
+                                            color = MaterialTheme.colors.onPrimary,
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                    }
+                                    // Indicador de mensajes no leídos
+                                    if (conversation.unreadCount > 0) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(12.dp)
+                                                .clip(CircleShape)
+                                                .background(Color.Red)
+                                                .align(Alignment.TopEnd),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = if (conversation.unreadCount > 9) "9+" else conversation.unreadCount.toString(),
+                                                color = Color.White,
+                                                fontSize = 8.sp
+                                            )
+                                        }
+                                    }
                                 }
+                                Spacer(modifier = Modifier.height(4.dp))
+                            }
+                        }
+                    }
+                } else {
+                    // Vista expandida - contenido completo
+                    Column(
+                        modifier = Modifier.fillMaxHeight()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Messages",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.SemiBold
                             )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Button(
+                                    onClick = { },
+                                    colors = ButtonDefaults.buttonColors(
+                                        backgroundColor = MaterialTheme.colors.primary,
+                                        contentColor = MaterialTheme.colors.onPrimary
+                                    )
+                                ) {
+                                    Icon(Icons.Default.Add, contentDescription = "New")
+                                    Spacer(Modifier.width(4.dp))
+                                    Text("New")
+                                }
+                                Spacer(Modifier.width(4.dp))
+                                IconButton(
+                                    onClick = { isCollapsed = true },
+                                    modifier = Modifier.size(32.dp)
+                                ) {
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                        contentDescription = "Collapse",
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
+                        }
+
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp)
+                                .height(56.dp),
+                            placeholder = { Text("Search conversations...") },
+                            leadingIcon = {
+                                Icon(Icons.Default.Search, contentDescription = "Search")
+                            },
+                            singleLine = true
+                        )
+
+                        Spacer(Modifier.height(8.dp))
+
+                        TabRow(
+                            selectedTabIndex = tabs.indexOfFirst { it.first == activeTab }.takeIf { it >= 0 } ?: 0,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            tabs.forEachIndexed { _, (type, title) ->
+                                Tab(
+                                    selected = activeTab == type,
+                                    onClick = { activeTab = type },
+                                    text = { Text(title) }
+                                )
+                            }
+                        }
+
+                        LazyColumn(modifier = Modifier.weight(1f)) {
+                            items(ConversationsState.state.filter { conversation ->
+                                when (activeTab) {
+                                    MessageStatus.ALL -> true
+                                    MessageStatus.DELIVERED -> conversation.unreadCount > 0
+                                    MessageStatus.READ -> conversation.unreadCount == 0
+                                    else -> true
+                                }
+                            }) { conversation ->
+                                ConversationItem(
+                                    conversation = conversation,
+                                    isSelected = selectedConversation == conversation,
+                                    onClick = {
+                                        selectedConversation = conversation
+                                    }
+                                )
+                            }
                         }
                     }
                 }
             }
 
-            // Message thread
+            // Divisor redimensionable
+            if (!isCollapsed) {
+                Box(
+                    modifier = Modifier
+                        .width(6.dp)
+                        .fillMaxHeight()
+                        .background(if (isDragging) MaterialTheme.colors.primary.copy(alpha = 0.3f) else Color.Transparent)
+                        .pointerInput(Unit) {
+                            detectDragGestures(
+                                onDragStart = { isDragging = true },
+                                onDragEnd = { isDragging = false }
+                            ) { _, dragAmount ->
+                                val newWidth = sidebarWidth + with(density) { dragAmount.x.toDp() }
+                                sidebarWidth = newWidth.coerceIn(minWidth, maxWidth)
+                            }
+                        }
+                        .hoverable(interactionSource = remember { MutableInteractionSource() })
+                ) {
+                    // Línea visual del divisor
+                    Box(
+                        modifier = Modifier
+                            .width(2.dp)
+                            .fillMaxHeight()
+                            .background(MaterialTheme.colors.onSurface.copy(alpha = 0.12f))
+                            .align(Alignment.Center)
+                    )
+                }
+            }
+
+            // Área del chat
             Box(modifier = Modifier.weight(1f)) {
                 if (selectedConversation != null) {
                     ChatView(
@@ -441,7 +569,7 @@ fun MessagesScreen() {
                             modifier = Modifier.padding(16.dp)
                         )
                         Button(
-                            onClick = { isModalOpen = true },
+                            onClick = { },
                             colors = ButtonDefaults.buttonColors(
                                 backgroundColor = MaterialTheme.colors.primary,
                                 contentColor = MaterialTheme.colors.onPrimary
@@ -659,14 +787,6 @@ private fun ChatHeader(
                             else -> MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                         }
                     )
-                }
-            }
-            Row {
-                IconButton(onClick = { /* Handle info */ }) {
-                    Icon(Icons.Default.Info, contentDescription = "Info")
-                }
-                IconButton(onClick = { /* Handle more */ }) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "More")
                 }
             }
         }

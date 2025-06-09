@@ -17,22 +17,29 @@ import es.gaspardev.core.Action
 import es.gaspardev.core.LocalRouter
 import es.gaspardev.core.RouterState
 import es.gaspardev.core.domain.entities.users.Athlete
+import es.gaspardev.core.domain.entities.workouts.WorkoutPlan
+import es.gaspardev.core.domain.usecases.update.UpdateWorkout
+import es.gaspardev.enums.OpeningMode
 import es.gaspardev.enums.StatusState
+import es.gaspardev.helpers.editWorkout
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
 import es.gaspardev.layout.dialogs.DietDialog
 import es.gaspardev.layout.dialogs.WorkoutDialog
 import es.gaspardev.pages.Routes
+import es.gaspardev.states.ConversationsState
 import es.gaspardev.states.LoggedTrainer
 import fit_me.composeapp.generated.resources.Res
 import fit_me.composeapp.generated.resources.active
 import fit_me.composeapp.generated.resources.inactive
 import fit_me.composeapp.generated.resources.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun AthletesList() {
+fun AthletesList(scope: CoroutineScope) {
     val router = LocalRouter.current
 
     Column(
@@ -42,7 +49,7 @@ fun AthletesList() {
 
         if (LoggedTrainer.state.trainer != null) {
             LoggedTrainer.state.athletes!!.take(5).forEach { athlete ->
-                AthleteListItem(athlete, router)
+                AthleteListItem(athlete, router, scope)
             }
         }
 
@@ -59,7 +66,7 @@ fun AthletesList() {
 }
 
 @Composable
-fun AthleteListItem(athlete: Athlete, router: RouterState) {
+fun AthleteListItem(athlete: Athlete, router: RouterState, scope: CoroutineScope) {
     var showDropdown by remember { mutableStateOf(false) }
 
     Row(
@@ -148,7 +155,14 @@ fun AthleteListItem(athlete: Athlete, router: RouterState) {
                     )
 
                     IconButton(
-                        onClick = { router.navigateTo(Routes.Messages) },
+                        onClick = {
+                            router.executeAction(
+                                Action.SimpleAction.create {
+                                    ConversationsState.selectConversation(athlete.user)
+                                    router.navigateTo(Routes.Messages)
+                                }
+                            )
+                        },
                         modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
@@ -194,7 +208,13 @@ fun AthleteListItem(athlete: Athlete, router: RouterState) {
                                         if (athlete.workout != null) {
                                             router.executeAction(Action.SimpleAction.create {
                                                 router.navigateTo(Routes.AthleteInfo.load(athlete))
-                                                DialogState.openWith { WorkoutDialog(athlete.workout!!) { } }
+                                                editWorkout(athlete.workout!!) {
+                                                    scope.launch {
+                                                        UpdateWorkout().run(WorkoutPlan.fromWorkout(it)).fold(
+                                                            {}
+                                                        )
+                                                    }
+                                                }
                                             })
                                             showDropdown = false
                                             funtion(false)
@@ -206,7 +226,12 @@ fun AthleteListItem(athlete: Athlete, router: RouterState) {
                                         if (athlete.diet != null) {
                                             router.executeAction(Action.SimpleAction.create {
                                                 router.navigateTo(Routes.AthleteInfo.load(athlete))
-                                                DialogState.openWith { DietDialog(athlete.diet!!) { } }
+                                                DialogState.openWith {
+                                                    DietDialog(
+                                                        athlete.diet!!,
+                                                        mode = OpeningMode.EDIT
+                                                    ) { }
+                                                }
                                             })
                                             showDropdown = false
                                             funtion(false)

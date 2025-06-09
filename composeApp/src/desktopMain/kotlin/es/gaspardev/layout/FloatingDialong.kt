@@ -29,6 +29,10 @@ object DialogState {
         isOpen.value = true
     }
 
+    fun changeContent(newContent: @Composable () -> Unit) {
+        content.value = newContent
+    }
+
     fun close() {
         isOpen.value = false
         content.value = null
@@ -61,7 +65,7 @@ fun FloatingDialog(
                     .width(maxSize.first.div(2.25f))
                     .height(maxSize.second.div(1.25f))
                     .background(
-                        MaterialTheme.colors.surface,
+                        MaterialTheme.colors.background,
                         border.shape
                     )
                     .border(border.width, border.color, border.shape)

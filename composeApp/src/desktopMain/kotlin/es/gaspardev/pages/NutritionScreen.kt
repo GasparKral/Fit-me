@@ -33,7 +33,6 @@ import es.gaspardev.layout.dialogs.DietDialog
 import es.gaspardev.layout.nutrition.NutritionPlanCard
 import es.gaspardev.layout.nutrition.NutritionTemplateCard
 import es.gaspardev.states.LoggedTrainer
-import es.gaspardev.utils.toWeeks
 import fit_me.composeapp.generated.resources.*
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -126,7 +125,7 @@ fun NutritionScreen(width: Dp) {
                                                name = diet.name,
                                                description = diet.description,
                                                type = diet.dietType,
-                                               duration = diet.duration.toWeeks(),
+                                               duration = diet.duration,
                                                frequency = diet.dishes.keys.count().toString(),
                                                asignedCount = 0,
                                                dishes = diet.dishes
@@ -198,7 +197,7 @@ fun NutritionScreen(width: Dp) {
                if (filteredPlans.isNotEmpty()) {
                   LazyVerticalGrid(
                      columns = GridCells.Fixed(if (width > 1440.dp) 4 else 3),
-                     modifier = Modifier.padding(12.dp),
+                     modifier = Modifier.fillMaxSize().padding(12.dp),
                      state = lazyGridState1,
                      verticalArrangement = Arrangement.spacedBy(16.dp),
                      horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -271,7 +270,7 @@ fun NutritionScreen(width: Dp) {
                                                      name = diet.name,
                                                      description = diet.description,
                                                      type = diet.dietType,
-                                                     duration = diet.duration.toWeeks(),
+                                                     duration = diet.duration,
                                                      frequency = diet.dishes.keys.count().toString(),
                                                      asignedCount = 0,
                                                      dishes = diet.dishes
@@ -330,7 +329,7 @@ fun NutritionScreen(width: Dp) {
                                                name = diet.name,
                                                description = diet.description,
                                                type = diet.dietType,
-                                               duration = diet.duration.toIsoString(),
+                                               duration = diet.duration,
                                                frequency = diet.dishes.keys.count().toString(),
                                                asignedCount = 0,
                                                dishes = diet.dishes

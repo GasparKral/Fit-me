@@ -19,14 +19,19 @@ import es.gaspardev.core.domain.entities.diets.DietPlan
 import es.gaspardev.core.domain.usecases.create.CreateNewDiet
 import es.gaspardev.core.domain.usecases.delete.DeleteDiet
 import es.gaspardev.core.domain.usecases.update.UpdateDiet
+import es.gaspardev.helpers.resDietType
+import es.gaspardev.helpers.visualizeDiet
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
 import es.gaspardev.layout.dialogs.DietDialog
 import es.gaspardev.states.LoggedTrainer
+import es.gaspardev.utils.toWeeks
+import fit_me.composeapp.generated.resources.Res
+import fit_me.composeapp.generated.resources.weeks
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
-import kotlin.time.Duration
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -80,11 +85,10 @@ fun NutritionPlanCard(
                                             id = plan.dietId,
                                             name = plan.name,
                                             description = plan.description,
-                                            duration = Duration.parse(plan.duration),
+                                            duration = plan.duration,
                                             startAt = Instant.DISTANT_FUTURE,
                                             dietType = plan.type,
-                                            dishes = plan.dishes,
-                                            notes = listOf()
+                                            dishes = plan.dishes
                                         )
                                     ) {
                                         scope.launch {
@@ -101,13 +105,12 @@ fun NutritionPlanCard(
                             1 -> {
                                 val diet = Diet(
                                     null,
-                                    name = plan.name + " {2}",
+                                    name = plan.name + " copy",
                                     description = plan.description,
-                                    duration = Duration.parse(plan.duration),
+                                    duration = plan.duration,
                                     startAt = Instant.DISTANT_FUTURE,
                                     dietType = plan.type,
-                                    dishes = plan.dishes,
-                                    notes = emptyList()
+                                    dishes = plan.dishes
                                 )
 
                                 scope.launch {
@@ -116,7 +119,7 @@ fun NutritionPlanCard(
                                             onDuplicationAction(
                                                 plan.copy(
                                                     dietId = value,
-                                                    name = plan.name + " {2}"
+                                                    name = plan.name + " copy"
                                                 )
                                             )
                                         },
@@ -151,16 +154,13 @@ fun NutritionPlanCard(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 AssistChip(
-                    {},
-                    label = { Text(plan.type.toString()) },
+                    label = { Text(resDietType(plan.type)) },
                     leadingIcon = { Icon(FitMeIcons.Nutrition, "Icons of ${plan.type}") })
                 AssistChip(
-                    {},
-                    label = { Text(plan.duration) },
+                    label = { Text(plan.duration.toWeeks().format(stringResource(Res.string.weeks))) },
                     leadingIcon = { Icon(FitMeIcons.Calendar, "Icons of ${plan.duration}") })
                 AssistChip(
-                    {},
-                    label = { Text("${plan.dishes.values.sumOf { it.size }} meals/day") },
+                    label = { Text("${plan.dishes.values.sumOf { it.size } / plan.dishes.keys.size} raziones/día") },
                     leadingIcon = { Icon(Icons.Default.Refresh, "Icons of meals per day") })
             }
 
@@ -197,7 +197,9 @@ fun NutritionPlanCard(
                     )
                 }
 
-                TextButton(onClick = {}) {
+                TextButton(onClick = {
+                    visualizeDiet(Diet.fromPlan(plan))
+                }) {
                     Text("View Details")
                 }
             }

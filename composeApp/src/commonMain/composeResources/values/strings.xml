@@ -84,6 +84,14 @@
     <string name="last_update">Última actualización</string>
     <string name="schedule">Agendar un entrenamiento</string>
 
+    <!--Partes del cuerpo-->
+    <string name="body_part_arm">Brazo</string>
+    <string name="body_part_leg">Pierna</string>
+    <string name="body_part_shoulder">Hombro</string>
+    <string name="body_part_core">Core</string>
+    <string name="body_part_back">Espalda</string>
+    <string name="body_part_chest">Pectoral</string>
+
     <!-- Días de la semana -->
     <string name="day_monday">Lunes</string>
     <string name="day_tuesday">Martes</string>
@@ -569,6 +577,7 @@
     <string name="create_first_workout">Crea tu primer plan de entrenamiento para comenzar</string>
     <string name="workout_templates">Plantillas de Entrenamiento</string>
     <string name="workout_history">Historial de Entrenamientos</string>
+    <string name="diet_history">Historial de Dietas</string>
     <string name="assign_workout">Asignar Entrenamiento</string>
     <string name="error_creating_workout">Error al crear la rutina</string>
 

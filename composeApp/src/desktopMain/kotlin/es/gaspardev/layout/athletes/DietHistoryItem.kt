@@ -10,17 +10,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import es.gaspardev.core.domain.entities.workouts.CompletionWorkoutStatistic
+import es.gaspardev.core.domain.entities.diets.CompletionDietStatistics
 import es.gaspardev.enums.OpeningMode
 import es.gaspardev.helpers.toSpainDate
 import es.gaspardev.helpers.toSpainTime
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
-import es.gaspardev.layout.dialogs.WorkoutDialog
-
+import es.gaspardev.layout.dialogs.DietDialog
 
 @Composable
-fun WorkoutHistoryItem(history: CompletionWorkoutStatistic) {
+fun DietHistoryItem(history: CompletionDietStatistics) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colors.surface
@@ -34,7 +33,7 @@ fun WorkoutHistoryItem(history: CompletionWorkoutStatistic) {
         ) {
             Column {
                 Text(
-                    text = history.workout.name,
+                    text = history.diet.name,
                     style = MaterialTheme.typography.body1,
                     fontWeight = FontWeight.Medium
                 )
@@ -67,7 +66,7 @@ fun WorkoutHistoryItem(history: CompletionWorkoutStatistic) {
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = history.workout.duration.toSpainTime(),
+                            text = history.diet.duration.toSpainTime(),
                             style = MaterialTheme.typography.body2,
                             color = MaterialTheme.colors.onSurface
                         )
@@ -78,7 +77,7 @@ fun WorkoutHistoryItem(history: CompletionWorkoutStatistic) {
                         color = MaterialTheme.colors.surface
                     ) {
                         Text(
-                            text = history.workout.workoutType.name,
+                            text = history.diet.dietType.name,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                             style = MaterialTheme.typography.subtitle2
                         )
@@ -90,7 +89,7 @@ fun WorkoutHistoryItem(history: CompletionWorkoutStatistic) {
 
                 IconButton(onClick = {
                     DialogState.openWith {
-                        WorkoutDialog(workout = history.workout, mode = OpeningMode.VISUALIZE) {
+                        DietDialog(diet = history.diet, mode = OpeningMode.VISUALIZE) {
 
                         }
                     }

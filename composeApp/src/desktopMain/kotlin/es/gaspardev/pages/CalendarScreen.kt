@@ -43,25 +43,12 @@ fun getEventTypeColor(type: SessionType): Color {
 @Composable
 fun CalendarScreen() {
 
-    val controler = LocalRouter.current
-
     val timeZone = TimeZone.currentSystemDefault()
     var currentDate by remember { mutableStateOf(Clock.System.now()) }
-    var searchQuery by remember { mutableStateOf("") }
     var viewType by remember { mutableStateOf("month") }
     var isModalOpen by remember { mutableStateOf(false) }
     var selectedEvent by remember { mutableStateOf<Session?>(null) }
     var filterType by remember { mutableStateOf("all") }
-
-    val filteredEvents = SessionState.state.filter { event ->
-        val matchesSearch = event.title.contains(searchQuery, ignoreCase = true) ||
-                event.with.contains(searchQuery, ignoreCase = true)
-
-        if (filterType == "all") matchesSearch else matchesSearch && event.sessionType.name.equals(
-            filterType,
-            ignoreCase = true
-        )
-    }
 
     fun handlePrevious() {
         currentDate = when (viewType) {
@@ -268,7 +255,7 @@ fun CalendarScreen() {
                                                 "${localDate.dayOfWeek.name}, ${localDate.month.name} ${localDate.dayOfMonth}, ${localDate.year}"
                                             }
                                         },
-                                        style= MaterialTheme.typography.subtitle2
+                                        style = MaterialTheme.typography.subtitle2
                                     )
                                 }
                             }
@@ -277,77 +264,9 @@ fun CalendarScreen() {
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                OutlinedTextField(
-                                    value = searchQuery,
-                                    onValueChange = { searchQuery = it },
-                                    modifier = Modifier.height(32.dp),
-                                    placeholder = { Text(stringResource(Res.string.search_events)) },
-                                    leadingIcon = {
-                                        Icon(Icons.Default.Search, contentDescription = "Search")
-                                    },
-                                    singleLine = true,
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-
-                                var expanded by remember { mutableStateOf(false) }
-                                ExposedDropdownMenuBox(
-                                    expanded = expanded,
-                                    onExpandedChange = { expanded = !expanded }
-                                ) {
-                                    OutlinedTextField(
-                                        value = when (filterType) {
-                                            "all" -> stringResource(Res.string.all_events)
-                                            "workout" -> stringResource(Res.string.workouts)
-                                            "nutrition" -> stringResource(Res.string.nutrition)
-                                            "assessment" -> stringResource(Res.string.assessments)
-                                            "group" -> stringResource(Res.string.group_sessions)
-                                            else -> stringResource(Res.string.filter_by_type)
-                                        },
-                                        onValueChange = {},
-                                        readOnly = true,
-                                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                                        modifier = Modifier
-                                            .width(150.dp),
-                                        shape = RoundedCornerShape(8.dp)
-                                    )
-                                    ExposedDropdownMenu(
-                                        expanded = expanded,
-                                        onDismissRequest = { expanded = false }
-                                    ) {
-                                        DropdownMenuItem(
-                                            onClick = {
-                                                filterType = "all"
-                                                expanded = false
-                                            }
-                                        ) { Text(stringResource(Res.string.all_events)) }
-                                        DropdownMenuItem(
-                                            onClick = {
-                                                filterType = "workout"
-                                                expanded = false
-                                            }
-                                        ) { Text(stringResource(Res.string.workouts)) }
-                                        DropdownMenuItem(
-                                            onClick = {
-                                                filterType = "nutrition"
-                                                expanded = false
-                                            }
-                                        ) { Text(stringResource(Res.string.nutrition)) }
-                                        DropdownMenuItem(
-                                            onClick = {
-                                                filterType = "assessment"
-                                                expanded = false
-                                            }
-                                        ) { Text(stringResource(Res.string.assessments)) }
-                                        DropdownMenuItem(
-                                            onClick = {
-                                                filterType = "group"
-                                                expanded = false
-                                            }
-                                        ) { Text(stringResource(Res.string.group_sessions)) }
-                                    }
-                                }
 
                                 TabRow(
+                                    modifier = Modifier.width(350.dp),
                                     selectedTabIndex = when (viewType) {
                                         "month" -> 0
                                         "week" -> 1
@@ -358,10 +277,10 @@ fun CalendarScreen() {
                                     contentColor = MaterialTheme.colors.primary
                                 ) {
                                     listOf(
-                                    stringResource(Res.string.month),
-                                    stringResource(Res.string.week), 
-                                    stringResource(Res.string.day)
-                                ).forEachIndexed { index, title ->
+                                        stringResource(Res.string.month),
+                                        stringResource(Res.string.week),
+                                        stringResource(Res.string.day)
+                                    ).forEachIndexed { index, title ->
                                         Tab(
                                             selected = when (index) {
                                                 0 -> viewType == "month"
