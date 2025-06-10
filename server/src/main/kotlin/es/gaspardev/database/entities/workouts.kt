@@ -14,10 +14,6 @@ class ExerciseEntity(id: EntityID<Int>) : IntEntity(id) {
     var description by Exercises.description
     var bodyPart by Exercises.bodyPart
 
-    // Relaciones
-    val workoutExercises by WorkoutExerciseEntity referrersOn WorkoutExercises.exerciseId
-    val templateExercises by WorkoutTemplateExerciseEntity referrersOn WorkoutTemplateExercises.exerciseId
-
     fun toModel(): Exercise {
         return Exercise(
             id = this.id.value,
@@ -41,8 +37,6 @@ class WorkoutEntity(id: EntityID<Int>) : IntEntity(id) {
 
     // Relaciones
     val exercises by WorkoutExerciseEntity referrersOn WorkoutExercises.workoutId
-    val athletes by AthleteEntity optionalReferrersOn Athletes.workoutId
-    val completions by CompletionWorkoutStatisticEntity referrersOn CompletionWorkoutStatistics.workoutId
 
     fun toModel(): Workout {
         return Workout(
@@ -69,9 +63,6 @@ class WorkoutExerciseEntity(id: EntityID<Int>) : IntEntity(id) {
     var sets by WorkoutExercises.sets
     var isOptional by WorkoutExercises.isOptional
     var parentExercise by WorkoutExerciseEntity optionalReferencedOn WorkoutExercises.parentExerciseId
-
-    // Relaciones
-    val childExercises by WorkoutExerciseEntity optionalReferrersOn WorkoutExercises.parentExerciseId
 
     fun toModel(): Pair<WeekDay, WorkoutExecise> {
         return Pair(
@@ -100,6 +91,7 @@ class WorkoutTemplateEntity(id: EntityID<Int>) : IntEntity(id) {
 
     fun toModel(): WorkoutTemplate {
         return WorkoutTemplate(
+            templateId = this.id.value,
             name = this.name,
             description = this.description,
             difficulty = this.difficulty,
@@ -119,12 +111,10 @@ class WorkoutPlanEntity(id: EntityID<Int>) : IntEntity(id) {
     var duration by Workouts.duration
     var workoutType by Workouts.workoutType
     var createdBy by TrainerEntity referencedOn Workouts.createdBy
-    var startAt by Workouts.startUp
 
     // Relaciones
     val exercises by WorkoutExerciseEntity referrersOn WorkoutExercises.workoutId
     val athletes by AthleteEntity optionalReferrersOn Athletes.workoutId
-    val completions by CompletionWorkoutStatisticEntity referrersOn CompletionWorkoutStatistics.workoutId
 
     fun toModel(): WorkoutPlan {
         return WorkoutPlan(
@@ -146,9 +136,8 @@ class WorkoutPlanEntity(id: EntityID<Int>) : IntEntity(id) {
 class WorkoutTemplateExerciseEntity(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<WorkoutTemplateExerciseEntity>(WorkoutTemplateExercises)
 
-    var template by WorkoutTemplateEntity referencedOn WorkoutTemplateExercises.templateId
+    var templateId by WorkoutTemplateExercises.templateId
     var exercise by ExerciseEntity referencedOn WorkoutTemplateExercises.exerciseId
-
     var weekDay by WorkoutTemplateExercises.weekDay
     var reps by WorkoutTemplateExercises.reps
     var sets by WorkoutTemplateExercises.sets

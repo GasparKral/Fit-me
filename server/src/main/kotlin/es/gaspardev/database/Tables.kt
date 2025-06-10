@@ -22,7 +22,6 @@ object Users : IntIdTable("users") {
     val creationDate = timestamp("creation_date").transform(
         wrap = { Instant.fromEpochMilliseconds(it.toEpochMilli()) },
         unwrap = { java.time.Instant.ofEpochMilli(it.toEpochMilliseconds()) })
-    val userImageUrl = varchar("user_image_url", 500).nullable()
 }
 
 object UserStatus : IntIdTable("user_status") {
@@ -71,7 +70,7 @@ object Allergies : IntIdTable("allergies") {
 
 object AthleteAllergies : Table("athlete_allergies") {
     val athleteId = reference("athlete_id", Athletes.id)
-    val allergyId = reference("allergy_id", Allergies)
+    private val allergyId = reference("allergy_id", Allergies)
 
     override val primaryKey = PrimaryKey(athleteId, allergyId)
 }
@@ -207,7 +206,6 @@ object WorkoutTemplateExercises : IntIdTable("workout_template_exercises") {
     val reps = integer("reps")
     val sets = integer("sets")
     val isOptional = bool("is_optional").default(false)
-    val parentExerciseId = reference("parent_exercise_id", WorkoutExercises).nullable()
 }
 
 object CompletionWorkoutStatistics : IntIdTable("completion_workout_statistics") {
@@ -446,28 +444,6 @@ object ActiveSessions : IntIdTable("active_sessions") {
     }
 }
 
-object Sessions : IntIdTable("sessions") {
-    val title = varchar("title", 255)
-    val dateTime = timestamp("date_time").transform(
-        wrap = { Instant.fromEpochMilliseconds(it.toEpochMilli()) },
-        unwrap = { java.time.Instant.ofEpochMilli(it.toEpochMilliseconds()) })
-    val sessionType = customEnumeration(
-        "session_type",
-        "sessionType",
-        { value -> SessionType.valueOf(value as String) },
-        { PGEnum("sessionType", it) })
-    val trainerId = reference("trainer_id", Trainers)
-    val athleteId = reference("athlete_id", Athletes)
-    val expectedDuration = long("expected_duration_minutes").transform(
-        wrap = { it.toDuration(DurationUnit.MINUTES) },
-        unwrap = { it.toLong(DurationUnit.MINUTES) }
-    )
-    val actualDuration = long("actual_duration_minutes").nullable().transform(
-        wrap = { it?.toDuration(DurationUnit.MINUTES) },
-        unwrap = { it?.toLong(DurationUnit.MINUTES) }
-    )
-    val completed = bool("completed").default(false)
-}
 
 // ============================================================================
 // TABLA CLAVES DE ACCESO
@@ -477,4 +453,46 @@ object RegistKeyTable : IntIdTable("key_gen") {
     val key = varchar("key", 250)
     val trainer = reference("trainer_id", Trainers)
 }
+
+// ============================================================================
+// TABLAS DE CONFIGURACIONES DE USUARIOS
+// ============================================================================
+
+object AccountSettings : IntIdTable("account_settings") {
+    val userId = reference("user_id", Users).uniqueIndex()
+    val emailNotifications = bool("email_notifications").default(true)
+    val smsNotifications = bool("sms_notifications").default(false)
+    val twoFactorEnabled = bool("two_factor_enabled").default(false)
+    val sessionTimeout = integer("session_timeout").default(60) // en minutos
+    val autoLogout = bool("auto_logout").default(false)
+    val createdAt = timestamp("created_at").transform(
+        wrap = { Instant.fromEpochMilliseconds(it.toEpochMilli()) },
+        unwrap = { java.time.Instant.ofEpochMilli(it.toEpochMilliseconds()) }
+    )
+    val updatedAt = timestamp("updated_at").transform(
+        wrap = { Instant.fromEpochMilliseconds(it.toEpochMilli()) },
+        unwrap = { java.time.Instant.ofEpochMilli(it.toEpochMilliseconds()) }
+    )
+}
+
+object AppearanceSettings : IntIdTable("appearance_settings") {
+    val userId = reference("user_id", Users).uniqueIndex()
+    val theme = customEnumeration(
+        "theme",
+        "theme_enum",
+        { value -> ThemeType.valueOf(value as String) },
+        { PGEnum("theme_enum", it) }
+    ).default(ThemeType.SYSTEM)
+
+    val createdAt = timestamp("created_at").transform(
+        wrap = { Instant.fromEpochMilliseconds(it.toEpochMilli()) },
+        unwrap = { java.time.Instant.ofEpochMilli(it.toEpochMilliseconds()) }
+    )
+    val updatedAt = timestamp("updated_at").transform(
+        wrap = { Instant.fromEpochMilliseconds(it.toEpochMilli()) },
+        unwrap = { java.time.Instant.ofEpochMilli(it.toEpochMilliseconds()) }
+    )
+}
+
+
 

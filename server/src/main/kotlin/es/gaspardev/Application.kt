@@ -58,12 +58,7 @@ fun Application.module() {
     configureDatabases()
     chat()
 
-    /* Modulos Referentes a recursos */
-    upload()
-    resources()
-
     routing {
-        user()
         trainer()
         athlete()
         workout()

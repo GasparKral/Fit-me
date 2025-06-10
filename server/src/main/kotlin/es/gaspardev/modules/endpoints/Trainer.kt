@@ -1,19 +1,27 @@
 package es.gaspardev.modules.endpoints
 
 import es.gaspardev.core.domain.dtos.DashboardChartInfo
+import es.gaspardev.core.domain.dtos.RegisterTrainerData
 import es.gaspardev.core.domain.entities.users.Athlete
 import es.gaspardev.core.domain.entities.users.Trainer
+import es.gaspardev.database.RegistKeyTable
+import es.gaspardev.database.Trainers
 import es.gaspardev.database.daos.*
 import es.gaspardev.database.entities.MessageEntity
 import es.gaspardev.database.entities.TrainerEntity
 import es.gaspardev.enums.MessageStatus
+import es.gaspardev.modules.endpoints.suspendTransaction
+import es.gaspardev.utils.encrypt
 import io.ktor.http.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimePeriod
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -21,6 +29,83 @@ import kotlin.time.toDuration
 fun Route.trainer() {
 
     route(Trainer.URLPATH) {
+
+        // Endpoint para registro de nuevos entrenadores
+        post("/register") {
+            try {
+                val registerData = call.receive<RegisterTrainerData>()
+                
+                // Validar datos básicos
+                if (registerData.userName.isBlank()) {
+                    return@post call.respondText(
+                        "El nombre de usuario es requerido",
+                        status = HttpStatusCode.BadRequest
+                    )
+                }
+                
+                if (registerData.email.isBlank()) {
+                    return@post call.respondText(
+                        "El email es requerido",
+                        status = HttpStatusCode.BadRequest
+                    )
+                }
+                
+                if (registerData.password.isBlank()) {
+                    return@post call.respondText(
+                        "La contraseña es requerida",
+                        status = HttpStatusCode.BadRequest
+                    )
+                }
+                
+                if (registerData.specialization.isNullOrBlank()) {
+                    return@post call.respondText(
+                        "La especialización es requerida",
+                        status = HttpStatusCode.BadRequest
+                    )
+                }
+                
+                val result = suspendTransaction {
+                    // Verificar si el email ya existe
+                    val existingUser = UserDao().findUserByEmail(registerData.email)
+                    if (existingUser != null) {
+                        return@suspendTransaction null
+                    }
+                    
+                    // Crear usuario
+                    val user = UserDao().createUser(
+                        fullname = registerData.userName,
+                        password = encrypt(registerData.password),
+                        email = registerData.email,
+                        phone = "", // Por ahora vacío, se puede añadir al formulario después
+                        userImageUrl = null
+                    )
+                    
+                    // Crear entrenador
+                    val trainer = TrainerDao.createTrainer(
+                        userId = user.id.value,
+                        specialization = registerData.specialization!!, // Ya validamos que no sea null
+                        yearsOfExperience = registerData.yearsOfExperience
+                    )
+                    
+                    trainer.toModel()
+                }
+                
+                if (result != null) {
+                    call.respond(HttpStatusCode.Created, result)
+                } else {
+                    call.respondText(
+                        "El email ya está registrado",
+                        status = HttpStatusCode.Conflict
+                    )
+                }
+                
+            } catch (e: Exception) {
+                call.respondText(
+                    "Error interno del servidor: ${e.message}",
+                    status = HttpStatusCode.InternalServerError
+                )
+            }
+        }
 
         get("/{userIdentification}/{userPassword}") {
             val userIdentification = call.parameters["userIdentification"]
@@ -43,6 +128,23 @@ fun Route.trainer() {
                 ?: return@get call.respondText("Parámetro trainer_id requerido", status = HttpStatusCode.BadRequest)
 
             call.respond(CommunicationDao.getConversations(trainerID))
+        }
+
+        get("/key_gen") {
+            val trainerID = call.request.queryParameters["trainer_id"]
+            if (trainerID != null) {
+                val keyValue = encrypt(trainerID + Clock.System.now().toString())
+                suspendTransaction {
+                    RegistKeyTable.insert {
+                        it[key] = keyValue
+                        it[trainer] =
+                            Trainers.select(Trainers.id).where(Trainers.id eq trainerID.toInt())
+                    }
+                }
+                call.respond(keyValue)
+            } else {
+                call.respondText("Parámetros requeridos faltantes", status = HttpStatusCode.BadRequest)
+            }
         }
 
         route("/data/{trainer_id}") {
@@ -92,23 +194,6 @@ fun Route.trainer() {
                 }
             }
 
-            get("/session") {
-                val trainerID = call.parameters["trainer_id"]?.toInt()
-                    ?: return@get call.respondText("Parámetro trainer_id requerido", status = HttpStatusCode.BadRequest)
-
-                try {
-                    val result = transaction {
-                        TrainerEntity.all()
-                            .first { it.user.id.value == trainerID }.sessions.count {
-                                !it.completed && it.dateTime in Clock.System.now()..Clock.System.now()
-                                    .plus(2.toDuration(DurationUnit.DAYS))
-                            }
-                    }
-                    call.respond(result)
-                } catch (e: Exception) {
-                    call.respondText(e.message!!, status = HttpStatusCode.ExpectationFailed)
-                }
-            }
             get("/messages") {
                 val trainerID = call.parameters["trainer_id"]?.toInt()
                     ?: return@get call.respondText("Parámetro trainer_id requerido", status = HttpStatusCode.BadRequest)

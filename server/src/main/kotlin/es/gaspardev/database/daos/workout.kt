@@ -63,8 +63,7 @@ object WorkoutDao {
         weekDay: WeekDay,
         reps: Int,
         sets: Int,
-        isOptional: Boolean = false,
-        parentExerciseId: Int? = null
+        isOptional: Boolean = false
     ): WorkoutExerciseEntity = transaction {
         WorkoutExerciseEntity.new {
             this.workout = WorkoutEntity[workoutId]
@@ -73,7 +72,6 @@ object WorkoutDao {
             this.reps = reps
             this.sets = sets
             this.isOptional = isOptional
-            this.parentExercise = parentExerciseId?.let { WorkoutExerciseEntity[it] }
         }
     }
 
@@ -113,6 +111,63 @@ object WorkoutDao {
                 throw NoSuchElementException("Workout with ID $workoutId not found")
             }
         }
+    }
+
+    fun createWorkoutTemplate(
+        name: String,
+        description: String,
+        difficulty: Difficulty = Difficulty.EASY,
+        workoutType: WorkoutType,
+        createdBy: Int
+    ): WorkoutTemplate = transaction {
+        val result = WorkoutTemplateEntity.new {
+            this.name = name
+            this.description = description
+            this.difficulty = difficulty
+            this.workoutType = workoutType
+            this.createdBy = TrainerEntity.all().first { it.user.id.value == createdBy }
+        }
+
+        result.toModel()
+    }
+
+    fun addWorkoutTemplateExercises(
+        templateId: Int,
+        exerciseId: Int,
+        weekDay: WeekDay,
+        reps: Int,
+        sets: Int,
+        isOptional: Boolean = false,
+    ) = transaction {
+        WorkoutTemplateExerciseEntity.new {
+            this.templateId = WorkoutTemplateEntity[templateId].id
+            this.weekDay = weekDay
+            this.reps = reps
+            this.sets = sets
+            this.isOption = isOption
+            this.exercise = ExerciseEntity.findById(exerciseId)!!
+        }
+    }
+
+    fun deleteWorkoutTemplate(templateId: Int): Boolean = transaction {
+        try {
+            val template = WorkoutTemplateEntity.findById(templateId)
+            if (template != null) {
+                // Eliminar ejercicios relacionados del template
+                template.exercises.forEach { it.delete() }
+                // Eliminar el template
+                template.delete()
+                true
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    fun findWorkoutTemplateById(id: Int): WorkoutTemplateEntity? = transaction {
+        WorkoutTemplateEntity.findById(id)
     }
 
 }

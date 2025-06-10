@@ -29,7 +29,6 @@ class UserEntity(id: EntityID<Int>) : IntEntity(id) {
     var email by Users.email
     var phone by Users.phone
     var creationDate by Users.creationDate
-    var userImageUrl by Users.userImageUrl
 
     // Relaciones
     val userStatus by UserStatusEntity backReferencedOn UserStatus.userId
@@ -43,7 +42,6 @@ class UserEntity(id: EntityID<Int>) : IntEntity(id) {
             email = this.email,
             phone = this.phone,
             creationDate = this.creationDate,
-            userImageURL = this.userImageUrl,
             status = this.userStatus.toModel()
         )
     }
@@ -91,7 +89,6 @@ class TrainerEntity(id: EntityID<Int>) : Entity<Int>(id) {
     val socials by TrainerSocialEntity referrersOn TrainerSocials.trainerId
     val availability by TrainerAvailabilityEntity referrersOn TrainerAvailability.trainerId
     val athletes by AthleteEntity optionalReferrersOn Athletes.trainer
-    val sessions by SessionEntity referrersOn Sessions.trainerId
 
     fun toModel(): Trainer {
         return Trainer(

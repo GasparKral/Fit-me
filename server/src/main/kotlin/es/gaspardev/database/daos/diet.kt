@@ -162,4 +162,41 @@ object DietDao {
             false
         }
     }
+
+    fun createDietTemplate(
+        name: String,
+        description: String,
+        dietType: DietType,
+        createdBy: Int
+    ): DietTemplate = transaction {
+        val result = DietTemplateEntity.new {
+            this.name = name
+            this.description = description
+            this.dietType = dietType
+            this.createdBy = TrainerEntity.all().first { it.user.id.value == createdBy }
+        }
+
+        result.toModel()
+    }
+
+    fun deleteDietTemplate(templateId: Int): Boolean = transaction {
+        try {
+            val template = DietTemplateEntity.findById(templateId)
+            if (template != null) {
+                // Eliminar platos relacionados del template
+                template.dishes.forEach { it.delete() }
+                // Eliminar el template
+                template.delete()
+                true
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    fun findDietTemplateById(id: Int): DietTemplateEntity? = transaction {
+        DietTemplateEntity.findById(id)
+    }
 }
