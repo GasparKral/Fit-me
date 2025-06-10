@@ -5,6 +5,7 @@ import es.gaspardev.core.domain.dtos.LoginCredentials
 import es.gaspardev.core.domain.dtos.RegisterAthleteData
 import es.gaspardev.core.domain.entities.comunication.Conversation
 import es.gaspardev.core.domain.entities.comunication.Session
+import es.gaspardev.core.domain.entities.diets.CompletionDietStatistics
 import es.gaspardev.core.domain.entities.users.Athlete
 import es.gaspardev.core.domain.entities.users.Trainer
 import es.gaspardev.core.domain.entities.users.User
@@ -19,6 +20,12 @@ class AthletetRepositoryImp : AthleteRepository {
     override suspend fun getWorkoutsHistory(athlete: Athlete): Either<Exception, List<CompletionWorkoutStatistic>> {
         return AthleteRepository.API.getGenericList<CompletionWorkoutStatistic>(
             listOf("data", "workouthistory", athlete.user.id.toString())
+        )
+    }
+
+    override suspend fun getDietsHistory(athlete: Athlete): Either<Exception, List<CompletionDietStatistics>> {
+        return AthleteRepository.API.getGenericList<CompletionDietStatistics>(
+            listOf("data", "diethitory", athlete.user.id.toString())
         )
     }
 

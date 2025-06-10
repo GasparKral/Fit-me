@@ -21,7 +21,7 @@ data class WorkoutPlan(
     companion object {
         fun fromWorkout(workout: Workout): WorkoutPlan {
             return WorkoutPlan(
-                workoutId = workout.getId(),
+                workoutId = workout.getId()!!,
                 name = workout.name,
                 description = workout.description,
                 type = workout.workoutType,

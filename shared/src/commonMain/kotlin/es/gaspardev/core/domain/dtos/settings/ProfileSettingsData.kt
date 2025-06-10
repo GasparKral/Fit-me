@@ -8,7 +8,5 @@ data class ProfileSettingsData(
     val email: String,
     val phone: String?,
     val specialization: String?,
-    val yearsOfExperience: Int?,
-    val bio: String?,
-    val profileImageUrl: String?
+    val yearsOfExperience: Int?
 )

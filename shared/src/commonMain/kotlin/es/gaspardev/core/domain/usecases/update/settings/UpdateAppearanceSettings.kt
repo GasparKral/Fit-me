@@ -10,7 +10,7 @@ import es.gaspardev.interfaces.repositories.settings.SettingsRepository
 
 /**
  * Use case para actualizar la configuración de apariencia del usuario
- * 
+ *
  * @param repository Repositorio de configuraciones
  */
 class UpdateAppearanceSettings(
@@ -19,25 +19,25 @@ class UpdateAppearanceSettings(
 
     /**
      * Ejecuta la actualización de la configuración de apariencia
-     * 
+     *
      * @param params Par que contiene el usuario y los datos de apariencia a actualizar
      * @return Either con el resultado de la operación
      */
     override suspend fun run(params: Pair<User, AppearanceSettingsData>): Either<Exception, UserSettings> {
         val (user, appearanceData) = params
-        
+
         // Validar datos de apariencia antes de enviar al repositorio
         val validationResult = validateAppearanceData(appearanceData)
         if (validationResult != null) {
             return Either.Failure(validationResult)
         }
-        
+
         return repository.updateAppearanceSettings(user, appearanceData)
     }
 
     /**
      * Valida los datos de apariencia antes de procesar la actualización
-     * 
+     *
      * @param appearanceData Datos de apariencia a validar
      * @return Exception si hay errores de validación, null si todo es válido
      */
@@ -46,32 +46,17 @@ class UpdateAppearanceSettings(
         if (!isValidTheme(appearanceData.theme)) {
             return IllegalArgumentException("El tema debe ser 'light', 'dark' o 'system'")
         }
-        
-        // Validar color de acento (debe ser un código hex válido)
-        if (!isValidHexColor(appearanceData.accentColor)) {
-            return IllegalArgumentException("El color de acento debe ser un código hexadecimal válido (ej: #FF5722)")
-        }
-        
-        // Validar tamaño de fuente
-        if (!isValidFontSize(appearanceData.fontSize)) {
-            return IllegalArgumentException("El tamaño de fuente debe ser 'small', 'medium' o 'large'")
-        }
-        
-        // Validar idioma
-        if (!isValidLanguage(appearanceData.language)) {
-            return IllegalArgumentException("El idioma especificado no es compatible")
-        }
-        
+
         return null
     }
-    
+
     /**
      * Valida que el tema sea uno de los permitidos
      */
     private fun isValidTheme(theme: String): Boolean {
         return theme in listOf("light", "dark", "system")
     }
-    
+
     /**
      * Valida que el color sea un código hexadecimal válido
      */
@@ -79,14 +64,14 @@ class UpdateAppearanceSettings(
         val hexColorRegex = Regex("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$")
         return hexColorRegex.matches(color)
     }
-    
+
     /**
      * Valida que el tamaño de fuente sea uno de los permitidos
      */
     private fun isValidFontSize(fontSize: String): Boolean {
         return fontSize in listOf("small", "medium", "large")
     }
-    
+
     /**
      * Valida que el idioma sea uno de los soportados por la aplicación
      */
@@ -96,7 +81,7 @@ class UpdateAppearanceSettings(
         )
         return language in supportedLanguages
     }
-    
+
     companion object {
         // Colores de acento predefinidos
         val PRESET_ACCENT_COLORS = listOf(
@@ -111,13 +96,13 @@ class UpdateAppearanceSettings(
             "#FF5722", // Deep Orange
             "#3F51B5"  // Indigo
         )
-        
+
         // Temas disponibles
         val AVAILABLE_THEMES = listOf("light", "dark", "system")
-        
+
         // Tamaños de fuente disponibles
         val FONT_SIZES = listOf("small", "medium", "large")
-        
+
         // Idiomas soportados
         val SUPPORTED_LANGUAGES = mapOf(
             "es" to "Español",

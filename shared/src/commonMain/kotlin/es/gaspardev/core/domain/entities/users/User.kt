@@ -12,7 +12,6 @@ class User(
     var email: String,
     var phone: String?,
     val creationDate: Instant,
-    val userImageURL: String?,
     var status: UserStatus
 ) {
 
@@ -26,6 +25,10 @@ class User(
             .filter { it.isNotEmpty() }
             .take(2)
             .joinToString(separator = "") { it.first().uppercase() }
+    }
+
+    fun getPassword(): String {
+        return this.password
     }
 
 }

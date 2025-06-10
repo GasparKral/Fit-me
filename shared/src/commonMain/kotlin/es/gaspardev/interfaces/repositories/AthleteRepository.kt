@@ -3,6 +3,7 @@ package es.gaspardev.interfaces.repositories
 import es.gaspardev.auxliars.Either
 import es.gaspardev.core.domain.dtos.RegisterAthleteData
 import es.gaspardev.core.domain.entities.comunication.Session
+import es.gaspardev.core.domain.entities.diets.CompletionDietStatistics
 import es.gaspardev.core.domain.entities.users.Athlete
 import es.gaspardev.core.domain.entities.users.Trainer
 import es.gaspardev.core.domain.entities.workouts.CompletionWorkoutStatistic
@@ -16,6 +17,8 @@ interface AthleteRepository : UserRepository<Athlete, Trainer> {
 
     suspend fun registerAthlete(newAthleteData: RegisterAthleteData): Either<Exception, Athlete>
     suspend fun getWorkoutsHistory(athlete: Athlete): Either<Exception, List<CompletionWorkoutStatistic>>
+
+    suspend fun getDietsHistory(athlete: Athlete): Either<Exception, List<CompletionDietStatistics>>
     suspend fun getCommingSessions(athlete: Athlete): Either<Exception, List<Session>>
 
 }

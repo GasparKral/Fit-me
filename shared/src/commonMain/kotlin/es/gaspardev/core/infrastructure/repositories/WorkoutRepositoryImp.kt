@@ -2,6 +2,7 @@ package es.gaspardev.core.infrastructure.repositories
 
 import es.gaspardev.auxliars.Either
 import es.gaspardev.core.domain.entities.users.Trainer
+import es.gaspardev.core.domain.entities.workouts.Exercise
 import es.gaspardev.core.domain.entities.workouts.Workout
 import es.gaspardev.core.domain.entities.workouts.WorkoutPlan
 import es.gaspardev.core.domain.entities.workouts.WorkoutTemplate
@@ -49,5 +50,26 @@ class WorkoutRepositoryImp : WorkoutRepository {
             { _ -> Either.Success(workout) },
             { err -> Either.Failure(err) }
         )
+    }
+
+    override suspend fun createWorkoutTemplate(template: WorkoutTemplate, trainer: Trainer): Either<Exception, Int> {
+        return WorkoutRepository.API.postGeneric<WorkoutTemplate, WorkoutTemplate>(
+            listOf("templates", "create", trainer.user.id.toString()),
+            template
+        ).foldValue(
+            { value -> Either.Success(value.getId()) },
+            { err -> Either.Failure(err) }
+        )
+    }
+
+    override suspend fun deleteWorkoutTemplate(templateId: Int): Either<Exception, Unit> {
+        return WorkoutRepository.API.delete(
+            listOf("templates"),
+            params = arrayOf(Pair("template_id", templateId.toString()))
+        )
+    }
+
+    override suspend fun getAvailableExercises(): Either<Exception, List<Exercise>> {
+        return WorkoutRepository.API.getGenericList(listOf("exercises"))
     }
 }

@@ -22,4 +22,5 @@ class Trainer(
 
     val socials: Map<Social, String>
         get() = raw_socials.mapKeys { (key, _) -> Social.from(key) }
+
 }

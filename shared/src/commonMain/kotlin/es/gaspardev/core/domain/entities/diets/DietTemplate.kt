@@ -13,6 +13,18 @@ data class DietTemplate(
     val dishes: MutableMap<WeekDay, MutableList<DietDish>>
 ) {
 
+    companion object {
+        fun fromDiet(diet: Diet): DietTemplate {
+            return DietTemplate(
+                templateId = diet.getId(),
+                name = diet.name,
+                description = diet.description,
+                dietType = diet.dietType,
+                dishes = diet.dishes
+            )
+        }
+    }
+
     fun getId(): Int = templateId
 
 }

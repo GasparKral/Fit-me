@@ -39,7 +39,7 @@ data class Workout(
         }
     }
 
-    fun getId(): Int = id ?: throw IllegalStateException("ID no puede ser null")
+    fun getId(): Int? = id
 
     fun getWorkoutProgression(): Double {
         val now = Clock.System.now()

@@ -64,8 +64,11 @@ class TrainerRepositoryImp : TrainerRepository {
         )
     }
 
-    override suspend fun registerTrainer(newSportsmanData: RegisterTrainerData): Either<Exception, Trainer> {
-        TODO("Not yet implemented")
+    override suspend fun registerTrainer(newTrainerData: RegisterTrainerData): Either<Exception, Trainer> {
+        return TrainerRepository.API.post(
+            segments = listOf("register"),
+            body = newTrainerData
+        )
     }
 
     override suspend fun deleteAccount(trainer: Trainer): Either.Failure<Exception>? {
