@@ -41,10 +41,7 @@ object AthleteDao {
         CompletionDietStatisticEntity.all().filter { it.athlete.userEntity.id.value == userId }.map { it.toModel() }
     }
 
-    fun getCommingSessions(athleteId: Int): List<Session> = transaction {
-        SessionEntity.all().filter { it.athlete.id.value == athleteId && !it.completed }.map { it.toModel() }
-    }
-
+    
     fun findAthleteByUserId(userId: Int): AthleteEntity? = transaction {
         AthleteEntity.findById(userId)
     }

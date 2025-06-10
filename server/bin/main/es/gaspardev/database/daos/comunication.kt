@@ -200,7 +200,6 @@ object CommunicationDao {
         }
     }
 
-    // Estados de usuario - **MÉTODO CORREGIDO**
     fun updateUserOnlineStatus(userId: Int, isOnline: Boolean): UserStatusEntity {
         return try {
             val userStatus = UserStatusEntity.find { UserStatus.userId eq userId }.firstOrNull()

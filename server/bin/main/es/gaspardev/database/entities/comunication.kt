@@ -143,26 +143,3 @@ class ActiveSessionEntity(id: EntityID<Int>) : IntEntity(id) {
         lastPingAt = Clock.System.now()
     }
 }
-
-class SessionEntity(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<SessionEntity>(Sessions)
-
-    var title by Sessions.title
-    var dateTime by Sessions.dateTime
-    var sessionType by Sessions.sessionType
-    var trainer by TrainerEntity referencedOn Sessions.trainerId
-    var athlete by AthleteEntity referencedOn Sessions.athleteId
-    var expectedDuration by Sessions.expectedDuration
-    var actualDuration by Sessions.actualDuration
-    var completed by Sessions.completed
-
-    fun toModel(): Session {
-        return Session(
-            title = this.title,
-            dateTime = this.dateTime,
-            sessionType = this.sessionType,
-            with = this.athlete.userEntity.toModel().fullname,
-            expectedDuration = this.expectedDuration
-        )
-    }
-}

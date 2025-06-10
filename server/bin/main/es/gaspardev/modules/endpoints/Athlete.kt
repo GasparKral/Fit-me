@@ -28,13 +28,7 @@ fun Route.athlete() {
                 call.respond(AthleteDao.getDietHistory(athleteId))
             }
 
-            get("/sessions/{athlete_id}") {
-                val athleteId = call.parameters["athlete_id"]?.toInt() ?: return@get call.respondText(
-                    "Parámetros requeridos faltantes",
-                    status = HttpStatusCode.BadRequest
-                )
-                call.respond(AthleteDao.getCommingSessions(athleteId))
-            }
+           
         }
     }
 }

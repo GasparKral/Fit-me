@@ -2,16 +2,27 @@ package es.gaspardev.modules.endpoints
 
 import es.gaspardev.core.domain.entities.diets.Diet
 import es.gaspardev.core.domain.entities.diets.DietPlan
+import es.gaspardev.core.domain.entities.diets.DietTemplate
 import es.gaspardev.database.daos.DietDao
 import es.gaspardev.database.entities.DietPlanEntity
+import es.gaspardev.database.entities.DishEntity
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import org.jetbrains.exposed.sql.transactions.transaction
 
 fun Route.diet() {
 
     route(Diet.URLPATH) {
+
+        get("/dishes") {
+            val dishes = transaction {
+                DishEntity.all().map { it.toModel() }
+            }
+
+            call.respond(dishes)
+        }
 
         get("/plans/{trainer_id}") {
             val trainerID = call.parameters["trainer_id"]?.toIntOrNull() ?: return@get call.respondText(
@@ -179,6 +190,96 @@ fun Route.diet() {
             } catch (e: Exception) {
                 call.respondText(
                     "Error al asignar la dieta: ${e.message}",
+                    status = HttpStatusCode.InternalServerError
+                )
+            }
+        }
+
+        // Endpoints para templates
+        post("/templates/{trainer_id}") {
+            val trainerId = call.parameters["trainer_id"]?.toIntOrNull()
+                ?: return@post call.respondText(
+                    "Parámetro trainer_id requerido",
+                    status = HttpStatusCode.BadRequest
+                )
+
+            try {
+                val template = call.receive<DietTemplate>()
+
+                // Validación básica
+                if (template.name.isBlank()) {
+                    return@post call.respondText(
+                        "El nombre del template es requerido",
+                        status = HttpStatusCode.BadRequest
+                    )
+                }
+
+                val createdTemplate = DietDao.createDietTemplate(
+                    name = template.name,
+                    description = template.description,
+                    dietType = template.dietType,
+                    createdBy = trainerId
+                )
+
+                call.respond(HttpStatusCode.Created, createdTemplate)
+            } catch (e: Exception) {
+                call.respondText(
+                    "Error al crear el template de dieta: ${e.message}",
+                    status = HttpStatusCode.InternalServerError
+                )
+            }
+        }
+
+        delete("/templates") {
+            val templateId = call.request.queryParameters["template_id"]?.toIntOrNull()
+
+            if (templateId == null) {
+                call.respondText(
+                    "Parámetro template_id requerido",
+                    status = HttpStatusCode.BadRequest
+                )
+                return@delete
+            }
+
+            try {
+                val deleted = DietDao.deleteDietTemplate(templateId)
+
+                if (deleted) {
+                    call.respond(HttpStatusCode.OK, "Template de dieta eliminado correctamente")
+                } else {
+                    call.respondText(
+                        "Template de dieta no encontrado",
+                        status = HttpStatusCode.NotFound
+                    )
+                }
+            } catch (e: Exception) {
+                call.respondText(
+                    "Error al eliminar el template de dieta: ${e.message}",
+                    status = HttpStatusCode.InternalServerError
+                )
+            }
+        }
+
+        get("/template/{template_id}") {
+            val templateId = call.parameters["template_id"]?.toIntOrNull()
+                ?: return@get call.respondText(
+                    "Parámetro template_id requerido",
+                    status = HttpStatusCode.BadRequest
+                )
+
+            try {
+                val template = DietDao.findDietTemplateById(templateId)
+                if (template != null) {
+                    call.respond(HttpStatusCode.OK, template.toModel())
+                } else {
+                    call.respondText(
+                        "Template de dieta no encontrado",
+                        status = HttpStatusCode.NotFound
+                    )
+                }
+            } catch (e: Exception) {
+                call.respondText(
+                    "Error al obtener el template de dieta: ${e.message}",
                     status = HttpStatusCode.InternalServerError
                 )
             }

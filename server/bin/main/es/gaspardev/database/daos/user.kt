@@ -19,7 +19,6 @@ class UserDao {
             this.email = email
             this.phone = phone
             this.creationDate = Instant.fromEpochMilliseconds(System.currentTimeMillis())
-            this.userImageUrl = userImageUrl
         }
     }
 
