@@ -91,7 +91,7 @@ fun WorkoutHistoryItem(history: CompletionWorkoutStatistic) {
                 IconButton(onClick = {
                     DialogState.openWith {
                         WorkoutDialog(workout = history.workout, mode = OpeningMode.VISUALIZE) {
-
+                            DialogState.close()
                         }
                     }
                 }) {
@@ -103,6 +103,5 @@ fun WorkoutHistoryItem(history: CompletionWorkoutStatistic) {
             }
         }
 
-        Divider()
     }
 }

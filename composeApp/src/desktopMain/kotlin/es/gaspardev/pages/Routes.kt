@@ -28,11 +28,6 @@ sealed class Routes {
 
     }
 
-    object Calendar : Route {
-        override val view: @Composable (Dp, Dp) -> Unit
-            get() = { _, _ -> CalendarScreen() }
-    }
-
     object Messages : Route {
         override val view: @Composable (Dp, Dp) -> Unit
             get() = { _, _ -> MessagesScreen() }

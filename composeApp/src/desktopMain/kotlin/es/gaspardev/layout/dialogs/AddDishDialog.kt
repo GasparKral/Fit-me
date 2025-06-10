@@ -21,15 +21,16 @@ import es.gaspardev.enums.WeekDay
 import es.gaspardev.helpers.resMealType
 import es.gaspardev.helpers.resWeekDay
 import es.gaspardev.components.AutoCompleteTextField
+import es.gaspardev.components.ToastManager
+import es.gaspardev.core.domain.usecases.UseCase
+import es.gaspardev.core.domain.usecases.read.GetAvailableDishes
 import es.gaspardev.icons.FitMeIcons
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AddDishDialog(
     onCreateDish: (DietDish, WeekDay) -> Unit = { _, _ -> },
-    onCancel: () -> Unit = {},
-    modifier: Modifier = Modifier,
-    availableDishes: List<Dish> = getSampleDishes(),
+    onCancel: () -> Unit = {}
 ) {
     var amount by remember { mutableStateOf("") }
     var selectedMealType by remember { mutableStateOf<MealType?>(null) }
@@ -38,6 +39,12 @@ fun AddDishDialog(
     var dishSearchQuery by remember { mutableStateOf("") }
     var mealTypeExpanded by remember { mutableStateOf(false) }
     var weekDayExpanded by remember { mutableStateOf(false) }
+    var availableDishes: List<Dish> by remember { mutableStateOf(emptyList()) }
+
+    LaunchedEffect(Unit) {
+        GetAvailableDishes().run(UseCase.None).fold(
+            { list -> availableDishes = list }, { err -> ToastManager.showError(err.message!!) })
+    }
 
     // Validación
     val isFormValid = selectedDish != null &&

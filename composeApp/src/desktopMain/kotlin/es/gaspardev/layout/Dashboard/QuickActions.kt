@@ -60,6 +60,8 @@ fun QuickActions(controller: RouterState, toaster: ToasterState) {
                         scope.launch {
                             CreateNewWorkout().run(Pair(workout, LoggedTrainer.state.trainer!!)).fold(
                                 {
+
+                                    DialogState.close()
                                     toaster.show(
                                         "La rutina se ha creado correctamente",
                                         type = ToastType.Success
@@ -84,11 +86,6 @@ fun QuickActions(controller: RouterState, toaster: ToasterState) {
                 controller.navigateTo(Routes.Nutrition)
                 DialogState.openWith { DietDialog { } }
             }
-        ),
-        QuickAction(
-            icon = FitMeIcons.Calendar,
-            labelRes = Res.string.schedule_session,
-            actionType = Action.SuspendAction.create { }
         ),
         QuickAction(
             icon = FitMeIcons.Messages,
@@ -139,7 +136,7 @@ fun QuickActions(controller: RouterState, toaster: ToasterState) {
                         ) {
                             Icon(
                                 imageVector = action.icon,
-                                contentDescription = "",
+                                contentDescription = null,
                                 modifier = Modifier.size(24.dp),
                                 tint = MaterialTheme.colors.onPrimary
                             )

@@ -4,14 +4,29 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import es.gaspardev.components.ToastManager
+import es.gaspardev.core.LocalRouter
+import es.gaspardev.core.domain.usecases.delete.DeleteTrainerAccount
+import es.gaspardev.core.domain.usecases.update.settings.ChangePassword
+import es.gaspardev.core.domain.usecases.update.settings.ChangePasswordParams
+import es.gaspardev.pages.Routes
+import es.gaspardev.states.LoggedTrainer
+import kotlinx.coroutines.launch
 
 @Composable
 fun AccountSettings() {
+
+    val scope = rememberCoroutineScope()
+    val router = LocalRouter.current
+    var newPassword by remember { mutableStateOf("") }
+    var confirmNewPassword by remember { mutableStateOf("") }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -19,7 +34,7 @@ fun AccountSettings() {
             .padding(vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Card {
+        Card(Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     text = "Cambiar contraseña",
@@ -30,100 +45,38 @@ fun AccountSettings() {
                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
-
-                // Password form would go here
-                // Similar to the ProfileSettings implementation
-            }
-        }
-
-        Card {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "Seguridad de la cuenta",
-                    style = MaterialTheme.typography.h3
-                )
-                Text(
-                    text = "Configura opciones adicionales de seguridad para proteger tu cuenta",
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
-                    modifier = Modifier.padding(bottom = 16.dp)
+                OutlinedTextField(
+                    value = newPassword,
+                    onValueChange = { newPassword = it },
+                    visualTransformation = PasswordVisualTransformation(),
+                    label = { Text("Contraseña") }
                 )
 
-                var twoFactorEnabled by remember { mutableStateOf(false) }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text("Autenticación de dos factores")
-                        Text(
-                            text = "Añade una capa adicional de seguridad a tu cuenta",
-                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
-                            fontSize = 14.sp
-                        )
-                    }
-                    Switch(
-                        checked = twoFactorEnabled,
-                        onCheckedChange = { twoFactorEnabled = it }
-                    )
-                }
+                OutlinedTextField(
+                    value = confirmNewPassword,
+                    onValueChange = { confirmNewPassword = it },
+                    visualTransformation = PasswordVisualTransformation(),
+                    label = { Text("Repetir contraseña") }
+                )
 
-                if (twoFactorEnabled) {
-                    AlertDialog(
-                        onDismissRequest = { /* Handle dismiss */ },
-                        title = { Text("Configuración requerida") },
-                        text = {
-                            Text("Para completar la configuración de la autenticación de dos factores, necesitas escanear un código QR con tu aplicación de autenticación.")
-                        },
-                        confirmButton = {
-                            Button(onClick = { /* Handle setup */ }) {
-                                Text("Configurar ahora")
-                            }
-                        },
-                        dismissButton = {
-                            Button(onClick = { twoFactorEnabled = false }) {
-                                Text("Cerrar")
-                            }
+                Button(
+                    onClick = {
+                        scope.launch {
+                            ChangePassword().run(
+                                ChangePasswordParams(
+                                    LoggedTrainer.state.trainer!!.user,
+                                    LoggedTrainer.state.trainer!!.user.getPassword(),
+                                    newPassword,
+                                    confirmNewPassword
+                                )
+                            ).fold(
+                                { _ -> ToastManager.showSuccess("Contraseña actualizada correctamente") },
+                                { err -> ToastManager.showError(err.message!!) }
+                            )
                         }
-                    )
-                }
-
-                Divider(modifier = Modifier.padding(vertical = 16.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    }
                 ) {
-                    Column {
-                        Text("Notificaciones de inicio de sesión")
-                        Text(
-                            text = "Recibe notificaciones cuando alguien inicie sesión en tu cuenta",
-                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
-                            fontSize = 14.sp
-                        )
-                    }
-                    Switch(checked = true, onCheckedChange = {})
-                }
-
-                Divider(modifier = Modifier.padding(vertical = 16.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text("Sesiones activas")
-                        Text(
-                            text = "Administra los dispositivos donde has iniciado sesión",
-                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
-                            fontSize = 14.sp
-                        )
-                    }
-                    Button(onClick = { /* Handle manage sessions */ }) {
-                        Text("Administrar sesiones")
-                    }
+                    Text("Cambiar Contraseña")
                 }
             }
         }
@@ -139,7 +92,23 @@ fun AccountSettings() {
                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
-
+                Button(
+                    onClick = {
+                        scope.launch {
+                            DeleteTrainerAccount().run(LoggedTrainer.state.trainer!!).fold(
+                                { _ ->
+                                    LoggedTrainer.logout()
+                                    router.navigateTo(Routes.Login)
+                                },
+                                { err -> ToastManager.showError(err.message!!) }
+                            )
+                        }
+                    }
+                ) {
+                    Icon(Icons.Default.Warning, contentDescription = null)
+                    Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+                    Text("Eliminar Cuenta")
+                }
             }
         }
     }

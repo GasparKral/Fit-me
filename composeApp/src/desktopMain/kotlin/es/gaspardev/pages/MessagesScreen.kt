@@ -436,7 +436,7 @@ fun MessagesScreen() {
                                     Spacer(Modifier.width(4.dp))
                                     Text("New")
                                 }
-                                Spacer(Modifier.width(4.dp))
+                                Spacer(Modifier.width(8.dp))
                                 IconButton(
                                     onClick = { isCollapsed = true },
                                     modifier = Modifier.size(32.dp)

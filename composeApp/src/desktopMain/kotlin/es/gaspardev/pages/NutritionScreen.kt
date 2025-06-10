@@ -21,12 +21,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.dokar.sonner.ToastType
 import com.dokar.sonner.rememberToasterState
+import es.gaspardev.components.ToastManager
 import es.gaspardev.core.domain.entities.diets.DietPlan
 import es.gaspardev.core.domain.entities.diets.DietTemplate
+import es.gaspardev.core.domain.usecases.create.CreateDietTemplate
 import es.gaspardev.core.domain.usecases.create.CreateNewDiet
 import es.gaspardev.core.domain.usecases.read.GetTrainerDietsPlans
 import es.gaspardev.core.domain.usecases.read.GetTrainerDietsTemplates
 import es.gaspardev.enums.DietType
+import es.gaspardev.helpers.createDiet
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
 import es.gaspardev.layout.dialogs.DietDialog
@@ -58,7 +61,7 @@ fun NutritionScreen(width: Dp) {
    var activeTab by remember { mutableStateOf(DietType.ALL) }
 
    var dietPlans by remember { mutableStateOf<List<DietPlan>>(emptyList()) }
-   var dietTemplate by remember { mutableStateOf<List<DietTemplate>>(emptyList()) }
+   var dietTemplates by remember { mutableStateOf<List<DietTemplate>>(emptyList()) }
 
    LaunchedEffect(Unit) {
       val trainer = LoggedTrainer.state.trainer!!
@@ -69,7 +72,7 @@ fun NutritionScreen(width: Dp) {
       )
 
       GetTrainerDietsTemplates().run(trainer).fold(
-         { value -> dietTemplate = value },
+         { value -> dietTemplates = value },
          { _ -> }
       )
    }
@@ -178,7 +181,7 @@ fun NutritionScreen(width: Dp) {
       Card(Modifier.fillMaxSize().padding(bottom = 16.dp)) {
          Column {
             ScrollableTabRow(
-               selectedTabIndex = tabs.indexOfFirst { it.first == activeTab }.takeIf { it >= 0 } ?: 0,
+               selectedTabIndex = 0,
                edgePadding = 0.dp
             ) {
                tabs.forEachIndexed { _, (workoutType, title) ->
@@ -302,12 +305,27 @@ fun NutritionScreen(width: Dp) {
                }
             }
             Spacer(Modifier.height(32.dp))
-            Text(
-               text = stringResource(Res.string.nutrition_templates),
-               style = MaterialTheme.typography.h2,
-               fontWeight = FontWeight.Bold,
-               modifier = Modifier.padding(start = 12.dp)
-            )
+            Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+               Text(
+                  text = stringResource(Res.string.nutrition_templates),
+                  style = MaterialTheme.typography.h2,
+                  fontWeight = FontWeight.Bold
+               )
+               Button(onClick = {
+                  createDiet() { diet ->
+                     val template: DietTemplate = DietTemplate.fromDiet(diet)
+
+                     scope.launch {
+                        CreateDietTemplate().run(Pair(template, LoggedTrainer.state.trainer!!)).fold(
+                           { newId -> dietTemplates = dietTemplates + template.copy(templateId = newId) },
+                           { err -> ToastManager.showError(err.message!!) }
+                        )
+                     }
+                  }
+               }) {
+                  Text("Crear nueva plantilla")
+               }
+            }
             Spacer(Modifier.height(16.dp))
             Box(Modifier.fillMaxSize()) {
                LazyVerticalGrid(
@@ -317,8 +335,10 @@ fun NutritionScreen(width: Dp) {
                   verticalArrangement = Arrangement.spacedBy(16.dp),
                   horizontalArrangement = Arrangement.spacedBy(16.dp)
                ) {
-                  items(dietTemplate) { template ->
-                     NutritionTemplateCard(template) { diet ->
+                  items(dietTemplates) { template ->
+                     NutritionTemplateCard(template, scope, { id ->
+                        dietTemplates = dietTemplates - dietTemplates.first { it.getId() == id }
+                     }) { diet ->
                         scope.launch {
                            CreateNewDiet().run(Pair(diet, LoggedTrainer.state.trainer!!))
                               .fold(

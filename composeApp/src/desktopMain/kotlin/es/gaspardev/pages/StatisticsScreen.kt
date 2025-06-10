@@ -94,6 +94,7 @@ fun StatisticsScreen() {
                 Spacer(Modifier.height(8.dp))
 
                 AutoCompleteTextField(
+
                     initialValue = selectedAthlete.user.fullname,
                     options = LoggedTrainer.state.athletes!!,
                     onItemSelected = { athlete ->

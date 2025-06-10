@@ -217,6 +217,31 @@ fun LoginScreen() {
                         Text(if (isLoading) stringResource(Res.string.signing_in) else stringResource(Res.string.sign_in))
                     }
 
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "¿No tienes cuenta?",
+                            style = MaterialTheme.typography.body2,
+                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        TextButton(
+                            onClick = { controller.navigateTo(Routes.Regist) },
+                            enabled = !isLoading
+                        ) {
+                            Text(
+                                text = "Registrarse",
+                                style = MaterialTheme.typography.body2,
+                                color = MaterialTheme.colors.primary
+                            )
+                        }
+                    }
+
                 }
             }
         }

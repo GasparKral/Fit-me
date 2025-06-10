@@ -29,6 +29,7 @@ fun <E> AutoCompleteTextField(
     onValueChange: (String) -> Unit = {},
     onItemSelected: (E) -> Unit = {},
     options: List<E> = emptyList(),
+    maxShowElements: Int = 10,
     getFilterableText: (E) -> String,
     modifier: Modifier = Modifier,
     dropDownModifier: Modifier = Modifier,
@@ -55,11 +56,11 @@ fun <E> AutoCompleteTextField(
 
     val filteredOptions = remember(filterQuery, options) {
         if (filterQuery.isEmpty()) {
-            options.take(10)
+            options.take(maxShowElements)
         } else {
             options.filter {
                 getFilterableText(it).contains(filterQuery, ignoreCase = true)
-            }.take(10)
+            }.take(maxShowElements)
         }
     }
 

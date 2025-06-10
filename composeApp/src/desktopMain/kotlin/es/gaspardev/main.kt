@@ -61,16 +61,11 @@ fun main() = application {
             }
 
             event.isAltPressed && (event.key == Key.Five || event.key == Key.NumPad5) -> {
-                router?.navigateTo(Routes.Calendar)
-                true
-            }
-
-            event.isAltPressed && (event.key == Key.Six || event.key == Key.NumPad6) -> {
                 router?.navigateTo(Routes.Statistics)
                 true
             }
 
-            event.isAltPressed && (event.key == Key.Seven || event.key == Key.NumPad7) -> {
+            event.isAltPressed && (event.key == Key.Six || event.key == Key.NumPad6) -> {
                 router?.navigateTo(Routes.Messages)
                 true
             }
@@ -96,7 +91,7 @@ fun main() = application {
                 }
 
                 BoxWithConstraints(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.background)
                 ) {
                     val isVisible = controller.currentRoute != Routes.Login && controller.currentRoute != Routes.Regist
                     val sidebarWidth = if (isSidebarCollapsed) 80.dp else 255.dp
@@ -112,7 +107,7 @@ fun main() = application {
                     Box(
                         modifier = Modifier
                             .padding(start = if (isVisible) sidebarWidth else 0.dp)
-                            .background(MaterialTheme.colors.background)
+
                     ) {
                         content(this@BoxWithConstraints.maxWidth, this@BoxWithConstraints.maxHeight)
                     }

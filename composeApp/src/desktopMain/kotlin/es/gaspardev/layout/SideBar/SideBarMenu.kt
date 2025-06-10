@@ -32,18 +32,19 @@ fun SideBarMenu(
 ) {
     val PADDING = 16
     val sidebarWidth = if (isCollapsed) 80.dp else 255.dp
+    val background = MaterialTheme.colors.surface
 
     FlowColumn(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier
             .width(sidebarWidth)
             .fillMaxHeight()
-            .background(MaterialTheme.colors.onPrimary)
             .padding(PADDING.dp)
+            .background(background.copy(alpha = .8f))
             .drawBehind {
                 val borderWidth = 1.dp.toPx()
                 drawRect(
-                    color = Color(0xFFD9D9D9),
+                    color = background,
                     topLeft = androidx.compose.ui.geometry.Offset(
                         size.width - borderWidth + PADDING,
                         0f - PADDING
@@ -67,7 +68,7 @@ fun SideBarMenu(
                 .drawBehind {
                     val borderWidth = 1.dp.toPx()
                     drawRect(
-                        color = Color(0xFFD9D9D9),
+                        color = background,
                         topLeft = androidx.compose.ui.geometry.Offset(
                             0f - PADDING * 2,
                             size.height - borderWidth + PADDING / 2
@@ -141,13 +142,6 @@ fun SideBarMenu(
             path = Routes.Nutrition,
             controller = controller,
             icon = FitMeIcons.Nutrition,
-            isCollapsed = isCollapsed
-        )
-        SideBarMenuItem(
-            text = stringResource(Res.string.calendar),
-            path = Routes.Calendar,
-            controller = controller,
-            icon = FitMeIcons.Calendar,
             isCollapsed = isCollapsed
         )
         SideBarMenuItem(

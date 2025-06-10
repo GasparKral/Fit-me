@@ -9,6 +9,8 @@ import fit_me.composeapp.generated.resources.full_body
 import fit_me.composeapp.generated.resources.strength
 import org.jetbrains.compose.resources.stringResource
 
+fun Double.formatAsPercentage(): String = "%.1f%%".format(this)
+
 val resWeekDay: @Composable (WeekDay) -> String = { day ->
     when (day) {
         WeekDay.MONDAY -> stringResource(Res.string.day_monday)

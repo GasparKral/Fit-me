@@ -415,7 +415,6 @@ fun WorkoutDialog(
                 Button(
                     onClick = {
                         onAcceptAction(state)
-                        DialogState.close()
                     }
                 ) {
                     Text(

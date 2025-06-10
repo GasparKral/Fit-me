@@ -24,6 +24,7 @@ import es.gaspardev.core.domain.usecases.update.UpdateWorkout
 import es.gaspardev.enums.OpeningMode
 import es.gaspardev.helpers.resDifficulty
 import es.gaspardev.helpers.resWorkoutType
+import es.gaspardev.helpers.visualizeWorkout
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
 import es.gaspardev.layout.dialogs.AsignDialog
@@ -47,7 +48,6 @@ fun WorkoutPlanCard(
 
     Card(
         modifier = modifier.fillMaxWidth(),
-        backgroundColor = Color.White,
         elevation = 4.dp
     ) {
         Column(
@@ -143,10 +143,14 @@ fun WorkoutPlanCard(
                                 DialogState.openWith {
                                     AsignDialog(
                                         {
-                                            WorkoutPlanCard(
-                                                plan,
-                                                scope
-                                            )
+                                            Card {
+                                                Column {
+                                                    Text(plan.name)
+                                                    Text(plan.description)
+                                                }
+
+                                            }
+
                                         }
                                     ) { onAsign(plan.copy(asignedCount = plan.asignedCount + 1)) }
                                 }
@@ -251,23 +255,7 @@ fun WorkoutPlanCard(
                 }
 
                 TextButton(onClick = {
-                    DialogState.openWith {
-                        WorkoutDialog(
-                            Workout(
-                                id = plan.workoutId,
-                                name = plan.name,
-                                description = plan.description,
-                                difficulty = plan.difficulty,
-                                duration = plan.duration,
-                                startAt = Instant.DISTANT_FUTURE,
-                                workoutType = plan.type,
-                                exercises = plan.exercises
-                            ),
-                            mode = OpeningMode.VISUALIZE
-                        ) {
-
-                        }
-                    }
+                    visualizeWorkout(Workout.fromPlan(plan))
                 }) {
                     Text("View Details")
                 }

@@ -2,24 +2,34 @@ package es.gaspardev.layout.nutrition
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import es.gaspardev.components.ToastManager
 import es.gaspardev.core.domain.entities.diets.Diet
 import es.gaspardev.core.domain.entities.diets.DietTemplate
+import es.gaspardev.core.domain.usecases.delete.DeleteDietTemplate
 import es.gaspardev.helpers.resDietType
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
 import es.gaspardev.layout.dialogs.DietDialog
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun NutritionTemplateCard(template: DietTemplate, onAcceptAction: (Diet) -> Unit) {
+fun NutritionTemplateCard(
+    template: DietTemplate,
+    scope: CoroutineScope,
+    onDeleteAction: (Int) -> Unit,
+    onAcceptAction: (Diet) -> Unit
+) {
+
     Card(
         modifier = Modifier.fillMaxWidth(),
-        backgroundColor = Color.White,
         elevation = 4.dp
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -53,14 +63,31 @@ fun NutritionTemplateCard(template: DietTemplate, onAcceptAction: (Diet) -> Unit
                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier.padding(top = 16.dp)
             )
+            Row {
 
-            Button(
-                onClick = {
-                    DialogState.openWith { DietDialog(template = template, onAcceptAction = onAcceptAction) }
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Use Template")
+                OutlinedButton(
+                    onClick = {
+                        scope.launch {
+                            DeleteDietTemplate().run(template.getId()).fold(
+                                { _ -> onDeleteAction(template.getId()) },
+                                { err -> ToastManager.showError(err.message!!) }
+                            )
+                        }
+                    }
+                ) {
+                    Icon(Icons.Default.Warning, contentDescription = null)
+                    Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+                    Text("Elimar Template")
+                }
+                Spacer(Modifier.width(6.dp))
+                Button(
+                    onClick = {
+                        DialogState.openWith { DietDialog(template = template, onAcceptAction = onAcceptAction) }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Usar Template")
+                }
             }
         }
     }

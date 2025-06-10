@@ -25,13 +25,9 @@ import es.gaspardev.helpers.editWorkout
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
 import es.gaspardev.layout.dialogs.DietDialog
-import es.gaspardev.layout.dialogs.WorkoutDialog
 import es.gaspardev.pages.Routes
 import es.gaspardev.states.ConversationsState
 import es.gaspardev.states.LoggedTrainer
-import fit_me.composeapp.generated.resources.Res
-import fit_me.composeapp.generated.resources.active
-import fit_me.composeapp.generated.resources.inactive
 import fit_me.composeapp.generated.resources.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

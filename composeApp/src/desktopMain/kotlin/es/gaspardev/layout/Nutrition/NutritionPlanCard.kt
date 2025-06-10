@@ -48,7 +48,6 @@ fun NutritionPlanCard(
 ) {
     Card(
         modifier = modifier,
-        backgroundColor = Color.White,
         elevation = 4.dp
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -135,9 +134,11 @@ fun NutritionPlanCard(
                                 DialogState.openWith {
                                     AsignDialog(
                                         {
-                                            Column {
-                                                Text(plan.name)
-                                                Text(plan.description)
+                                            Card {
+                                                Column {
+                                                    Text(plan.name)
+                                                    Text(plan.description)
+                                                }
                                             }
                                         },
                                         onAcceptAction = {

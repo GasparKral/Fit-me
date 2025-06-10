@@ -2,27 +2,36 @@ package es.gaspardev.layout.workouts
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import es.gaspardev.components.AssistChip
 import es.gaspardev.components.DifficultyBadge
+import es.gaspardev.components.ToastManager
 import es.gaspardev.core.domain.entities.workouts.Workout
 import es.gaspardev.core.domain.entities.workouts.WorkoutTemplate
+import es.gaspardev.core.domain.usecases.delete.DeleteWorkoutTemplate
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
 import es.gaspardev.layout.dialogs.WorkoutDialog
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun WorkoutTemplateCard(template: WorkoutTemplate, onAcceptAction: (Workout) -> Unit) {
+fun WorkoutTemplateCard(
+    template: WorkoutTemplate,
+    scope: CoroutineScope,
+    onDeleteAction: (Int) -> Unit,
+    onAcceptAction: (Workout) -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        backgroundColor = Color.White,
         elevation = 4.dp
     ) {
         Column(
@@ -52,7 +61,6 @@ fun WorkoutTemplateCard(template: WorkoutTemplate, onAcceptAction: (Workout) -> 
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 AssistChip(
-                    onClick = {},
                     label = { Text(template.workoutType.toString()) },
                     leadingIcon = {
                         Icon(
@@ -78,14 +86,30 @@ fun WorkoutTemplateCard(template: WorkoutTemplate, onAcceptAction: (Workout) -> 
             Divider()
 
             Spacer(Modifier.height(12.dp))
-
-            Button(
-                onClick = {
-                    DialogState.openWith { WorkoutDialog(template = template, onAcceptAction = onAcceptAction) }
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Use Template")
+            Row {
+                OutlinedButton(
+                    onClick = {
+                        scope.launch {
+                            DeleteWorkoutTemplate().run(template.getId()).fold(
+                                { _ -> onDeleteAction(template.getId()) },
+                                { err -> ToastManager.showError(err.message!!) }
+                            )
+                        }
+                    }
+                ) {
+                    Icon(Icons.Default.Warning, contentDescription = null)
+                    Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+                    Text("Elimar Template")
+                }
+                Spacer(Modifier.width(6.dp))
+                Button(
+                    onClick = {
+                        DialogState.openWith { WorkoutDialog(template = template, onAcceptAction = onAcceptAction) }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Use Template")
+                }
             }
         }
     }

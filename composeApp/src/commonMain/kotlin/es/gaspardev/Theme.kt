@@ -1,53 +1,86 @@
 package es.gaspardev
 
-import fit_me.composeapp.generated.resources.Res
-import fit_me.composeapp.generated.resources.RobotoSerif_VariableFont
-import org.jetbrains.compose.resources.Font
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Shapes
-import androidx.compose.material.lightColors
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import fit_me.composeapp.generated.resources.Nunito_Variable
+import fit_me.composeapp.generated.resources.Res
+import fit_me.composeapp.generated.resources.RobotoSerif_VariableFont
+import org.jetbrains.compose.resources.Font
 
+object ThemeOption {
+
+    var _selectedTheme by mutableStateOf("system")
+    val selectedTheme get() = _selectedTheme
+
+    fun modifyTheme(value: String) {
+        _selectedTheme = value
+    }
+
+}
 
 @Composable
-fun AppTheme(content: @Composable () -> Unit) {
+fun AppTheme(
+    themeOption: String = ThemeOption.selectedTheme,
+    content: @Composable () -> Unit
+) {
+    val isDarkTheme = when (themeOption) {
+        "dark" -> true
+        "light" -> false
+        else -> isSystemInDarkTheme()
+    }
     val robotoSerif = FontFamily(Font(Res.font.RobotoSerif_VariableFont))
     val nunito = FontFamily(Font(Res.font.Nunito_Variable))
 
-    // Definición de la paleta de colores
-    val customColorPalette = lightColors(
-        primary = Color(0xFFFF4000),            // Naranja energía (se mantiene)
-        primaryVariant = Color(0xFFE03A00),     // Variante más oscura del naranja
-        secondary = Color(0xFF005DFF),          // Azul eléctrico (enfocado, atlético)
-        secondaryVariant = Color(0xFF003EB3),   // Azul más profundo (para énfasis)
-
-        background = Color(0xFFF6EEE5),
-        surface = Color(0xFFFFFAFA),
-        error = Color(0xFFD32F2F),               // Rojo deportivo y técnico, con contraste
-        onPrimary = Color.White,                 // Texto sobre naranja
-        onSecondary = Color.White,               // Texto sobre azul
-        onBackground = Color(0xFF121212),        // Texto negro-azulado profundo
-        onSurface = Color(0xFF1E1E1E),           // Texto casi negro sobre blanco
-        onError = Color.White                    // Texto blanco sobre error
-    )
-
+    val customColorPalette = if (isDarkTheme) {
+        darkColors(
+            primary = Color(0xFFFF5722),
+            primaryVariant = Color(0xFFE64A19),
+            secondary = Color(0xFF448AFF),
+            secondaryVariant = Color(0xFF2962FF),
+            background = Color(0xFF121212),
+            surface = Color(0xFF1E1E1E),
+            error = Color(0xFFCF6679),
+            onPrimary = Color.White,
+            onSecondary = Color.White,
+            onBackground = Color(0xFFE0E0E0),
+            onSurface = Color(0xFFCCCCCC),
+            onError = Color.Black
+        )
+    } else {
+        lightColors(
+            primary = Color(0xFFFF4000),
+            primaryVariant = Color(0xFFE03A00),
+            secondary = Color(0xFF005DFF),
+            secondaryVariant = Color(0xFF003EB3),
+            background = Color(0xFFF6EEE5),
+            surface = Color(0xFFFFFAFA),
+            error = Color(0xFFD32F2F),
+            onPrimary = Color.White,
+            onSecondary = Color.White,
+            onBackground = Color(0xFF121212),
+            onSurface = Color(0xFF1E1E1E),
+            onError = Color.White
+        )
+    }
 
     val customShapes = Shapes(
         small = RoundedCornerShape(8.dp),
-        medium = RoundedCornerShape(12.dp),   // Usar en botones y tarjetas
-        large = RoundedCornerShape(24.dp)     // Usar en diálogos o elementos destacados
+        medium = RoundedCornerShape(12.dp),
+        large = RoundedCornerShape(24.dp)
     )
 
-
-    val customTypography = androidx.compose.material.Typography(
+    val customTypography = Typography(
         h1 = TextStyle(
             fontFamily = robotoSerif,
             fontWeight = FontWeight.ExtraBold,
@@ -63,8 +96,7 @@ fun AppTheme(content: @Composable () -> Unit) {
         h3 = TextStyle(
             fontFamily = robotoSerif,
             fontWeight = FontWeight.Medium,
-            fontSize = 20.sp,
-            letterSpacing = 0.sp
+            fontSize = 20.sp
         ),
         h4 = TextStyle(fontFamily = robotoSerif),
         h5 = TextStyle(fontFamily = robotoSerif),

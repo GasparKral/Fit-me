@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.gaspardev.layout.settings.AccountSettings
 import es.gaspardev.layout.settings.AppearanceSettings
-import es.gaspardev.layout.settings.NotificationSettings
 import es.gaspardev.layout.settings.ProfileSettings
 
 @Composable
@@ -45,21 +44,20 @@ fun SettingsScreen() {
                 "profile" -> 0
                 "account" -> 1
                 "appearance" -> 2
-                "notifications" -> 3
                 else -> 0
             },
             edgePadding = 0.dp,
             backgroundColor = Color.Transparent,
             contentColor = MaterialTheme.colors.primary
         ) {
-            listOf("Perfil", "Cuenta", "Apariencia", "Notificaciones")
+            listOf("Perfil", "Cuenta", "Apariencia")
                 .forEachIndexed { index, title ->
                     Tab(
                         selected = when (index) {
                             0 -> activeTab == "profile"
                             1 -> activeTab == "account"
                             2 -> activeTab == "appearance"
-                            3 -> activeTab == "notifications"
+
                             else -> false
                         },
                         onClick = {
@@ -67,7 +65,6 @@ fun SettingsScreen() {
                                 0 -> "profile"
                                 1 -> "account"
                                 2 -> "appearance"
-                                3 -> "notifications"
                                 else -> "profile"
                             }
                         },
@@ -81,7 +78,6 @@ fun SettingsScreen() {
                 "profile" -> ProfileSettings()
                 "account" -> AccountSettings()
                 "appearance" -> AppearanceSettings()
-                "notifications" -> NotificationSettings()
             }
         }
     }

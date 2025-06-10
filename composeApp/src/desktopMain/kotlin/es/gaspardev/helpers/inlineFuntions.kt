@@ -1,6 +1,7 @@
 package es.gaspardev.helpers
 
 import es.gaspardev.core.domain.entities.diets.Diet
+import es.gaspardev.core.domain.entities.diets.DietTemplate
 import es.gaspardev.core.domain.entities.workouts.Workout
 import es.gaspardev.core.domain.entities.workouts.WorkoutTemplate
 import es.gaspardev.enums.OpeningMode
@@ -35,10 +36,10 @@ inline fun visualizeWorkout(workout: Workout, crossinline onAcceptAction: (Worko
     }
 }
 
-inline fun createDiet(diet: Diet, crossinline onAcceptAction: (Diet) -> Unit) {
+inline fun createDiet(optionalTemplate: DietTemplate? = null, crossinline onAcceptAction: (Diet) -> Unit) {
     DialogState.openWith {
         DietDialog(
-            diet,
+            template = optionalTemplate,
             mode = OpeningMode.CREATION
         ) { onAcceptAction(it) }
     }

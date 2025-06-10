@@ -21,9 +21,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.dokar.sonner.ToastType
 import com.dokar.sonner.rememberToasterState
+import es.gaspardev.components.ToastManager
 import es.gaspardev.core.domain.entities.workouts.WorkoutPlan
 import es.gaspardev.core.domain.entities.workouts.WorkoutTemplate
 import es.gaspardev.core.domain.usecases.create.CreateNewWorkout
+import es.gaspardev.core.domain.usecases.create.CreateWorkoutTemplate
 import es.gaspardev.core.domain.usecases.read.GetTrainerWorkoutsPlans
 import es.gaspardev.core.domain.usecases.read.GetTrainerWorkoutsTemplates
 import es.gaspardev.enums.WorkoutType
@@ -125,6 +127,8 @@ fun WorkoutsScreen(width: Dp) {
                                                             exercises = workout.exercises
                                                         )
                                                         )
+
+                                                DialogState.close()
                                                 toaster.show(
                                                     "La rutina se ha creado correctamente",
                                                     type = ToastType.Success
@@ -292,12 +296,32 @@ fun WorkoutsScreen(width: Dp) {
                     }
                 }
                 Spacer(Modifier.height(32.dp))
-                Text(
-                    text = stringResource(Res.string.workout_templates),
-                    style = MaterialTheme.typography.h2,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(start = 12.dp)
-                )
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = stringResource(Res.string.workout_templates),
+                        style = MaterialTheme.typography.h2,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Button(onClick = {
+                        createWorkout { workout ->
+                            val template = WorkoutTemplate.fromWorkout(workout)
+
+                            scope.launch {
+                                CreateWorkoutTemplate().run(Pair(template, LoggedTrainer.state.trainer!!)).fold(
+                                    { newId ->
+                                        workoutTemplates = workoutTemplates + template.copy(templateId = newId)
+                                    },
+                                    { err -> ToastManager.showError(err.message!!) }
+                                )
+                            }
+                        }
+                    }) {
+                        Text("Crear nueva plantilla")
+                    }
+                }
                 Spacer(Modifier.height(16.dp))
                 Box(Modifier.fillMaxSize()) {
                     // Workout templates section
@@ -309,7 +333,9 @@ fun WorkoutsScreen(width: Dp) {
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         items(workoutTemplates) { template ->
-                            WorkoutTemplateCard(template = template) { workout ->
+                            WorkoutTemplateCard(template = template, scope, { id ->
+                                workoutTemplates = workoutTemplates - workoutTemplates.first { it.getId() == id }
+                            }) { workout ->
                                 scope.launch {
                                     CreateNewWorkout().run(Pair(workout, LoggedTrainer.state.trainer!!))
                                         .fold(
