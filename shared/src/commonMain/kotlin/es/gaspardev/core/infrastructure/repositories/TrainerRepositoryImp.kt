@@ -64,15 +64,18 @@ class TrainerRepositoryImp : TrainerRepository {
         )
     }
 
-    override suspend fun registerTrainer(newTrainerData: RegisterTrainerData): Either<Exception, Trainer> {
+    override suspend fun registerTrainer(newAthleteData: RegisterTrainerData): Either<Exception, Trainer> {
         return TrainerRepository.API.post(
             segments = listOf("register"),
-            body = newTrainerData
+            body = newAthleteData
         )
     }
 
-    override suspend fun deleteAccount(trainer: Trainer): Either.Failure<Exception>? {
-        TODO("Not yet implemented")
+    override suspend fun deleteAccount(trainer: Trainer): Either<Exception, Unit> {
+        return TrainerRepository.API.delete(
+            listOf("/acount"),
+            params = arrayOf(Pair("user_id", trainer.user.id.toString()))
+        )
     }
 
     override suspend fun logIn(expectedUser: LoginCredentials): Either<Exception, Triple<Trainer, List<Athlete>, List<Conversation>>> {

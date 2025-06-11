@@ -13,9 +13,9 @@ interface TrainerRepository : UserRepository<Trainer, Athlete> {
         val API = TrainerAPI()
     }
 
-    suspend fun registerTrainer(newSportsmanData: RegisterTrainerData): Either<Exception, Trainer>
+    suspend fun registerTrainer(newAthleteData: RegisterTrainerData): Either<Exception, Trainer>
     suspend fun getPendingWorkouts(trainer: Trainer): Int
-    suspend fun deleteAccount(trainer: Trainer): Either.Failure<Exception>?
+    suspend fun deleteAccount(trainer: Trainer): Either<Exception, Unit>
     suspend fun getActivePlans(trainer: Trainer): Int
     suspend fun getUpCommingSessions(trainer: Trainer): Int
     suspend fun getUnreadMessages(trainer: Trainer): Int

@@ -8,7 +8,7 @@ import kotlin.time.Duration
 
 @Serializable
 data class WorkoutPlan(
-    val workoutId: Int,
+    val workoutId: Int? = null,
     var name: String,
     var description: String,
     var type: WorkoutType,
@@ -16,12 +16,12 @@ data class WorkoutPlan(
     val frequency: String,
     var difficulty: Difficulty,
     val asignedCount: Int,
-    var exercises: MutableMap<WeekDay, MutableList<WorkoutExecise>>
+    var exercises: MutableMap<WeekDay, MutableList<WorkoutExercise>>
 ) {
     companion object {
         fun fromWorkout(workout: Workout): WorkoutPlan {
             return WorkoutPlan(
-                workoutId = workout.getId()!!,
+                workoutId = workout.id,
                 name = workout.name,
                 description = workout.description,
                 type = workout.workoutType,

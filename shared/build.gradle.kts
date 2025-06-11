@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
-    kotlin("plugin.serialization") version "2.1.0"
+    kotlin("plugin.serialization") version libs.versions.kotlin.get()
 }
 
 kotlin {
@@ -12,10 +12,23 @@ kotlin {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
+            freeCompilerArgs.addAll(
+                "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
+                "-opt-in=kotlinx.datetime.ExperimentalDateTimeApi"
+            )
         }
     }
 
-    jvm()
+    jvm {
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+            freeCompilerArgs.addAll(
+                "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
+                "-opt-in=kotlinx.datetime.ExperimentalDateTimeApi"
+            )
+        }
+    }
 
     sourceSets {
         commonMain.dependencies {
@@ -39,7 +52,6 @@ kotlin {
             implementation(libs.core) // Para generación de QR
         }
     }
-
 }
 
 android {
@@ -53,6 +65,7 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
     }
 }
+
 dependencies {
     implementation(libs.androidx.annotation.jvm)
     implementation(libs.androidx.ui.graphics.android)

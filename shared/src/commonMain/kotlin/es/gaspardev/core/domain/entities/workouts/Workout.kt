@@ -12,14 +12,14 @@ import kotlin.time.toDuration
 
 @Serializable
 data class Workout(
-    private val id: Int? = null,
+    val _id: Int? = null,
     var name: String = "",
     var description: String = "",
     var difficulty: Difficulty = Difficulty.EASY,
     var duration: Duration = 0.toDuration(DurationUnit.HOURS),
     val startAt: Instant = Clock.System.now(),
     var workoutType: WorkoutType = WorkoutType.ALL,
-    var exercises: MutableMap<WeekDay, MutableList<WorkoutExecise>> = mutableMapOf()
+    var exercises: MutableMap<WeekDay, MutableList<WorkoutExercise>> = mutableMapOf()
 ) {
 
     companion object {
@@ -27,7 +27,7 @@ data class Workout(
 
         fun fromPlan(plan: WorkoutPlan): Workout {
             return Workout(
-                id = plan.workoutId,
+                _id = plan.workoutId,
                 name = plan.name,
                 description = plan.description,
                 difficulty = plan.difficulty,
@@ -39,7 +39,7 @@ data class Workout(
         }
     }
 
-    fun getId(): Int? = id
+    val id get() = _id!!
 
     fun getWorkoutProgression(): Double {
         val now = Clock.System.now()

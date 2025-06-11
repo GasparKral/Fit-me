@@ -15,7 +15,10 @@ class SettingsAPI(
         return performRequest<UserSettings>(HttpMethod.Post, segments, body)
     }
 
-    override suspend fun get(segments: List<String>, vararg params: Pair<String, String>): Either<Exception, UserSettings> {
+    override suspend fun get(
+        segments: List<String>,
+        vararg params: Pair<String, String>
+    ): Either<Exception, UserSettings> {
         return performRequest<UserSettings>(HttpMethod.Get, segments, null, *params)
     }
 
@@ -43,7 +46,7 @@ class SettingsAPI(
         settingsData: Any
     ): Either<Exception, UserSettings> {
         return performRequest<UserSettings>(
-            HttpMethod.Put,
+            HttpMethod.Patch,
             listOf(userId.toString(), settingsType),
             settingsData
         )
@@ -54,7 +57,7 @@ class SettingsAPI(
         passwordData: Any
     ): Either<Exception, Unit> {
         return performRequest<Unit>(
-            HttpMethod.Put,
+            HttpMethod.Patch,
             listOf(userId.toString(), "password"),
             passwordData
         )

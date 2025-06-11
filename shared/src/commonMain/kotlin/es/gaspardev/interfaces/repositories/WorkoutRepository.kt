@@ -23,4 +23,5 @@ interface WorkoutRepository {
     suspend fun createWorkoutTemplate(template: WorkoutTemplate, trainer: Trainer): Either<Exception, Int>
     suspend fun deleteWorkoutTemplate(templateId: Int): Either<Exception, Unit>
     suspend fun getAvailableExercises(): Either<Exception, List<Exercise>>
+    suspend fun assignWorkouteToAthlete(workoutId: Int, id: Int): Either<Exception, Unit>
 }

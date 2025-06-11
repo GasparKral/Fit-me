@@ -4,6 +4,7 @@ import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
@@ -155,12 +156,12 @@ abstract class API<ApiType> where ApiType : Any {
      * Maneja la respuesta HTTP común para todas las APIs
      */
     suspend inline fun <reified T : Any> handleResponse(
-        response: io.ktor.client.statement.HttpResponse
+        response: HttpResponse
     ): Either<Exception, T> {
         return when (response.status) {
             HttpStatusCode.OK -> Either.Success(response.body())
             HttpStatusCode.RequestTimeout -> Either.Failure(TimeoutException("Fallo en la conexión"))
-            else -> Either.Failure(Exception("Unexpected status code: ${response.status}"))
+            else -> Either.Failure(Exception(response.bodyAsText()))
         }
     }
 

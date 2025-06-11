@@ -1,6 +1,5 @@
 package es.gaspardev.core.domain.entities.diets
 
-import es.gaspardev.core.domain.entities.Note
 import es.gaspardev.enums.DietType
 import es.gaspardev.enums.WeekDay
 import kotlinx.datetime.Clock
@@ -37,7 +36,7 @@ data class Diet(
         }
     }
 
-    fun getId(): Int = id ?: throw IllegalStateException("ID no puede ser null")
+    fun getId(): Int? = id
 
     fun getDietProgression(): Double {
         val now = Clock.System.now()

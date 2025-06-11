@@ -57,7 +57,7 @@ class WorkoutRepositoryImp : WorkoutRepository {
             listOf("templates", "create", trainer.user.id.toString()),
             template
         ).foldValue(
-            { value -> Either.Success(value.getId()) },
+            { value -> Either.Success(value.templateId!!) },
             { err -> Either.Failure(err) }
         )
     }
@@ -71,5 +71,15 @@ class WorkoutRepositoryImp : WorkoutRepository {
 
     override suspend fun getAvailableExercises(): Either<Exception, List<Exercise>> {
         return WorkoutRepository.API.getGenericList(listOf("exercises"))
+    }
+
+    override suspend fun assignWorkouteToAthlete(workoutId: Int, id: Int): Either<Exception, Unit> {
+        return WorkoutRepository.API.patch(
+            listOf("assign"),
+            mapOf("workoutId" to workoutId, "athleteId" to id)
+        ).foldValue(
+            { _ -> Either.Success(Unit) },
+            { err -> Either.Failure(err) }
+        )
     }
 }

@@ -6,9 +6,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class User(
-    val id: Int,
+    private val _id: Int,
     var fullname: String,
-    private var password: String,
+    private val _password: String,
     var email: String,
     var phone: String?,
     val creationDate: Instant,
@@ -27,8 +27,24 @@ class User(
             .joinToString(separator = "") { it.first().uppercase() }
     }
 
-    fun getPassword(): String {
-        return this.password
+    val password get() = _password
+    val id get() = _id
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as User
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
+
+    override fun toString(): String {
+        return "User(id=$id, fullname='$fullname', email='$email', phone=$phone, creationDate=$creationDate, status=$status)"
     }
 
 }

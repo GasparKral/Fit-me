@@ -31,7 +31,7 @@ class SettingsRepositoryImp : SettingsRepository {
     ): Either<Exception, UserSettings> {
         return SettingsRepository.API.updateSettings(
             userId = user.id,
-            settingsType = "account", 
+            settingsType = "account",
             settingsData = accountData
         )
     }
@@ -63,14 +63,13 @@ class SettingsRepositoryImp : SettingsRepository {
         currentPassword: String,
         newPassword: String
     ): Either<Exception, Unit> {
-        val passwordData = mapOf(
-            "currentPassword" to currentPassword,
-            "newPassword" to newPassword
-        )
-        
+
         return SettingsRepository.API.changePassword(
             userId = user.id,
-            passwordData = passwordData
+            passwordData = mapOf(
+                "currentPassword" to currentPassword,
+                "newPassword" to newPassword
+            )
         )
     }
 
@@ -79,7 +78,7 @@ class SettingsRepositoryImp : SettingsRepository {
         imageUrl: String
     ): Either<Exception, UserSettings> {
         val imageData = mapOf("profileImageUrl" to imageUrl)
-        
+
         return SettingsRepository.API.updateSettings(
             userId = user.id,
             settingsType = "profile-image",

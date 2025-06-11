@@ -6,25 +6,26 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class DietTemplate(
-    private val templateId: Int,
+    var templateId: Int? = null,
     var name: String,
     var description: String,
     var dietType: DietType,
     val dishes: MutableMap<WeekDay, MutableList<DietDish>>
 ) {
 
+
     companion object {
         fun fromDiet(diet: Diet): DietTemplate {
-            return DietTemplate(
+            val template = DietTemplate(
                 templateId = diet.getId(),
                 name = diet.name,
                 description = diet.description,
                 dietType = diet.dietType,
                 dishes = diet.dishes
             )
+            return template
         }
     }
 
-    fun getId(): Int = templateId
 
 }

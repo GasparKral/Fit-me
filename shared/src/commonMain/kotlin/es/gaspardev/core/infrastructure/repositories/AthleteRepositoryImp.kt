@@ -4,7 +4,6 @@ import es.gaspardev.auxliars.Either
 import es.gaspardev.core.domain.dtos.LoginCredentials
 import es.gaspardev.core.domain.dtos.RegisterAthleteData
 import es.gaspardev.core.domain.entities.comunication.Conversation
-import es.gaspardev.core.domain.entities.comunication.Session
 import es.gaspardev.core.domain.entities.diets.CompletionDietStatistics
 import es.gaspardev.core.domain.entities.users.Athlete
 import es.gaspardev.core.domain.entities.users.Trainer
@@ -29,9 +28,10 @@ class AthletetRepositoryImp : AthleteRepository {
         )
     }
 
-    override suspend fun getCommingSessions(athlete: Athlete): Either<Exception, List<Session>> {
-        return AthleteRepository.API.getGenericList<Session>(
-            listOf("data", "sessions", athlete.user.id.toString())
+    override suspend fun getAthleteInfo(athleteId: Int): Either<Exception, Athlete> {
+        return AthleteRepository.API.getSingleValue(
+            emptyList(),
+            params = arrayOf(Pair("athlete_id", athleteId.toString()))
         )
     }
 

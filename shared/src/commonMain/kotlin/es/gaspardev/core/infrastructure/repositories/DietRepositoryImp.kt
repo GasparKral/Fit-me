@@ -41,7 +41,7 @@ class DietRepositoryImp : DietRepository {
             listOf("create", trainer.user.id.toString()),
             diet
         ).foldValue(
-            { value -> Either.Success(value.getId()) },
+            { value -> Either.Success(value.getId()!!) },
             { err -> Either.Failure(err) }
         )
     }
@@ -75,7 +75,7 @@ class DietRepositoryImp : DietRepository {
             listOf("templates", "create", trainer.user.id.toString()),
             template
         ).foldValue(
-            { value -> Either.Success(value.getId()) },
+            { value -> Either.Success(value.templateId!!) },
             { err -> Either.Failure(err) }
         )
     }
