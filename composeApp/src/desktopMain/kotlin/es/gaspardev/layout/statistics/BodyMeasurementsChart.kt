@@ -130,7 +130,8 @@ fun BodyMeasurementsChart(
                         ),
                         yAxisRange = 10,
                         oneLineChart = false,
-                        gridOrientation = GridOrientation.VERTICAL
+                        gridOrientation = GridOrientation.VERTICAL,
+                        descriptionStyle = MaterialTheme.typography.caption
                     )
                 }
 

@@ -12,7 +12,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import es.gaspardev.components.ToastManager
 import es.gaspardev.core.LocalRouter
-import es.gaspardev.core.domain.usecases.delete.DeleteTrainerAccount
+import es.gaspardev.core.domain.usecases.delete.user.DeleteTrainerAccount
 import es.gaspardev.core.domain.usecases.update.settings.ChangePassword
 import es.gaspardev.core.domain.usecases.update.settings.ChangePasswordParams
 import es.gaspardev.pages.Routes
@@ -64,8 +64,8 @@ fun AccountSettings() {
                         scope.launch {
                             ChangePassword().run(
                                 ChangePasswordParams(
-                                    LoggedTrainer.state.trainer!!.user,
-                                    LoggedTrainer.state.trainer!!.user.getPassword(),
+                                    LoggedTrainer.state.trainer.user,
+                                    LoggedTrainer.state.trainer.user.password,
                                     newPassword,
                                     confirmNewPassword
                                 )

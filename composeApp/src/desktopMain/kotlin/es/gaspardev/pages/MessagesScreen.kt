@@ -180,7 +180,6 @@ fun MessagesScreen() {
             },
             onError = { error ->
                 connectionError = error
-                println("WebSocket error: $error")
             }
         )
 
@@ -474,7 +473,7 @@ fun MessagesScreen() {
                                 Tab(
                                     selected = activeTab == type,
                                     onClick = { activeTab = type },
-                                    text = { Text(title) }
+                                    text = { Text(title, color = MaterialTheme.colors.onPrimary) }
                                 )
                             }
                         }

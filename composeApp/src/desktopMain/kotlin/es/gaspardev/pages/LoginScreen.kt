@@ -22,8 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.gaspardev.core.LocalRouter
 import es.gaspardev.core.domain.dtos.LoginCredentials
-import es.gaspardev.core.domain.usecases.read.GetConversations
-import es.gaspardev.core.domain.usecases.read.LogInUser
+import es.gaspardev.core.domain.usecases.read.user.GetConversations
+import es.gaspardev.core.domain.usecases.read.user.LogInUser
 import es.gaspardev.core.infrastructure.memo.CacheManager
 import es.gaspardev.core.infrastructure.memo.CacheRef
 import es.gaspardev.core.infrastructure.repositories.TrainerRepositoryImp

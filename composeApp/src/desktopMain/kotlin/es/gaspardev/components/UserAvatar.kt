@@ -126,8 +126,7 @@ private fun TextContent(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = user.fullname,
-                style = MaterialTheme.typography.subtitle1,
-                fontWeight = FontWeight.Medium
+                style = MaterialTheme.typography.h3
             )
             if (subtitleContent != null) {
                 subtitleContent.invoke()

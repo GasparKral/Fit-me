@@ -23,7 +23,7 @@ import es.gaspardev.helpers.resWeekDay
 import es.gaspardev.components.AutoCompleteTextField
 import es.gaspardev.components.ToastManager
 import es.gaspardev.core.domain.usecases.UseCase
-import es.gaspardev.core.domain.usecases.read.GetAvailableDishes
+import es.gaspardev.core.domain.usecases.read.diet.GetAvailableDishes
 import es.gaspardev.icons.FitMeIcons
 
 @OptIn(ExperimentalMaterialApi::class)

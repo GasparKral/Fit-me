@@ -10,7 +10,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import es.gaspardev.core.domain.dtos.settings.ProfileSettingsData
+import es.gaspardev.core.domain.usecases.update.settings.UpdateProfileSettings
 import es.gaspardev.states.LoggedTrainer
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileSettings() {
@@ -19,7 +23,6 @@ fun ProfileSettings() {
     var email by remember { mutableStateOf(trainer.user.email) }
     var phone by remember { mutableStateOf(trainer.user.phone) }
     var specialization by remember { mutableStateOf(trainer.specialization) }
-    var certifications by remember { mutableStateOf(trainer.certifications) }
     var isLoading by remember { mutableStateOf(false) }
 
     Column(
@@ -79,7 +82,20 @@ fun ProfileSettings() {
                 Button(
                     onClick = {
                         isLoading = true
-                        //TODO
+                        MainScope().launch {
+                            UpdateProfileSettings().run(
+                                Pair(
+                                    LoggedTrainer.state.trainer!!.user,
+                                    ProfileSettingsData(
+                                        fullName = name,
+                                        email = email,
+                                        phone = phone,
+                                        specialization = specialization,
+                                        yearsOfExperience = LoggedTrainer.state.trainer!!.yearsOfExperiencie
+                                    )
+                                )
+                            )
+                        }
                     },
                     modifier = Modifier.align(Alignment.End),
                     enabled = !isLoading

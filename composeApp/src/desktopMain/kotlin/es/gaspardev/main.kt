@@ -6,7 +6,12 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
@@ -38,39 +43,44 @@ fun main() = application {
     var isSidebarCollapsed by remember { mutableStateOf(false) }
 
     val actions: (KeyEvent) -> Boolean = { event ->
-        when {
-            LoggedTrainer.state.trainer == null || router == null -> false
-            event.isAltPressed && (event.key == Key.One || event.key == Key.NumPad1) -> {
-                router?.navigateTo(Routes.Dashboard)
-                true
-            }
 
-            event.isAltPressed && (event.key == Key.Two || event.key == Key.NumPad2) -> {
-                router?.navigateTo(Routes.Athletes)
-                true
-            }
+        if (LoggedTrainer.state.isNull) {
+            false
+        } else {
+            when {
+                router == null -> false
+                event.isAltPressed && (event.key == Key.One || event.key == Key.NumPad1) -> {
+                    router?.navigateTo(Routes.Dashboard)
+                    true
+                }
 
-            event.isAltPressed && (event.key == Key.Three || event.key == Key.NumPad3) -> {
-                router?.navigateTo(Routes.Workouts)
-                true
-            }
+                event.isAltPressed && (event.key == Key.Two || event.key == Key.NumPad2) -> {
+                    router?.navigateTo(Routes.Athletes)
+                    true
+                }
 
-            event.isAltPressed && (event.key == Key.Four || event.key == Key.NumPad4) -> {
-                router?.navigateTo(Routes.Nutrition)
-                true
-            }
+                event.isAltPressed && (event.key == Key.Three || event.key == Key.NumPad3) -> {
+                    router?.navigateTo(Routes.Workouts)
+                    true
+                }
 
-            event.isAltPressed && (event.key == Key.Five || event.key == Key.NumPad5) -> {
-                router?.navigateTo(Routes.Statistics)
-                true
-            }
+                event.isAltPressed && (event.key == Key.Four || event.key == Key.NumPad4) -> {
+                    router?.navigateTo(Routes.Nutrition)
+                    true
+                }
 
-            event.isAltPressed && (event.key == Key.Six || event.key == Key.NumPad6) -> {
-                router?.navigateTo(Routes.Messages)
-                true
-            }
+                event.isAltPressed && (event.key == Key.Five || event.key == Key.NumPad5) -> {
+                    router?.navigateTo(Routes.Statistics)
+                    true
+                }
 
-            else -> false
+                event.isAltPressed && (event.key == Key.Six || event.key == Key.NumPad6) -> {
+                    router?.navigateTo(Routes.Messages)
+                    true
+                }
+
+                else -> false
+            }
         }
     }
 
@@ -93,7 +103,8 @@ fun main() = application {
                 BoxWithConstraints(
                     modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.background)
                 ) {
-                    val isVisible = controller.currentRoute != Routes.Login && controller.currentRoute != Routes.Regist
+                    val isVisible =
+                        controller.currentRoute != Routes.Login && controller.currentRoute != Routes.Regist
                     val sidebarWidth = if (isSidebarCollapsed) 80.dp else 255.dp
 
                     if (isVisible) {

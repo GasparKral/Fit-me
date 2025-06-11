@@ -8,7 +8,6 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import es.gaspardev.components.AssistChip
@@ -16,10 +15,10 @@ import es.gaspardev.components.DropdownMenuButton
 import es.gaspardev.components.ToastManager
 import es.gaspardev.core.domain.entities.diets.Diet
 import es.gaspardev.core.domain.entities.diets.DietPlan
-import es.gaspardev.core.domain.usecases.create.CreateNewDiet
-import es.gaspardev.core.domain.usecases.delete.DeleteDiet
-import es.gaspardev.core.domain.usecases.update.AssignDietToAthlete
-import es.gaspardev.core.domain.usecases.update.UpdateDiet
+import es.gaspardev.core.domain.usecases.create.diet.CreateNewDiet
+import es.gaspardev.core.domain.usecases.delete.diet.DeleteDiet
+import es.gaspardev.core.domain.usecases.update.diet.AssignDietToAthlete
+import es.gaspardev.core.domain.usecases.update.diet.UpdateDiet
 import es.gaspardev.helpers.resDietType
 import es.gaspardev.helpers.visualizeDiet
 import es.gaspardev.icons.FitMeIcons
@@ -41,7 +40,7 @@ fun NutritionPlanCard(
     plan: DietPlan,
     scope: CoroutineScope,
     onDuplicationAction: (DietPlan) -> Unit = {},
-    onAsign: (DietPlan) -> Unit = {},
+    onAssignAction: (DietPlan) -> Unit = {},
     onEditAction: (DietPlan) -> Unit = {},
     onDeleteAction: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -144,7 +143,7 @@ fun NutritionPlanCard(
                                         onAcceptAction = {
                                             scope.launch {
                                                 AssignDietToAthlete().run(Pair(plan, it)).fold(
-                                                    { _ -> onAsign(plan.copy(asignedCount = plan.asignedCount + 1)) },
+                                                    { value -> onAssignAction(value) },
                                                     { err -> ToastManager.showError("Ocurrió un erro al actualizar${if (err.message != null) ": ${err.message!!}" else ""}") }
                                                 )
                                             }

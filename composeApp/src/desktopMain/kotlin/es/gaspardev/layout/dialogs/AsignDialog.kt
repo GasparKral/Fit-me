@@ -16,6 +16,9 @@ import es.gaspardev.components.AutoCompleteTextField
 import es.gaspardev.components.UserAvatar
 import es.gaspardev.core.domain.entities.users.Athlete
 import es.gaspardev.states.LoggedTrainer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun AsignDialog(
@@ -165,6 +168,9 @@ fun AsignDialog(
                 onClick = {
                     selectedAthlete?.let { athlete ->
                         onAcceptAction(athlete)
+                        MainScope().launch {
+                            LoggedTrainer.updateAthleteInfo(athlete.user.id)
+                        }
                     }
                 },
                 enabled = selectedAthlete != null && athletes.isNotEmpty(),

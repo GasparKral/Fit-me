@@ -7,15 +7,15 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import es.gaspardev.components.UserAvatar
 import es.gaspardev.core.RouterState
 import es.gaspardev.pages.Routes
 import es.gaspardev.states.LoggedTrainer
 import fit_me.composeapp.generated.resources.Res
-import fit_me.composeapp.generated.resources.*
+import fit_me.composeapp.generated.resources.log_out
+import fit_me.composeapp.generated.resources.profile
+import fit_me.composeapp.generated.resources.profile_options
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -37,7 +37,7 @@ fun UserProfileDropdown(
             onExpandedChange = { expanded = !expanded },
             modifier = Modifier.fillMaxWidth()
         ) {
-            UserAvatar(LoggedTrainer.state.trainer!!.user)
+            UserAvatar(LoggedTrainer.state.trainer.user)
 
             ExposedDropdownMenu(
                 expanded = expanded,

@@ -5,6 +5,9 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Message
+import androidx.compose.material.icons.filled.PeopleOutline
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -13,18 +16,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.dokar.sonner.ToastType
-import com.dokar.sonner.ToasterState
+import es.gaspardev.components.ToastManager
 import es.gaspardev.core.Action
 import es.gaspardev.core.RouterState
-import es.gaspardev.core.domain.entities.workouts.WorkoutPlan
-import es.gaspardev.core.domain.usecases.create.CreateNewWorkout
+import es.gaspardev.core.domain.usecases.create.diet.CreateNewDiet
+import es.gaspardev.core.domain.usecases.create.workout.CreateNewWorkout
+import es.gaspardev.helpers.createDiet
+import es.gaspardev.helpers.createWorkout
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
-import es.gaspardev.layout.dialogs.DietDialog
-import es.gaspardev.layout.dialogs.WorkoutDialog
 import es.gaspardev.pages.Routes
-import es.gaspardev.pages.agregateNewSportman
+import es.gaspardev.pages.agregateNewAthlete
 import es.gaspardev.states.LoggedTrainer
 import fit_me.composeapp.generated.resources.*
 import kotlinx.coroutines.launch
@@ -39,15 +41,15 @@ data class QuickAction(
 )
 
 @Composable
-fun QuickActions(controller: RouterState, toaster: ToasterState) {
+fun QuickActions(controller: RouterState) {
     val scope = rememberCoroutineScope()
     val quickActions = listOf(
         QuickAction(
-            icon = FitMeIcons.Athlets,
+            icon = Icons.Default.PeopleOutline,
             labelRes = Res.string.add_athlete_action,
             actionType = Action.SuspendAction.create {
                 controller.navigateTo(Routes.Athletes)
-                agregateNewSportman(toaster)
+                agregateNewAthlete()
             }
         ),
         QuickAction(
@@ -55,26 +57,21 @@ fun QuickActions(controller: RouterState, toaster: ToasterState) {
             labelRes = Res.string.create_workout,
             actionType = Action.SimpleAction.create {
                 controller.navigateTo(Routes.Workouts)
-                DialogState.openWith {
-                    WorkoutDialog { workout ->
-                        scope.launch {
-                            CreateNewWorkout().run(Pair(workout, LoggedTrainer.state.trainer!!)).fold(
-                                {
-
-                                    DialogState.close()
-                                    toaster.show(
-                                        "La rutina se ha creado correctamente",
-                                        type = ToastType.Success
-                                    )
-                                },
-                                { err -> // Error
-                                    toaster.show(
-                                        if (err.message != null) "Error al crear la rutina" else "Error al crear la rutina: ${err.message!!}",
-                                        type = ToastType.Error
-                                    )
-                                }
-                            )
-                        }
+                createWorkout { workout ->
+                    scope.launch {
+                        CreateNewWorkout().run(Pair(workout, LoggedTrainer.state.trainer)).fold(
+                            {
+                                DialogState.close()
+                                ToastManager.showSuccess(
+                                    "La rutina se ha creado correctamente",
+                                )
+                            },
+                            { err ->
+                                ToastManager.showError(
+                                    if (err.message != null) "Error al crear la rutina" else "Error al crear la rutina: ${err.message!!}"
+                                )
+                            }
+                        )
                     }
                 }
             }
@@ -84,11 +81,27 @@ fun QuickActions(controller: RouterState, toaster: ToasterState) {
             labelRes = Res.string.create_diet,
             actionType = Action.SuspendAction.create {
                 controller.navigateTo(Routes.Nutrition)
-                DialogState.openWith { DietDialog { } }
+                createDiet { diet ->
+                    scope.launch {
+                        CreateNewDiet().run(Pair(diet, LoggedTrainer.state.trainer)).fold(
+                            {
+                                DialogState.close()
+                                ToastManager.showSuccess(
+                                    "La dieta se ha creado correctamente",
+                                )
+                            },
+                            { err ->
+                                ToastManager.showError(
+                                    if (err.message != null) "Error al crear la rutina" else "Error al crear la rutina: ${err.message!!}"
+                                )
+                            }
+                        )
+                    }
+                }
             }
         ),
         QuickAction(
-            icon = FitMeIcons.Messages,
+            icon = Icons.AutoMirrored.Filled.Message,
             labelRes = Res.string.send_message,
             actionType = Action.Navigation(Routes.Messages)
         )

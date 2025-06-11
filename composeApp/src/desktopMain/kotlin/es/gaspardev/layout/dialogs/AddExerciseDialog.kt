@@ -18,9 +18,9 @@ import androidx.compose.ui.unit.dp
 import es.gaspardev.components.AutoCompleteTextField
 import es.gaspardev.components.ToastManager
 import es.gaspardev.core.domain.entities.workouts.Exercise
-import es.gaspardev.core.domain.entities.workouts.WorkoutExecise
+import es.gaspardev.core.domain.entities.workouts.WorkoutExercise
 import es.gaspardev.core.domain.usecases.UseCase
-import es.gaspardev.core.domain.usecases.read.GetAvailableExercises
+import es.gaspardev.core.domain.usecases.read.workout.GetAvailableExercises
 import es.gaspardev.enums.BodyPart
 import es.gaspardev.enums.WeekDay
 import es.gaspardev.helpers.resBodyPart
@@ -30,7 +30,7 @@ import es.gaspardev.icons.FitMeIcons
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AddExerciseDialog(
-    onCreateExercise: (WorkoutExecise, WeekDay) -> Unit = { _, _ -> },
+    onCreateExercise: (WorkoutExercise, WeekDay) -> Unit = { _, _ -> },
     onCancel: () -> Unit = {},
 ) {
     var reps by remember { mutableStateOf("") }
@@ -499,7 +499,7 @@ fun AddExerciseDialog(
             Button(
                 onClick = {
                     if (isFormValid) {
-                        val workoutExercise = WorkoutExecise(
+                        val workoutExercise = WorkoutExercise(
                             reps = reps.toInt(),
                             sets = sets.toInt(),
                             isOption = isOptional,

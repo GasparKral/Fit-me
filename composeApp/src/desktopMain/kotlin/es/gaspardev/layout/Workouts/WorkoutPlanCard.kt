@@ -8,9 +8,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import es.gaspardev.components.AssistChip
 import es.gaspardev.components.DifficultyBadge
@@ -18,9 +16,10 @@ import es.gaspardev.components.DropdownMenuButton
 import es.gaspardev.components.ToastManager
 import es.gaspardev.core.domain.entities.workouts.Workout
 import es.gaspardev.core.domain.entities.workouts.WorkoutPlan
-import es.gaspardev.core.domain.usecases.create.CreateNewWorkout
-import es.gaspardev.core.domain.usecases.delete.DeleteWorkout
-import es.gaspardev.core.domain.usecases.update.UpdateWorkout
+import es.gaspardev.core.domain.usecases.create.workout.CreateNewWorkout
+import es.gaspardev.core.domain.usecases.delete.workout.DeleteWorkout
+import es.gaspardev.core.domain.usecases.update.workout.AssignWorkoutToAthlete
+import es.gaspardev.core.domain.usecases.update.workout.UpdateWorkout
 import es.gaspardev.enums.OpeningMode
 import es.gaspardev.helpers.resDifficulty
 import es.gaspardev.helpers.resWorkoutType
@@ -40,7 +39,7 @@ fun WorkoutPlanCard(
     plan: WorkoutPlan,
     scope: CoroutineScope,
     onDuplicationAction: (WorkoutPlan) -> Unit = {},
-    onAsign: (WorkoutPlan) -> Unit = {},
+    onAssignAction: (WorkoutPlan) -> Unit = {},
     onEditAction: (WorkoutPlan) -> Unit = {},
     onDeleteAction: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -63,16 +62,15 @@ fun WorkoutPlanCard(
                 ) {
                     Text(
                         text = plan.name,
-                        style = MaterialTheme.typography.h3,
+                        style = MaterialTheme.typography.h4,
                         fontWeight = FontWeight.Bold
                     )
-                    Spacer(Modifier.height(4.dp))
                     Text(
                         text = plan.description,
                         style = MaterialTheme.typography.body1,
-                        color = MaterialTheme.colors.onSurface,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
                         maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
+                        modifier = Modifier.padding(top = 4.dp)
                     )
                 }
 
@@ -83,13 +81,13 @@ fun WorkoutPlanCard(
                         { Text("Assign to Athlete", style = MaterialTheme.typography.subtitle2) },
                         { Text("Delete Plan", style = MaterialTheme.typography.subtitle2) }
                     ),
-                    onItemSelected = { index, funtion ->
+                    onItemSelected = { index, continueOpen ->
                         when (index) {
                             0 -> {
                                 DialogState.openWith {
                                     WorkoutDialog(
                                         Workout(
-                                            id = plan.workoutId,
+                                            _id = plan.workoutId,
                                             name = plan.name,
                                             description = plan.description,
                                             difficulty = plan.difficulty,
@@ -108,12 +106,12 @@ fun WorkoutPlanCard(
                                         }
                                     }
                                 }
-                                funtion(false)
+                                continueOpen(false)
                             }
 
                             1 -> {
                                 val workout = Workout(
-                                    id = null,
+                                    _id = null,
                                     name = plan.name + " copy",
                                     description = plan.description,
                                     difficulty = plan.difficulty,
@@ -124,7 +122,7 @@ fun WorkoutPlanCard(
                                 )
 
                                 scope.launch {
-                                    CreateNewWorkout().run(Pair(workout, LoggedTrainer.state.trainer!!)).fold(
+                                    CreateNewWorkout().run(Pair(workout, LoggedTrainer.state.trainer)).fold(
                                         { value ->
                                             onDuplicationAction(
                                                 plan.copy(
@@ -136,13 +134,13 @@ fun WorkoutPlanCard(
                                         { err -> ToastManager.showError(err.message!!) }
                                     )
                                 }
-                                funtion(false)
+                                continueOpen(false)
                             }
 
                             2 -> {
                                 DialogState.openWith {
                                     AsignDialog(
-                                        {
+                                        plan = {
                                             Card {
                                                 Column {
                                                     Text(plan.name)
@@ -151,20 +149,32 @@ fun WorkoutPlanCard(
 
                                             }
 
-                                        }
-                                    ) { onAsign(plan.copy(asignedCount = plan.asignedCount + 1)) }
+                                        },
+                                        onAcceptAction = { athlete ->
+                                            scope.launch {
+                                                AssignWorkoutToAthlete().run(Pair(plan, athlete)).fold(
+                                                    { value ->
+                                                        onAssignAction(value)
+                                                        ToastManager.showSuccess("Se ha asignado correctamente")
+                                                    },
+                                                    { err -> ToastManager.showError(err.message!!) }
+                                                )
+                                            }
+                                        },
+                                        onCancel = {}
+                                    )
                                 }
-                                funtion(false)
+                                continueOpen(false)
                             }
 
                             3 -> {
                                 scope.launch {
-                                    DeleteWorkout().run(plan.workoutId).fold(
+                                    DeleteWorkout().run(plan.workoutId!!).fold(
                                         { onDeleteAction() },
                                         { err -> ToastManager.showError(err.message!!) }
                                     )
                                 }
-                                funtion(false)
+                                continueOpen(false)
                             }
                         }
                     },
@@ -172,7 +182,7 @@ fun WorkoutPlanCard(
             }
 
             Spacer(Modifier.height(16.dp))
-            DifficultyBadge(resDifficulty(plan.difficulty))
+            DifficultyBadge(plan.difficulty)
             // Badges row
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),

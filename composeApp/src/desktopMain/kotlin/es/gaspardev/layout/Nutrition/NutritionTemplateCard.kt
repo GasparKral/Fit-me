@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 import es.gaspardev.components.ToastManager
 import es.gaspardev.core.domain.entities.diets.Diet
 import es.gaspardev.core.domain.entities.diets.DietTemplate
-import es.gaspardev.core.domain.usecases.delete.DeleteDietTemplate
+import es.gaspardev.core.domain.usecases.delete.diet.DeleteDietTemplate
 import es.gaspardev.helpers.resDietType
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.DialogState
@@ -39,7 +39,6 @@ fun NutritionTemplateCard(
                     style = MaterialTheme.typography.h4,
                     fontWeight = FontWeight.Bold
                 )
-                Spacer(Modifier.height(4.dp))
                 Text(
                     text = template.description,
                     style = MaterialTheme.typography.body1,
@@ -68,8 +67,8 @@ fun NutritionTemplateCard(
                 OutlinedButton(
                     onClick = {
                         scope.launch {
-                            DeleteDietTemplate().run(template.getId()).fold(
-                                { _ -> onDeleteAction(template.getId()) },
+                            DeleteDietTemplate().run(template.templateId!!).fold(
+                                { _ -> onDeleteAction(template.templateId!!) },
                                 { err -> ToastManager.showError(err.message!!) }
                             )
                         }
@@ -77,7 +76,7 @@ fun NutritionTemplateCard(
                 ) {
                     Icon(Icons.Default.Warning, contentDescription = null)
                     Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-                    Text("Elimar Template")
+                    Text("Elimar Plantilla", color = MaterialTheme.colors.primary.copy(alpha = .6f))
                 }
                 Spacer(Modifier.width(6.dp))
                 Button(
@@ -86,7 +85,7 @@ fun NutritionTemplateCard(
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Usar Template")
+                    Text("Usar Plantilla")
                 }
             }
         }

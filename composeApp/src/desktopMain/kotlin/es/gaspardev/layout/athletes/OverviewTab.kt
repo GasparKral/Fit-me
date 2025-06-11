@@ -11,23 +11,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import es.gaspardev.core.domain.entities.comunication.Session
 import es.gaspardev.core.domain.entities.diets.CompletionDietStatistics
 import es.gaspardev.core.domain.entities.users.Athlete
 import es.gaspardev.core.domain.entities.workouts.CompletionWorkoutStatistic
-import es.gaspardev.core.domain.usecases.read.GetAthleteCommingSessions
-import es.gaspardev.core.domain.usecases.read.GetAthleteDietHystory
-import es.gaspardev.core.domain.usecases.read.GetAthleteWorkoutHistory
+import es.gaspardev.core.domain.usecases.read.user.athlete.GetAthleteDietHystory
+import es.gaspardev.core.domain.usecases.read.user.athlete.GetAthleteWorkoutHistory
 import es.gaspardev.icons.FitMeIcons
 import fit_me.composeapp.generated.resources.*
-import fit_me.composeapp.generated.resources.Res
-import fit_me.composeapp.generated.resources.avg_performance
-import fit_me.composeapp.generated.resources.diet_adherence
-import fit_me.composeapp.generated.resources.no_appointment
-import fit_me.composeapp.generated.resources.recent_activity
-import fit_me.composeapp.generated.resources.workouts_completed
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -36,15 +26,11 @@ fun OverviewTab(
 ) {
 
     var workoutHistory: List<CompletionWorkoutStatistic> by remember { mutableStateOf(listOf()) }
-    var sessions: List<Session> by remember { mutableStateOf(listOf()) }
     var dietsHistory: List<CompletionDietStatistics> by remember { mutableStateOf(listOf()) }
 
     LaunchedEffect(Unit) {
         GetAthleteWorkoutHistory().run(athlete).fold(
             { value -> workoutHistory = value }
-        )
-        GetAthleteCommingSessions().run(athlete).fold(
-            { value -> sessions = value }
         )
         GetAthleteDietHystory().run(athlete).fold(
             { value -> dietsHistory = value }
@@ -74,14 +60,6 @@ fun OverviewTab(
                 icon = Icons.Default.AccountBox,
                 value = workoutHistory.size.toString(),
                 label = stringResource(Res.string.workouts_completed),
-                modifier = Modifier.weight(1f)
-            )
-
-            StatCard(
-                icon = FitMeIcons.Calendar,
-                value = sessions.minByOrNull { it.dateTime }?.dateTime?.toLocalDateTime(TimeZone.currentSystemDefault())?.date?.toString()
-                    ?: stringResource(Res.string.no_appointment),
-                label = stringResource(Res.string.upcoming_sessions_tab),
                 modifier = Modifier.weight(1f)
             )
 
@@ -117,21 +95,5 @@ fun OverviewTab(
             }
         }
 
-        if (sessions.isNotEmpty()) {
-            Column(Modifier.fillMaxHeight(.5f)) {
-                Text(
-                    text = stringResource(Res.string.upcoming_sessions_tab),
-                    style = MaterialTheme.typography.h3,
-                    fontWeight = FontWeight.Medium
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-                LazyColumn {
-                    items(sessions) { session ->
-                        SessionItem(session = session)
-                    }
-                }
-            }
-        }
     }
 }

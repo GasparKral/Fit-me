@@ -11,7 +11,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import es.gaspardev.core.domain.entities.users.Athlete
 import es.gaspardev.core.domain.entities.workouts.CompletionWorkoutStatistic
-import es.gaspardev.core.domain.usecases.read.GetAthleteWorkoutHistory
+import es.gaspardev.core.domain.usecases.read.user.athlete.GetAthleteWorkoutHistory
 import fit_me.composeapp.generated.resources.Res
 import fit_me.composeapp.generated.resources.workout_history
 import org.jetbrains.compose.resources.stringResource

@@ -21,7 +21,7 @@ import com.dokar.sonner.rememberToasterState
 import es.gaspardev.core.Action
 import es.gaspardev.core.LocalRouter
 import es.gaspardev.core.domain.dtos.TrainerDashBoardInfo
-import es.gaspardev.core.domain.usecases.read.LoadDashboardInfo
+import es.gaspardev.core.domain.usecases.read.user.trainer.LoadDashboardInfo
 import es.gaspardev.icons.FitMeIcons
 import es.gaspardev.layout.dashboard.AthletesList
 import es.gaspardev.layout.dashboard.QuickActions
@@ -122,7 +122,7 @@ fun DashboardScreen() {
             }
 
             // Quick Actions
-            QuickActions(router, toaster)
+            QuickActions(router)
 
             // Stats Cards
             LazyVerticalGrid(
@@ -221,7 +221,7 @@ fun DashboardScreen() {
                                 onClick = {
                                     router.executeAction(Action.SuspendAction.create {
                                         router.navigateTo(Routes.Athletes)
-                                        agregateNewSportman(toaster)
+                                        agregateNewAthlete()
                                     })
                                 },
                                 colors = ButtonDefaults.buttonColors(

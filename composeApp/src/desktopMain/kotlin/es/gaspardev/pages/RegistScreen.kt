@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.gaspardev.core.LocalRouter
 import es.gaspardev.core.domain.dtos.RegisterTrainerData
-import es.gaspardev.core.domain.usecases.create.RegisterNewTrainer
+import es.gaspardev.core.domain.usecases.create.user.RegisterNewTrainer
 import es.gaspardev.core.infrastructure.repositories.TrainerRepositoryImp
 import es.gaspardev.utils.validateEmail
 import fit_me.composeapp.generated.resources.*

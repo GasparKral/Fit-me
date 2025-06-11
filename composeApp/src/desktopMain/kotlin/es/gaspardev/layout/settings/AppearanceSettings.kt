@@ -56,6 +56,6 @@ fun ThemeOption(
             else MaterialTheme.colors.surface
         )
     ) {
-        Text(text = label, fontSize = 14.sp)
+        Text(text = label, fontSize = 14.sp, color = MaterialTheme.colors.primary)
     }
 }

@@ -2,7 +2,11 @@ package es.gaspardev
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Shapes
+import androidx.compose.material.Typography
+import androidx.compose.material.darkColors
+import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,9 +17,14 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import es.gaspardev.core.domain.dtos.settings.AppearanceSettingsData
+import es.gaspardev.core.domain.usecases.update.settings.UpdateAppearanceSettings
+import es.gaspardev.states.LoggedTrainer
 import fit_me.composeapp.generated.resources.Nunito_Variable
 import fit_me.composeapp.generated.resources.Res
 import fit_me.composeapp.generated.resources.RobotoSerif_VariableFont
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.Font
 
 object ThemeOption {
@@ -25,6 +34,14 @@ object ThemeOption {
 
     fun modifyTheme(value: String) {
         _selectedTheme = value
+        MainScope().launch {
+            UpdateAppearanceSettings().run(
+                Pair(
+                    LoggedTrainer.state.trainer!!.user,
+                    AppearanceSettingsData(value)
+                )
+            )
+        }
     }
 
 }
@@ -51,7 +68,7 @@ fun AppTheme(
             background = Color(0xFF121212),
             surface = Color(0xFF1E1E1E),
             error = Color(0xFFCF6679),
-            onPrimary = Color.White,
+            onPrimary = Color(0xFFFAFAFA),
             onSecondary = Color.White,
             onBackground = Color(0xFFE0E0E0),
             onSurface = Color(0xFFCCCCCC),
@@ -66,7 +83,7 @@ fun AppTheme(
             background = Color(0xFFF6EEE5),
             surface = Color(0xFFFFFAFA),
             error = Color(0xFFD32F2F),
-            onPrimary = Color.White,
+            onPrimary = Color(0xFFFAFAFA),
             onSecondary = Color.White,
             onBackground = Color(0xFF121212),
             onSurface = Color(0xFF1E1E1E),
@@ -94,6 +111,7 @@ fun AppTheme(
             letterSpacing = (-0.25).sp
         ),
         h3 = TextStyle(
+            color = if (isDarkTheme) Color(0xFFCCCCCC) else Color(0xFF1E1E1E),
             fontFamily = robotoSerif,
             fontWeight = FontWeight.Medium,
             fontSize = 20.sp
@@ -114,26 +132,30 @@ fun AppTheme(
             letterSpacing = 0.1.sp
         ),
         body1 = TextStyle(
+            color = if (isDarkTheme) Color(0xFFCCCCCC) else Color(0xFF1E1E1E),
             fontFamily = nunito,
             fontWeight = FontWeight.Medium,
             fontSize = 16.sp,
             letterSpacing = 0.5.sp
         ),
         body2 = TextStyle(
+            color = if (isDarkTheme) Color(0xFFCCCCCC) else Color(0xFF1E1E1E),
             fontFamily = nunito,
             fontWeight = FontWeight.Normal,
             fontSize = 14.sp,
             letterSpacing = 0.25.sp
         ),
         button = TextStyle(
+            color = MaterialTheme.colors.onPrimary,
             fontFamily = nunito,
             fontWeight = FontWeight.Bold,
             fontSize = 14.sp,
             letterSpacing = 1.25.sp
         ),
         caption = TextStyle(
+            color = if (isDarkTheme) Color(0xFFCCCCCC) else Color(0xFF1E1E1E),
             fontFamily = nunito,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Black,
             fontSize = 12.sp,
             letterSpacing = 0.4.sp
         ),

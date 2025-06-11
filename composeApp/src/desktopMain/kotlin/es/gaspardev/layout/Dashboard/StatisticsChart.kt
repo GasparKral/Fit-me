@@ -21,7 +21,7 @@ import com.aay.compose.lineChart.model.LineParameters
 import com.aay.compose.lineChart.model.LineType
 import es.gaspardev.components.formatDateTime
 import es.gaspardev.core.domain.dtos.DashboardChartInfo
-import es.gaspardev.core.domain.usecases.read.LoadDashboarChartInfo
+import es.gaspardev.core.domain.usecases.read.user.trainer.LoadDashboarChartInfo
 import es.gaspardev.states.LoggedTrainer
 import kotlinx.datetime.Clock.System.now
 import kotlinx.datetime.TimeZone
@@ -103,7 +103,8 @@ fun StatisticsChart() {
             ),
             oneLineChart = false,
             isGrid = true,
-            gridOrientation = GridOrientation.HORIZONTAL
+            gridOrientation = GridOrientation.HORIZONTAL,
+            descriptionStyle = MaterialTheme.typography.caption
         )
 
         // Legend
@@ -112,9 +113,9 @@ fun StatisticsChart() {
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             listOf(
-                Pair("Workout Completion", chartColors[0]),
-                Pair("Nutrition Adherence", chartColors[1]),
-                Pair("Overall Progress", chartColors[2])
+                Pair("Entrenamientos Terminados", chartColors[0]),
+                Pair("Dietas Acabadas", chartColors[1]),
+                Pair("Progreso General", chartColors[2])
             ).forEach { (label, color) ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -128,8 +129,7 @@ fun StatisticsChart() {
                     )
                     Text(
                         text = label,
-                        style = MaterialTheme.typography.caption,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.8f)
+                        style = MaterialTheme.typography.caption
                     )
                 }
             }

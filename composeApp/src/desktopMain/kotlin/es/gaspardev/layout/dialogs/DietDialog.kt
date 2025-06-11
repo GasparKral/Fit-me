@@ -276,6 +276,7 @@ fun DietDialog(
                                 text = resWeekDay(weekDay),
                                 style = MaterialTheme.typography.h6,
                                 fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colors.onSurface,
                                 modifier = Modifier.padding(vertical = 4.dp)
                             )
                         }

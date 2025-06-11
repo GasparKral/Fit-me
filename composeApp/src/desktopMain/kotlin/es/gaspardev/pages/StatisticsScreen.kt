@@ -19,7 +19,7 @@ import es.gaspardev.core.domain.entities.stadistics.*
 import es.gaspardev.core.domain.entities.stadistics.generatePerformanceReport
 import es.gaspardev.core.domain.entities.stadistics.generateReportFilename
 import es.gaspardev.core.domain.entities.stadistics.toFormattedReport
-import es.gaspardev.core.domain.usecases.read.GetAthleteStadistics
+import es.gaspardev.core.domain.usecases.read.user.athlete.GetAthleteStadistics
 import es.gaspardev.helpers.formatAsPercentage
 import es.gaspardev.layout.statistics.*
 import es.gaspardev.states.LoggedTrainer
@@ -74,8 +74,8 @@ fun StatisticsScreen() {
                                 statistics?.strengthStats ?: emptyList(),
                                 statistics?.enduranceStats ?: emptyList(),
                                 statistics?.measurementHistory ?: emptyList(),
-                                LoggedTrainer.state.trainer!!.user.fullname,
-                                LoggedTrainer.state.trainer!!.user.email
+                                LoggedTrainer.state.trainer.user.fullname,
+                                LoggedTrainer.state.trainer.user.email
                             )
 
                             val reportName = report.generateReportFilename("txt")
@@ -87,7 +87,7 @@ fun StatisticsScreen() {
                     ) {
                         Icon(Icons.Default.AccountBox, contentDescription = "Export")
                         Spacer(Modifier.width(8.dp))
-                        Text("Exportar Datos")
+                        Text("Exportar Datos", color = MaterialTheme.colors.onSurface)
                     }
                 }
 
@@ -169,7 +169,7 @@ fun StatisticsScreen() {
                                 else -> "strength"
                             }
                         },
-                        text = { Text(title) }
+                        text = { Text(title, color = MaterialTheme.colors.primary.copy(alpha = .6f)) }
                     )
                 }
         }
@@ -220,12 +220,6 @@ fun StatisticsScreen() {
                             timeRangeExpanded = false
                         }
                     ) { Text("Último año") }
-                    DropdownMenuItem(
-                        onClick = {
-                            timeRange = Duration.INFINITE
-                            timeRangeExpanded = false
-                        }
-                    ) { Text("Todo el historial") }
                 }
             }
         }

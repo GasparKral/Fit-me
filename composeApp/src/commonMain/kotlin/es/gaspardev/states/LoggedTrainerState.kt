@@ -5,11 +5,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import es.gaspardev.core.domain.entities.users.Athlete
 import es.gaspardev.core.domain.entities.users.Trainer
+import es.gaspardev.core.domain.usecases.read.user.athlete.GetAthleteInfo
 
 data class LoggedUserState(
-    var trainer: Trainer? = null,
+    private var _trainer: Trainer? = null,
     var athletes: List<Athlete>? = null
-)
+) {
+    val trainer get() = _trainer!!
+    val isNull get() = _trainer == null
+}
 
 object LoggedTrainer {
     private var _state by mutableStateOf(LoggedUserState())
@@ -18,7 +22,7 @@ object LoggedTrainer {
 
     fun login(trainer: Trainer, athletes: List<Athlete>) {
         _state = LoggedUserState(
-            trainer = trainer,
+            _trainer = trainer,
             athletes = athletes
         )
     }
@@ -27,8 +31,10 @@ object LoggedTrainer {
         _state = LoggedUserState()
     }
 
-    fun updateTrainer(trainer: Trainer) {
-        _state = _state.copy(trainer = trainer)
+    suspend fun updateAthleteInfo(athleteId: Int) {
+        GetAthleteInfo().run(athleteId).fold(
+            { athlete -> _state.athletes = _state.athletes!!.filter { it.user.id != athleteId } + athlete }
+        )
     }
 
 }

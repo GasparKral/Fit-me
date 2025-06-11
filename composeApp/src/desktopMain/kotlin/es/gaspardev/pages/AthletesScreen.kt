@@ -8,14 +8,10 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.dokar.sonner.ToastType
-import com.dokar.sonner.Toaster
-import com.dokar.sonner.ToasterState
-import com.dokar.sonner.rememberToasterState
+import es.gaspardev.components.ToastManager
 import es.gaspardev.core.LocalRouter
 import es.gaspardev.core.domain.dtos.QrData
 import es.gaspardev.core.infrastructure.repositories.TrainerRepositoryImp
@@ -27,30 +23,30 @@ import fit_me.composeapp.generated.resources.Res
 import fit_me.composeapp.generated.resources.add_athlete
 import fit_me.composeapp.generated.resources.athlete_search_query
 import fit_me.composeapp.generated.resources.clients
-import fit_me.composeapp.generated.resources.qr_generated_successfully
-import fit_me.composeapp.generated.resources.qr_generation_error
-import fit_me.composeapp.generated.resources.key_creation_error
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
 
-suspend fun agregateNewSportman(toaster: ToasterState) {
-    TrainerRepositoryImp().generateRegistrationKey(LoggedTrainer.state.trainer!!).fold(
-        { it ->
+// Actualizar la función agregateNewSportman en AthletesScreen.kt
+suspend fun agregateNewSportman() {
+    TrainerRepositoryImp().generateRegistrationKey(LoggedTrainer.state.trainer).fold(
+        { token ->
             try {
+                // Usar el nuevo método que genera deep links
                 saveQrToDesktop(
-                    QrGenerator.generateQrBitmap(
-                        QrData(it),
-                        300
-                    ),
-                    "Clave de Usuario"
+                    QrGenerator.generateRegistrationQrBitmap(token, 300),
+                    "Código_Registro_Atleta_${System.currentTimeMillis()}.png"
                 )
-                toaster.show(Res.string.qr_generated_successfully, type = ToastType.Success)
+                ToastManager.showSuccess("QR de registro generado correctamente")
             } catch (e: Exception) {
-                toaster.show(Res.string.qr_generation_error, it)
+                ToastManager.showError("Error al generar QR: ${e.message}")
             }
         },
-        { err -> toaster.show(Res.string.key_creation_error, err.message ?: "") }
+        { err ->
+            ToastManager.showError(
+                "Error al crear código de registro: ${err.message ?: "Error desconocido"}"
+            )
+        }
     )
 }
 
@@ -60,13 +56,11 @@ fun AthletesScreen(
     height: Dp
 ) {
     val scope = rememberCoroutineScope()
-    val toaster = rememberToasterState()
     val controller = LocalRouter.current
     val sportsmanList = LoggedTrainer.state.athletes!!
     var searchQuery by remember { mutableStateOf("") }
 
     Column(Modifier.fillMaxSize().padding(12.dp)) {
-        Toaster(toaster, Modifier.align(Alignment.End))
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -75,7 +69,7 @@ fun AthletesScreen(
                     OutlinedButton(
                         onClick = {
                             scope.launch {
-                                agregateNewSportman(toaster)
+                                agregateNewAthlete()
                             }
                         },
                         content = { Text(stringResource(Res.string.add_athlete)) }

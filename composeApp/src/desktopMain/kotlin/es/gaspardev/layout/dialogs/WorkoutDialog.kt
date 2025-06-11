@@ -315,6 +315,7 @@ fun WorkoutDialog(
                             Text(
                                 text = resWeekDay(weekDay),
                                 style = MaterialTheme.typography.h6,
+                                color = MaterialTheme.colors.onSurface,
                                 fontWeight = FontWeight.Medium,
                                 modifier = Modifier.padding(vertical = 4.dp)
                             )

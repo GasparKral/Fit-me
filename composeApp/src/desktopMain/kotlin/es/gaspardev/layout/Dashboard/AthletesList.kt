@@ -18,7 +18,7 @@ import es.gaspardev.core.LocalRouter
 import es.gaspardev.core.RouterState
 import es.gaspardev.core.domain.entities.users.Athlete
 import es.gaspardev.core.domain.entities.workouts.WorkoutPlan
-import es.gaspardev.core.domain.usecases.update.UpdateWorkout
+import es.gaspardev.core.domain.usecases.update.workout.UpdateWorkout
 import es.gaspardev.enums.OpeningMode
 import es.gaspardev.enums.StatusState
 import es.gaspardev.helpers.editWorkout
@@ -43,11 +43,11 @@ fun AthletesList(scope: CoroutineScope) {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
 
-        if (LoggedTrainer.state.trainer != null) {
-            LoggedTrainer.state.athletes!!.take(5).forEach { athlete ->
-                AthleteListItem(athlete, router, scope)
-            }
+
+        LoggedTrainer.state.athletes!!.take(5).forEach { athlete ->
+            AthleteListItem(athlete, router, scope)
         }
+
 
         OutlinedButton(
             onClick = { router.navigateTo(Routes.Athletes) },
@@ -56,7 +56,7 @@ fun AthletesList(scope: CoroutineScope) {
                 contentColor = MaterialTheme.colors.primary
             )
         ) {
-            Text(stringResource(Res.string.view_all_athletes))
+            Text(stringResource(Res.string.view_all_athletes), color = MaterialTheme.colors.primary)
         }
     }
 }
