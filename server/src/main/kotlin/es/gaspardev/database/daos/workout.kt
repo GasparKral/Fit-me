@@ -1,7 +1,7 @@
 package es.gaspardev.database.daos
 
-import es.gaspardev.core.domain.entities.Note
 import es.gaspardev.core.domain.entities.workouts.*
+import es.gaspardev.database.Athletes
 import es.gaspardev.database.Workouts
 import es.gaspardev.database.entities.*
 import es.gaspardev.enums.Difficulty
@@ -168,6 +168,22 @@ object WorkoutDao {
 
     fun findWorkoutTemplateById(id: Int): WorkoutTemplateEntity? = transaction {
         WorkoutTemplateEntity.findById(id)
+    }
+
+    fun assignWorkoutToAthlete(workoutId: Int, athleteId: Int): Boolean = transaction {
+        try {
+            val athlete = AthleteEntity.all().firstOrNull { it.userEntity.id.value == athleteId }
+            val workout = WorkoutEntity.findById(workoutId)
+
+            if (athlete != null && workout != null) {
+                athlete.workout = workout
+                true
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            false
+        }
     }
 
 }

@@ -34,7 +34,7 @@ fun Route.trainer() {
         post("/register") {
             try {
                 val registerData = call.receive<RegisterTrainerData>()
-                
+
                 // Validar datos básicos
                 if (registerData.userName.isBlank()) {
                     return@post call.respondText(
@@ -42,54 +42,53 @@ fun Route.trainer() {
                         status = HttpStatusCode.BadRequest
                     )
                 }
-                
+
                 if (registerData.email.isBlank()) {
                     return@post call.respondText(
                         "El email es requerido",
                         status = HttpStatusCode.BadRequest
                     )
                 }
-                
+
                 if (registerData.password.isBlank()) {
                     return@post call.respondText(
                         "La contraseña es requerida",
                         status = HttpStatusCode.BadRequest
                     )
                 }
-                
+
                 if (registerData.specialization.isNullOrBlank()) {
                     return@post call.respondText(
                         "La especialización es requerida",
                         status = HttpStatusCode.BadRequest
                     )
                 }
-                
+
                 val result = suspendTransaction {
                     // Verificar si el email ya existe
                     val existingUser = UserDao().findUserByEmail(registerData.email)
                     if (existingUser != null) {
                         return@suspendTransaction null
                     }
-                    
+
                     // Crear usuario
                     val user = UserDao().createUser(
                         fullname = registerData.userName,
                         password = encrypt(registerData.password),
                         email = registerData.email,
                         phone = "", // Por ahora vacío, se puede añadir al formulario después
-                        userImageUrl = null
                     )
-                    
+
                     // Crear entrenador
                     val trainer = TrainerDao.createTrainer(
                         userId = user.id.value,
                         specialization = registerData.specialization!!, // Ya validamos que no sea null
                         yearsOfExperience = registerData.yearsOfExperience
                     )
-                    
+
                     trainer.toModel()
                 }
-                
+
                 if (result != null) {
                     call.respond(HttpStatusCode.Created, result)
                 } else {
@@ -98,12 +97,25 @@ fun Route.trainer() {
                         status = HttpStatusCode.Conflict
                     )
                 }
-                
+
             } catch (e: Exception) {
                 call.respondText(
                     "Error interno del servidor: ${e.message}",
                     status = HttpStatusCode.InternalServerError
                 )
+            }
+        }
+
+        delete("/acount") {
+            val userId = call.queryParameters["user_id"]?.toInt() ?: return@delete call.respondText(
+                "Parámetros requeridos faltantes",
+                status = HttpStatusCode.BadRequest
+            )
+
+            try {
+                TrainerDao.deleteTrainer(userId)
+            } catch (e: Exception) {
+                call.respondText("Error al eliminar: ${e.message!!}", status = HttpStatusCode.ExpectationFailed)
             }
         }
 

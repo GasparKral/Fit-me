@@ -1,7 +1,6 @@
 package es.gaspardev.database.entities
 
 
-import es.gaspardev.core.domain.entities.comunication.Session
 import es.gaspardev.core.domain.entities.users.Athlete
 import es.gaspardev.core.domain.entities.users.Trainer
 import es.gaspardev.core.domain.entities.users.info.Allergy
@@ -36,9 +35,9 @@ class UserEntity(id: EntityID<Int>) : IntEntity(id) {
 
     fun toModel(): es.gaspardev.core.domain.entities.users.User {
         return es.gaspardev.core.domain.entities.users.User(
-            id = this.id.value,
+            _id = this.id.value,
             fullname = this.fullname,
-            password = this.password,
+            _password = this.password,
             email = this.email,
             phone = this.phone,
             creationDate = this.creationDate,
@@ -85,8 +84,6 @@ class TrainerEntity(id: EntityID<Int>) : Entity<Int>(id) {
     var yearsOfExperience by Trainers.yearsOfExperience
 
     // Relaciones
-    val certifications by CertificationEntity referrersOn Certifications.trainerId
-    val socials by TrainerSocialEntity referrersOn TrainerSocials.trainerId
     val availability by TrainerAvailabilityEntity referrersOn TrainerAvailability.trainerId
     val athletes by AthleteEntity optionalReferrersOn Athletes.trainer
 
@@ -95,8 +92,6 @@ class TrainerEntity(id: EntityID<Int>) : Entity<Int>(id) {
             user = this.user.toModel(),
             specialization = this.specialization,
             yearsOfExperiencie = this.yearsOfExperience,
-            raw_socials = this.socials.map { it.toSingleValue() }.associateBy({ it.first }, { it.second }),
-            certifications = this.certifications.map { it.toModel() },
             availability = this.availability
                 .map { it.toModel() }
                 .groupBy({ it.first }, { it.second })

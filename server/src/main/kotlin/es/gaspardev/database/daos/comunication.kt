@@ -13,7 +13,6 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.lowerCase
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.util.*
 
 object CommunicationDao {
 

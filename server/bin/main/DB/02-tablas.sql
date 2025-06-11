@@ -57,9 +57,11 @@ CREATE TYPE difficulty AS ENUM (
 CREATE TYPE workout_type AS ENUM (
     'STRENGTH',
     'CARDIO',
-    'FLEXIBILITY',
-    'MIXED',
-    'REHABILITATION'
+    'FULL_BODY',
+    'UPPER_BODY',
+    'LOWER_BODY',
+    'CORE',
+    'FLEXIBILITY'
 );
 
 -- Diet Type Enum

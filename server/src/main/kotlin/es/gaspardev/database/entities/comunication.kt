@@ -2,7 +2,6 @@ package es.gaspardev.database.entities
 
 import es.gaspardev.core.domain.entities.comunication.Conversation
 import es.gaspardev.core.domain.entities.comunication.Message
-import es.gaspardev.core.domain.entities.comunication.Session
 import es.gaspardev.database.*
 import es.gaspardev.enums.MessageStatus
 import kotlinx.datetime.Clock

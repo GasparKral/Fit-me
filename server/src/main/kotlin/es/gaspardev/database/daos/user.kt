@@ -11,7 +11,6 @@ class UserDao {
         password: String,
         email: String,
         phone: String,
-        userImageUrl: String? = null
     ): UserEntity = transaction {
         UserEntity.new {
             this.fullname = fullname

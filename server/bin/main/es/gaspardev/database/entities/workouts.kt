@@ -40,7 +40,7 @@ class WorkoutEntity(id: EntityID<Int>) : IntEntity(id) {
 
     fun toModel(): Workout {
         return Workout(
-            id = this.id.value,
+            _id = this.id.value,
             name = this.name,
             description = this.description,
             difficulty = this.difficulty,
@@ -64,10 +64,10 @@ class WorkoutExerciseEntity(id: EntityID<Int>) : IntEntity(id) {
     var isOptional by WorkoutExercises.isOptional
     var parentExercise by WorkoutExerciseEntity optionalReferencedOn WorkoutExercises.parentExerciseId
 
-    fun toModel(): Pair<WeekDay, WorkoutExecise> {
+    fun toModel(): Pair<WeekDay, WorkoutExercise> {
         return Pair(
             this.weekDay,
-            WorkoutExecise(
+            WorkoutExercise(
                 reps = this.reps,
                 sets = this.sets,
                 isOption = this.isOptional,
@@ -143,10 +143,10 @@ class WorkoutTemplateExerciseEntity(id: EntityID<Int>) : IntEntity(id) {
     var sets by WorkoutTemplateExercises.sets
     var isOption by WorkoutTemplateExercises.isOptional
 
-    fun toModel(): Pair<WeekDay, WorkoutExecise> {
+    fun toModel(): Pair<WeekDay, WorkoutExercise> {
         return Pair(
             weekDay,
-            WorkoutExecise(
+            WorkoutExercise(
                 reps = this.reps,
                 sets = this.sets,
                 isOption = this.isOption,

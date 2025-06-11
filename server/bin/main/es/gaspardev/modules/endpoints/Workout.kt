@@ -57,9 +57,38 @@ fun Route.workout() {
                 workoutType = workout.workoutType,
                 createdBy = trainerId
             )
-            call.respond(result.getId()!!)
+            call.respond(result.id)
         }
 
+        patch("/assign") {
+            try {
+                val assignData = call.receive<Map<String, Int>>()
+                val workoutId = assignData["workoutId"] ?: return@patch call.respondText(
+                    "dietId requerido",
+                    status = HttpStatusCode.BadRequest
+                )
+                val athleteId = assignData["athleteId"] ?: return@patch call.respondText(
+                    "athleteId requerido",
+                    status = HttpStatusCode.BadRequest
+                )
+
+                val assigned = WorkoutDao.assignWorkoutToAthlete(workoutId, athleteId)
+
+                if (assigned) {
+                    call.respond(HttpStatusCode.OK, "Dieta asignada correctamente")
+                } else {
+                    call.respondText(
+                        "Error al asignar la dieta",
+                        status = HttpStatusCode.BadRequest
+                    )
+                }
+            } catch (e: Exception) {
+                call.respondText(
+                    "Error al asignar la dieta: ${e.message}",
+                    status = HttpStatusCode.InternalServerError
+                )
+            }
+        }
 
         delete {
             val workoutId = call.request.queryParameters["workout_id"]
@@ -166,9 +195,9 @@ fun Route.workout() {
         }
 
         post("/templates/create/{trainer_id}") {
-            val trainerID = call.parameters["template_id"]?.toIntOrNull()
+            val trainerID = call.parameters["trainer_id"]?.toIntOrNull()
                 ?: return@post call.respondText(
-                    "Parámetro template_id requerido",
+                    "Parámetro trainer_id requerido",
                     status = HttpStatusCode.BadRequest
                 )
 
@@ -187,7 +216,7 @@ fun Route.workout() {
                     template.exercises.forEach { (day, exercises) ->
                         exercises.forEach { exercise ->
                             WorkoutDao.addWorkoutTemplateExercises(
-                                templateId = newTemplate.getId(),
+                                templateId = newTemplate.templateId!!,
                                 exerciseId = exercise.exercise.id,
                                 weekDay = day,
                                 reps = exercise.reps,

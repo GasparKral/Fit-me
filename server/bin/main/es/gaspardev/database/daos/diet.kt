@@ -149,7 +149,7 @@ object DietDao {
 
     fun assignDietToAthlete(dietId: Int, athleteId: Int): Boolean = transaction {
         try {
-            val athlete = AthleteEntity.findById(athleteId)
+            val athlete = AthleteEntity.all().firstOrNull { it.userEntity.id.value == athleteId }
             val diet = DietEntity.findById(dietId)
 
             if (athlete != null && diet != null) {

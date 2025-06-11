@@ -1,6 +1,5 @@
 package es.gaspardev.database.daos
 
-import es.gaspardev.core.domain.entities.comunication.Session
 import es.gaspardev.core.domain.entities.diets.CompletionDietStatistics
 import es.gaspardev.core.domain.entities.workouts.CompletionWorkoutStatistic
 import es.gaspardev.database.Measurements

@@ -2,7 +2,7 @@
 activityCompose = "1.7.2"
 agp = "8.5.0"
 android-compileSdk = "34"
-android-minSdk = "34"
+android-minSdk = "30"
 android-targetSdk = "34"
 androidx-activityCompose = "1.9.3"
 androidx-lifecycle = "2.8.3"
@@ -18,8 +18,7 @@ exposedJavaTimeVersion = "0.61.0"
 exposedJdbcVersion = "0.61.0"
 jetbrainsExposedCore = "0.61.0"
 kotlin = "2.0.21"
-kotlinKamelImageExtJvm = "1.16.0"
-kotlinReflect = "2.1.21-RC2"
+kotlinReflect = "2.0.21"
 kotlinx-coroutines = "1.9.0"
 kotlinxDatetime = "0.6.1"
 kotlinxSerializationCore = "1.7.3"
@@ -34,30 +33,23 @@ ktorClientSerialization = "3.0.1"
 ktorSerializationKotlinxJson = "3.0.1"
 ktorWebsockets = "3.1.2"
 logback = "1.5.11"
-material3Android = "1.3.2"
-navigationCompose = "2.9.0"
+materialIconsExtended = "1.7.3"
 postgresql = "42.6.0"
 postgresqlPostgresqlVersion = "42.7.5"
 annotationJvm = "1.9.1"
 constraintlayout = "2.2.1"
 routerComposeJvm = "1.0.2"
 uiGraphicsAndroid = "1.7.2"
-navigationRuntimeAndroid = "2.9.0"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
-androidx-activity-compose-v182 = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-annotation-jvm = { group = "androidx.annotation", name = "annotation-jvm", version.ref = "annotationJvm" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
 androidx-material3 = { module = "androidx.compose.material3:material3" }
-androidx-material3-android = { module = "androidx.compose.material3:material3-android", version.ref = "material3Android" }
-androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
-androidx-navigation-runtime-android = { group = "androidx.navigation", name = "navigation-runtime-android", version.ref = "navigationRuntimeAndroid" }
 androidx-ui = { module = "androidx.compose.ui:ui" }
 androidx-ui-graphics-android = { group = "androidx.compose.ui", name = "ui-graphics-android", version.ref = "uiGraphicsAndroid" }
-androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 chart = { module = "io.github.thechance101:chart", version.ref = "chart" }
 compose-destinations-core = { module = "io.github.raamcosta.compose-destinations:core", version.ref = "coreVersion" }
 compose-destinations-ksp = { group = "io.github.raamcosta.compose-destinations", name = "ksp", version.ref = "compose-destinations" }
@@ -70,8 +62,7 @@ exposed-java-time-v0610 = { module = "org.jetbrains.exposed:exposed-java-time", 
 exposed-jdbc-v0610 = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposedJdbcVersion" }
 io-ktor-ktor-client-content-negotiation2 = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktorClientContentNegotiation" }
 io-ktor-ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorSerializationKotlinxJson" }
-kotlin-kamel-image-ext-jvm = { module = "eu.codlab:kotlin-kamel-image-ext-jvm", version.ref = "kotlinKamelImageExtJvm" }
-kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlinReflect" }
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlinReflect" }  # FIXED: Now uses consistent version
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
@@ -93,6 +84,7 @@ ktor-server-tests = { module = "io.ktor:ktor-server-tests-jvm", version.ref = "k
 ktor-server-websockets = { module = "io.ktor:ktor-server-websockets" }
 ktor-websockets = { module = "io.ktor:ktor-websockets", version.ref = "ktorWebsockets" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 org-jetbrains-kotlinx-kotlinx-serialization-json2 = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 postgresql-v4275 = { module = "org.postgresql:postgresql", version.ref = "postgresqlPostgresqlVersion" }
