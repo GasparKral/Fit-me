@@ -13,11 +13,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+
+@Destination
+@Composable
+fun AthleteProgressScreen(
+    navigator: DestinationsNavigator
+) {
+    AthleteProgressScreenContent()
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AthleteProgressScreen(
-    onNavigateBack: () -> Unit
+fun AthleteProgressScreenContent(
+    onNavigateBack: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
@@ -72,8 +82,6 @@ fun AthleteProgressScreen(
         }
     }
 }
-
-
 
 
 @Composable

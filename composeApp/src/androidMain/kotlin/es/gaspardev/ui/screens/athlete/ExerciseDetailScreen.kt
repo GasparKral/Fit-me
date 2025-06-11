@@ -10,12 +10,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+
+@Destination
+@Composable
+fun ExerciseDetailScreen(
+    navigator: DestinationsNavigator
+) {
+    ExerciseDetailScreenContent(2)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExerciseDetailScreen(
+fun ExerciseDetailScreenContent(
     exerciseId: Int,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier.fillMaxSize()

@@ -11,15 +11,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Destination
 @Composable
 fun AthleteChatScreen(
-    id:Int,
-    groupName:String?,
-    osOwnUser:Boolean=false,
-    onNavigateBack: () -> Unit
+    navigator: DestinationsNavigator
+) {
+    AthleteChatScreenContent()
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AthleteChatScreenContent(
+    onNavigateBack: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier.fillMaxSize()

@@ -2,30 +2,67 @@ package es.gaspardev.ui.screens.athlete
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.ThumbUp
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.Badge
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import es.gaspardev.icons.FitMeIcons
+import es.gaspardev.ui.states.LoggedAthlete
+import kotlinx.coroutines.delay
+
 
 @Destination
 @Composable
@@ -51,7 +88,6 @@ fun DashboardScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreenContent(
     onNavigateToWorkout: () -> Unit = {},
@@ -85,46 +121,310 @@ fun DashboardScreenContent(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(MaterialTheme.colorScheme.background),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(16.dp)
+                .background(MaterialTheme.colorScheme.background)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item {
-                // Header con saludo y perfil
-                DashboardHeader(onNavigateToProfile = onNavigateToProfile)
-            }
+            DashboardHeader { onNavigateToProfile() }
 
-            item {
-                // Resumen de progreso diario
-                DailyProgressCard()
-            }
+            WorkoutControls()
 
-            item {
-                // Próximo entrenamiento
-                NextWorkoutCard(onNavigateToWorkout = onNavigateToWorkout)
-            }
+            QuickAccessSection(
+                onNavigateToNutrition = onNavigateToNutrition,
+                onNavigateToProgress = onNavigateToProgress,
+                onNavigateToChat = onNavigateToChat
+            )
 
-            item {
-                // Accesos rápidos
-                QuickAccessSection(
-                    onNavigateToNutrition = onNavigateToNutrition,
-                    onNavigateToProgress = onNavigateToProgress,
-                    onNavigateToChat = onNavigateToChat
+            TrainerMessagesCard(onNavigateToChat = onNavigateToChat)
+
+            // Espaciado adicional para el bottom navigation
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+    }
+}
+
+@Composable
+private fun WorkoutControls() {
+    var repCount by remember { mutableStateOf(0) }
+    var timeInSeconds by remember { mutableStateOf(0) }
+    var isTimerRunning by remember { mutableStateOf(false) }
+
+    // Cronómetro
+    LaunchedEffect(isTimerRunning) {
+        if (isTimerRunning) {
+            while (isTimerRunning) {
+                delay(1000)
+                timeInSeconds++
+            }
+        }
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics {
+                contentDescription = "Controles de entrenamiento"
+            },
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            Text(
+                text = "Controles de Entrenamiento",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+
+            // Layout adaptativo para móvil
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Cronómetro
+                Timer(
+                    timeInSeconds = timeInSeconds,
+                    isRunning = isTimerRunning,
+                    onStart = { isTimerRunning = true },
+                    onPause = { isTimerRunning = false },
+                    onReset = {
+                        isTimerRunning = false
+                        timeInSeconds = 0
+                    }
+                )
+                // Contador de Repeticiones
+                RepetitionCounter(
+                    count = repCount,
+                    onIncrement = { repCount++ },
+                    onDecrement = { if (repCount > 0) repCount-- },
+                    onReset = { repCount = 0 }
                 )
             }
+        }
+    }
+}
 
-            item {
-                // Estadísticas semanales
-                WeeklyStatsCard()
+@Composable
+private fun RepetitionCounter(
+    count: Int,
+    onIncrement: () -> Unit,
+    onDecrement: () -> Unit,
+    onReset: () -> Unit
+) {
+    val hapticFeedback = LocalHapticFeedback.current
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "Repeticiones",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Medium
+            )
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                FilledIconButton(
+                    onClick = {
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onDecrement()
+                    },
+                    modifier = Modifier
+                        .size(48.dp)
+                        .semantics {
+                            contentDescription = "Reducir repeticiones"
+                        },
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary
+                    ),
+                    enabled = count > 0
+                ) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Text(
+                    text = count.toString(),
+                    style = MaterialTheme.typography.displayMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 42.sp,
+                    modifier = Modifier.semantics {
+                        liveRegion = LiveRegionMode.Polite
+                        contentDescription = "$count repeticiones"
+                    }
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                FilledIconButton(
+                    onClick = {
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onIncrement()
+                    },
+                    modifier = Modifier
+                        .size(48.dp)
+                        .semantics {
+                            contentDescription = "Aumentar repeticiones"
+                        },
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
             }
 
-            item {
-                // Mensajes del entrenador
-                TrainerMessagesCard(onNavigateToChat = onNavigateToChat)
+            TextButton(
+                onClick = {
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onReset()
+                },
+                modifier = Modifier.semantics {
+                    contentDescription = "Reiniciar contador de repeticiones"
+                }
+            ) {
+                Text("Reiniciar")
+            }
+        }
+    }
+}
+
+@Composable
+private fun Timer(
+    timeInSeconds: Int,
+    isRunning: Boolean,
+    onStart: () -> Unit,
+    onPause: () -> Unit,
+    onReset: () -> Unit
+) {
+    val hapticFeedback = LocalHapticFeedback.current
+    val minutes = timeInSeconds / 60
+    val seconds = timeInSeconds % 60
+    val timeText = String.format("%02d:%02d", minutes, seconds)
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "Cronómetro",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Medium
+            )
+
+            Text(
+                text = timeText,
+                style = MaterialTheme.typography.displayMedium,
+                color = if (isRunning) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Bold,
+                fontSize = 36.sp,
+                modifier = Modifier.semantics {
+                    liveRegion = LiveRegionMode.Polite
+                    contentDescription = "Tiempo transcurrido: $minutes minutos y $seconds segundos"
+                }
+            )
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                FilledIconButton(
+                    onClick = {
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onReset()
+                    },
+                    modifier = Modifier
+                        .size(48.dp)
+                        .semantics {
+                            contentDescription = "Reiniciar cronómetro"
+                        },
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Icon(
+                        Icons.Default.Refresh,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                FilledIconButton(
+                    onClick = {
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                        if (isRunning) onPause() else onStart()
+                    },
+                    modifier = Modifier
+                        .size(48.dp)
+                        .semantics {
+                            contentDescription =
+                                if (isRunning) "Pausar cronómetro" else "Iniciar cronómetro"
+                        },
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = if (isRunning) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Icon(
+                        if (isRunning) Icons.Default.Stop else Icons.Default.PlayArrow,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
             }
         }
     }
@@ -141,201 +441,51 @@ private fun DashboardHeader(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column {
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
             Text(
-                text = "¡Hola, Alex! 👋",
+                text = "¡Hola, ${LoggedAthlete.state.athlete.user.fullname}! 👋",
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
             Text(
                 text = "¿Listo para entrenar hoy?",
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
 
-        // Avatar del usuario
-        Box(
+        Spacer(modifier = Modifier.width(16.dp))
+
+        // Avatar del usuario con mejor accesibilidad
+        Surface(
             modifier = Modifier
-                .size(56.dp)
+                .size(48.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-                .clickable { onNavigateToProfile() },
-            contentAlignment = Alignment.Center
+                .clickable(
+                    onClickLabel = "Ir al perfil"
+                ) { onNavigateToProfile() }
+                .semantics {
+                    role = Role.Button
+                    contentDescription = "Botón de perfil de usuario"
+                },
+            color = MaterialTheme.colorScheme.primary,
+            tonalElevation = 2.dp
         ) {
-            Icon(
-                Icons.Default.Person,
-                contentDescription = "Perfil",
-                modifier = Modifier.size(32.dp),
-                tint = MaterialTheme.colorScheme.onPrimary
-            )
-        }
-    }
-}
-
-@Composable
-private fun DailyProgressCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp)
-        ) {
-            Text(
-                text = "Progreso de Hoy",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                DailyProgressItem(
-                    title = "Entrenamiento",
-                    progress = 0.75f,
-                    label = "45/60 min"
-                )
-                DailyProgressItem(
-                    title = "Nutrición",
-                    progress = 0.6f,
-                    label = "3/5 comidas"
-                )
-                DailyProgressItem(
-                    title = "Hidratación",
-                    progress = 0.8f,
-                    label = "2.4/3L"
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun DailyProgressItem(
-    title: String,
-    progress: Float,
-    label: String
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
-            modifier = Modifier.size(60.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(
-                progress = { progress },
-                modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f),
-                strokeWidth = 4.dp
-            )
-            Text(
-                text = "${(progress * 100).toInt()}%",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            fontWeight = FontWeight.Medium
-        )
-
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-        )
-    }
-}
-
-@Composable
-private fun NextWorkoutCard(
-    onNavigateToWorkout: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onNavigateToWorkout() },
-        shape = MaterialTheme.shapes.medium
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Próximo Entrenamiento",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                Icon(
-                    FitMeIcons.Weight,
-                    contentDescription = "Entrenamiento",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = "Entrenamiento de Fuerza - Tren Superior",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Medium
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+            Box(
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    FitMeIcons.Calendar,
-                    contentDescription = "Duración",
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "45 minutos • 6 ejercicios",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = onNavigateToWorkout,
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.medium
-            ) {
-                Text(
-                    text = "COMENZAR AHORA",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onPrimary
+                    Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier.size(28.dp),
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         }
@@ -358,7 +508,11 @@ private fun QuickAccessSection(
         )
 
         LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(horizontal = 4.dp),
+            modifier = Modifier.semantics {
+                contentDescription = "Lista de accesos rápidos"
+            }
         ) {
             items(
                 listOf(
@@ -383,12 +537,24 @@ private fun QuickAccessCard(
     icon: ImageVector,
     onClick: () -> Unit
 ) {
+    val hapticFeedback = LocalHapticFeedback.current
+
     Card(
         modifier = Modifier
-            .width(100.dp)
-            .height(100.dp)
-            .clickable { onClick() },
-        shape = MaterialTheme.shapes.medium
+            .fillMaxWidth()
+            .height(96.dp)
+            .clickable(
+                onClickLabel = "Ir a $title"
+            ) {
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                onClick()
+            }
+            .semantics {
+                role = Role.Button
+                contentDescription = "Acceso rápido a $title"
+            },
+        shape = MaterialTheme.shapes.medium,
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier = Modifier
@@ -399,8 +565,8 @@ private fun QuickAccessCard(
         ) {
             Icon(
                 icon,
-                contentDescription = title,
-                modifier = Modifier.size(32.dp),
+                contentDescription = null,
+                modifier = Modifier.size(28.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
 
@@ -411,84 +577,11 @@ private fun QuickAccessCard(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
-    }
-}
-
-@Composable
-private fun WeeklyStatsCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp)
-        ) {
-            Text(
-                text = "Esta Semana",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                StatItem(
-                    value = "4",
-                    label = "Entrenamientos",
-                    icon = FitMeIcons.Weight
-                )
-                StatItem(
-                    value = "2.1kg",
-                    label = "Progreso",
-                    icon = Icons.Default.ThumbUp
-                )
-                StatItem(
-                    value = "92%",
-                    label = "Adherencia",
-                    icon = Icons.Default.CheckCircle
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun StatItem(
-    value: String,
-    label: String,
-    icon: ImageVector
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            icon,
-            contentDescription = label,
-            modifier = Modifier.size(24.dp),
-            tint = MaterialTheme.colorScheme.secondary
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = value,
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Bold
-        )
-
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-        )
     }
 }
 
@@ -496,11 +589,23 @@ private fun StatItem(
 private fun TrainerMessagesCard(
     onNavigateToChat: () -> Unit
 ) {
+    val hapticFeedback = LocalHapticFeedback.current
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onNavigateToChat() },
-        shape = MaterialTheme.shapes.medium
+            .clickable(
+                onClickLabel = "Ver mensajes del entrenador"
+            ) {
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                onNavigateToChat()
+            }
+            .semantics {
+                role = Role.Button
+                contentDescription = "Tarjeta de mensajes del entrenador. 2 mensajes nuevos"
+            },
+        shape = MaterialTheme.shapes.medium,
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier = Modifier.padding(20.dp)
@@ -514,11 +619,19 @@ private fun TrainerMessagesCard(
                     text = "Mensajes del Entrenador",
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
 
+                Spacer(modifier = Modifier.width(8.dp))
+
                 Badge(
-                    containerColor = MaterialTheme.colorScheme.secondary
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.semantics {
+                        contentDescription = "2 mensajes nuevos"
+                    }
                 ) {
                     Text(
                         text = "2",
@@ -534,7 +647,8 @@ private fun TrainerMessagesCard(
                 text = "Carlos: ¡Excelente progreso esta semana! Mañana...",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                maxLines = 2
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -558,66 +672,88 @@ private fun BottomNavigationBar(
 ) {
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surface,
-        tonalElevation = 8.dp
+        tonalElevation = 8.dp,
+        modifier = Modifier.semantics {
+            contentDescription = "Barra de navegación principal"
+        }
     ) {
         NavigationBarItem(
             icon = {
                 Icon(
                     Icons.Default.Home,
-                    contentDescription = "Inicio"
+                    contentDescription = null
                 )
             },
             label = { Text("Inicio") },
             selected = selectedIndex == 0,
-            onClick = { /* Ya estamos en dashboard */ }
+            onClick = { /* Ya estamos en dashboard */ },
+            modifier = Modifier.semantics {
+                contentDescription = "Pestaña de inicio, seleccionada"
+            }
         )
 
         NavigationBarItem(
             icon = {
                 Icon(
                     FitMeIcons.Weight,
-                    contentDescription = "Entrenamientos"
+                    contentDescription = null
                 )
             },
             label = { Text("Entrenar") },
             selected = selectedIndex == 1,
-            onClick = onWorkoutClick
+            onClick = onWorkoutClick,
+            modifier = Modifier.semantics {
+                contentDescription =
+                    if (selectedIndex == 1) "Pestaña de entrenar, seleccionada" else "Pestaña de entrenar"
+            }
         )
 
         NavigationBarItem(
             icon = {
                 Icon(
                     FitMeIcons.Nutrition,
-                    contentDescription = "Nutrición"
+                    contentDescription = null
                 )
             },
             label = { Text("Nutrición") },
             selected = selectedIndex == 2,
-            onClick = onNutritionClick
+            onClick = onNutritionClick,
+            modifier = Modifier.semantics {
+                contentDescription =
+                    if (selectedIndex == 2) "Pestaña de nutrición, seleccionada" else "Pestaña de nutrición"
+            }
         )
 
         NavigationBarItem(
             icon = {
                 Icon(
                     Icons.Default.ThumbUp,
-                    contentDescription = "Progreso"
+                    contentDescription = null
                 )
             },
             label = { Text("Progreso") },
             selected = selectedIndex == 3,
-            onClick = onProgressClick
+            onClick = onProgressClick,
+            modifier = Modifier.semantics {
+                contentDescription =
+                    if (selectedIndex == 3) "Pestaña de progreso, seleccionada" else "Pestaña de progreso"
+            }
         )
 
         NavigationBarItem(
             icon = {
                 Icon(
                     FitMeIcons.Messages,
-                    contentDescription = "Mensajes"
+                    contentDescription = null
                 )
             },
             label = { Text("Chat") },
             selected = selectedIndex == 4,
-            onClick = onChatClick
+            onClick = onChatClick,
+            modifier = Modifier.semantics {
+                contentDescription =
+                    if (selectedIndex == 4) "Pestaña de chat, seleccionada" else "Pestaña de chat"
+            }
         )
     }
 }

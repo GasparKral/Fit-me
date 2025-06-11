@@ -28,7 +28,7 @@ import org.jetbrains.compose.resources.stringResource
 
 
 // Actualizar la función agregateNewSportman en AthletesScreen.kt
-suspend fun agregateNewSportman() {
+suspend fun agregateNewAthlete() {
     TrainerRepositoryImp().generateRegistrationKey(LoggedTrainer.state.trainer).fold(
         { token ->
             try {

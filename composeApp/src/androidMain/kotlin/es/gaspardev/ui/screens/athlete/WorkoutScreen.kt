@@ -2,15 +2,46 @@ package es.gaspardev.ui.screens.athlete
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.*
+import androidx.compose.material.Badge
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Tab
+import androidx.compose.material.TabRow
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,22 +49,32 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import es.gaspardev.AppTheme
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import es.gaspardev.MobileAppTheme
 import es.gaspardev.icons.FitMeIcons
+
+@Destination
+@Composable
+fun WorkoutScreen(
+    navigator: DestinationsNavigator
+) {
+    WorkoutScreenContent()
+}
 
 /**
  * Pantalla de entrenamientos para deportistas
  * Muestra rutinas asignadas, progreso y herramientas de entrenamiento
  */
 @Composable
-fun WorkoutScreen(
-    onNavigateToWorkoutDetail: (String) -> Unit,
-    onNavigateBack: () -> Unit
+fun WorkoutScreenContent(
+    onNavigateToWorkoutDetail: (String) -> Unit = {},
+    onNavigateBack: () -> Unit = {}
 ) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Rutinas", "Historial", "Herramientas")
 
-    AppTheme {
+    MobileAppTheme {
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -67,7 +108,8 @@ fun WorkoutScreen(
                             text = {
                                 Text(
                                     title,
-                                    fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal
+                                    fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal,
+                                    color = MaterialTheme.colors.onPrimary
                                 )
                             }
                         )
@@ -479,10 +521,30 @@ private fun WorkoutToolsTab() {
 
         items(
             listOf(
-                ToolItem("Cronómetro", "Para descansos y series", FitMeIcons.Calendar, Color(0xFF4CAF50)),
-                ToolItem("Contador de Repeticiones", "Cuenta automáticamente", Icons.Default.Add, Color(0xFF2196F3)),
-                ToolItem("Calculadora RM", "1 Rep Max", Icons.Default.AccountBox, Color(0xFFFF9800)),
-                ToolItem("Notas Rápidas", "Apuntes del entrenamiento", FitMeIcons.Weight, Color(0xFF9C27B0))
+                ToolItem(
+                    "Cronómetro",
+                    "Para descansos y series",
+                    FitMeIcons.Calendar,
+                    Color(0xFF4CAF50)
+                ),
+                ToolItem(
+                    "Contador de Repeticiones",
+                    "Cuenta automáticamente",
+                    Icons.Default.Add,
+                    Color(0xFF2196F3)
+                ),
+                ToolItem(
+                    "Calculadora RM",
+                    "1 Rep Max",
+                    Icons.Default.AccountBox,
+                    Color(0xFFFF9800)
+                ),
+                ToolItem(
+                    "Notas Rápidas",
+                    "Apuntes del entrenamiento",
+                    FitMeIcons.Weight,
+                    Color(0xFF9C27B0)
+                )
             )
         ) { tool ->
             WorkoutToolCard(tool)
@@ -495,7 +557,7 @@ private fun WorkoutToolCard(tool: ToolItem) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {  },
+            .clickable { },
         elevation = 4.dp,
         shape = MaterialTheme.shapes.medium
     ) {

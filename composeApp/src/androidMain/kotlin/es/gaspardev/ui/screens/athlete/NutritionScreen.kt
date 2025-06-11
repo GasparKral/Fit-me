@@ -17,10 +17,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+
+@Destination
+@Composable
+fun NutritionScreen(
+    navigator: DestinationsNavigator
+) {
+    NutritionScreenContent()
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NutritionScreen(
+fun NutritionScreenContent(
     onNavigateBack: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -54,7 +64,7 @@ fun NutritionScreen(
                 Tab(
                     selected = selectedTab == index,
                     onClick = { selectedTab = index },
-                    text = { Text(title) }
+                    text = { Text(title, color = MaterialTheme.colorScheme.onPrimary) }
                 )
             }
         }

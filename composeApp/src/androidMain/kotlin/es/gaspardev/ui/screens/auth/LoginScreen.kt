@@ -1,14 +1,41 @@
 package es.gaspardev.ui.screens.auth
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -20,10 +47,18 @@ import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import es.gaspardev.AppTheme
-import es.gaspardev.ui.screens.destinations.ConnectionScreenDestinationDestination
+import es.gaspardev.MobileAppTheme
+import es.gaspardev.core.domain.dtos.LoginCredentials
+import es.gaspardev.core.domain.entities.users.Athlete
+import es.gaspardev.core.domain.entities.users.Trainer
+import es.gaspardev.core.domain.usecases.read.user.LogInUser
+import es.gaspardev.core.infrastructure.repositories.AthletetRepositoryImp
+import es.gaspardev.states.ConversationsState
 import es.gaspardev.ui.screens.destinations.DashboardScreenDestination
 import es.gaspardev.ui.screens.destinations.LoginScreenDestination
+import es.gaspardev.ui.states.LoggedAthlete
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
 @RootNavGraph(start = true)
 @Destination
@@ -33,11 +68,10 @@ fun LoginScreen(
 ) {
     LoginScreenContent(
         onNavigateToConnection = {
-            navigator.navigate(ConnectionScreenDestinationDestination)
+          //  navigator.navigate()
         },
         onLoginSuccess = {
             navigator.navigate(DashboardScreenDestination) {
-                // Limpiar back stack
                 popUpTo(LoginScreenDestination.route) {
                     inclusive = true
                 }
@@ -59,7 +93,7 @@ fun LoginScreenContent(
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
 
-    AppTheme {
+    MobileAppTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
@@ -87,7 +121,7 @@ fun LoginScreenContent(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "FIT",
+                            text = "Fit Me",
                             style = MaterialTheme.typography.headlineLarge,
                             color = MaterialTheme.colorScheme.onPrimary,
                             fontWeight = FontWeight.ExtraBold
@@ -188,8 +222,22 @@ fun LoginScreenContent(
                             onClick = {
                                 if (email.isNotEmpty() && password.isNotEmpty()) {
                                     isLoading = true
-                                    // Simular autenticación exitosa
-                                    onLoginSuccess()
+                                    MainScope().launch {
+                                        LogInUser<Athlete, Trainer>(AthletetRepositoryImp()).run(
+                                            LoginCredentials(
+                                                email,
+                                                password
+                                            )
+                                        ).fold(
+                                            { res ->
+                                                val (athlete, trainer, conversations) = res
+                                                LoggedAthlete.logIn(athlete, trainer.first())
+                                                ConversationsState.loadConversations(conversations)
+                                                onLoginSuccess()
+                                            },
+                                            { err -> errorMessage = err.message!! }
+                                        )
+                                    }
                                 } else {
                                     errorMessage = "Por favor completa todos los campos"
                                 }

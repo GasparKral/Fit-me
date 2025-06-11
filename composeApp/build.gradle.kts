@@ -42,6 +42,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.kotlin.reflect)
             implementation(libs.chart)
+            implementation(libs.material.icons.extended)
         }
         desktopMain.dependencies {
             implementation(compose.material)
@@ -49,7 +50,6 @@ kotlin {
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.kotlinx.datetime)
             implementation(libs.router.compose.jvm)
-            implementation(libs.kotlin.kamel.image.ext.jvm)
             implementation(libs.compose.sonner)
         }
     }
